@@ -1,0 +1,13 @@
+# -*-makefile-*-
+#
+# Generate pre-parsed C code.
+%.i: %.c
+	$(COMPILE) -E -c $^ -o $@
+
+.PRECIOUS: %.i
+%.ci: %.i
+	-grep -v -e "^#" -e "^ *$$" $^ | indent > $@
+	mv -f $@ $^
+
+
+## FIXME: Your stuff here

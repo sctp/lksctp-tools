@@ -1,0 +1,15 @@
+This is a package to let you use SCTP with your existing TCP-based binaries.
+
+usage:
+
+$ withsctp xinetd	# Start xinetd stream services on SCTP.
+$ withsctp telnet localhost	# Make a telnet over SCTP/IP connection.
+
+To install, edit the top of Makefile to set your install path(s) and then
+
+$ make all
+# make install
+
+This package originally written by La Monte H.P. Yarroll <piggy@acm.org>.
+To submit fixes or bug reports see lksctp.sourceforget.net.
+You can try the author or lksctp-developers@lists.sourceforget.net for support.

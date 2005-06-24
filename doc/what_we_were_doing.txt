@@ -1,0 +1,981 @@
+What were we doing when we stopped?
+funtest1.c
+	test_sendto()
+		Wed Sep 27 12:48:34 CDT 2000
+		We are about to write sctp_do_prm_asoc().
+		
+		Thu Sep 28 15:58:27 CDT 2000
+		DONE
+
+	test_run_network()
+		Thu Sep 28 21:37:51 CDT 2000
+		We are testing.  The first chunk we see in outqueue
+		has a chunkID of 0 (DATA), not 1 (INIT).  It also has
+		a length of 0.  It looks like a dummy chunk.
+
+		Next thing will be struct SCTP_inqueue.  We WILL
+		produce an automated test for that structure!
+
+		Fri Sep 29 19:41:21 CDT 2000
+		We fixed the bug mentioned above.
+		We have created a unit test for SCTP_inqueue.
+		Next, we should implement SCTP_inqueue.
+
+		Mon Oct  2 11:03:10 CDT 2000
+
+		Mon Oct  2 18:07:14 CDT 2000
+		Finishing up on test_inqueue.  Currently giving 
+		bad results for the chunk header for the second 
+		chunk popped.  Also need to clean up validate_queue's 
+		type-casting to make the warning go away.
+
+		Wed Oct  4 10:51:55 CDT 2000
+		We have fixed the warning.  Still working on the 2nd chunk.
+
+		Wed Oct  4 14:06:21 CDT 2000
+		We passed our first automated unit test!!!
+		sctp_bundle_out() needs writing.
+		
+		Wed Oct  4 16:36:10 CDT 2000
+		writing sctp_bundle_out()
+			writing ip_queue_xmit()
+			trying to find out how to call sctp_v4_rcv()
+			Thu Oct  5 18:40:49 CDT 2000
+			We believe that ip_queue_xmit() is "written".
+		We think sctp_bundle_out() is written.
+		We are stepping through test_run_network(),sctp_v4_rcv()
+		We have made it out to ep_put(), near the end of 
+		sctp_v4_rcv().
+		bh_[un]lock_ep(), ep_put() need writing.
+		We plan to continue through sctp_v4_rcv().
+		GOAL: return from test_run_network() by COB Friday
+
+		Fri Oct  6 18:29:01 CDT 2000
+		Gee!  We are calling ourselves forever!  We need to
+		break this cycle by implementing bottom half/top
+		half...  Welcome to the kernel!
+
+		On the upside, we made it back up into do_5_1B_init().
+		Fix the BUG BUG BUG at the end of ip_queue_xmit().
+
+		Mon Oct  9 12:17:59 CDT 2000
+		We believe test_run_network() is written--we have
+		completed on full loop.
+		
+		Here is what we expect in the next three iterations:
+Next loop:
+	ep2: send the INIT_ACK
+	ep1->asoc: process the INIT_ACK, enter COOKIE_ECHOED, queue COOKIE_ECHO
+ueber-next loop:
+	ep1->asoc: send the COOKIE_ECHO, send the DATA
+	ep2->asoc: process COOKIE_ECHO, make asoc in ESTABLISHED, queue COOKIE_ACK
+		process DATA, queue SACK
+ueber^2-next loop:
+	ep2->asoc: send COOKIE_ACK, SACK
+	ep1->asoc: process COOKIE_ACK, enter ESTABLISHED, process SACK,
+		free DATA
+
+		Mon Oct  9 18:53:44 CDT 2000
+		The test for SCTP_outqueue now fails!  Yay!
+		Mon Oct  9 20:41:36 CDT 2000
+		The test for SCTP_outqueue now passes!  Yay!
+		
+		Goal for tomorrow:  Return from test_run_network().
+		Continue through the loop...
+
+		The DATA packet is ending up in the endpoint queue, not the
+		assoication queue.
+		Tue Oct 10 15:26:54 CDT 2000
+		Fixed.  This is correct behaviour, but now we look for
+		the association AGAIN.
+
+	The TSN is not getting set.  This should happen in the
+	SCTP_outqueue.
+	Tue Oct 10 15:55:27 CDT 2000
+	Added a test to test_outqueue for TSN fix.
+	Yay, test_outqueue fails!
+	
+	Added a test to test_inqueue for the end-of-packet
+	callback feature.
+	Tue Oct 10 17:32:53 CDT 2000
+	Passing test...  We are now using the feature in sideeffects.c.
+	Are we getting a SACK now?
+	Tue Oct 10 18:58:25 CDT 2000
+	Yes!  We ARE getting a SACK!  Yahoo!
+
+	Plan for tomorrow:  sctp_recvmsg(), sctp_send_up().  This is
+		probably a new data struture...
+
+	Wed Oct 11 14:21:32 CDT 2000
+	Yes, it is several... 7?  Sigh.
+	Yay!  test_ULPqueue fails!
+
+	Wed Oct 11 16:56:06 CDT 2000
+	DANGER, WILL ROBINSON!  NOT ALL UNIT TEST PASS!  But the day
+	is over and piggy needs to leave...
+	WRITE sctp_ULPqueue.c:sctp_ULP_chunk2event()
+
+	Thu Oct 12 12:08:23 CDT 2000
+	Put SCTP and IP headers on the test chunk.  Make sure that
+	skb->data, however, points at the actual payload.
+	
+	Thu Oct 12 15:40:00 CDT 2000
+	test_ULPqueue passes!  Yahoo!
+	Back to funtest1...
+
+	options for things that changed which might corrupt the
+		MD5digest: 
+		do_gettimeofday() replaced get_time()
+		tv_add() replaced net_profile_add()
+		get_random_bytes() replaced net_random()
+	I switched to MD5 and the problem disappeared.  This is very
+	bad.  The problem is that the SLA1 code is overruning the
+	stack and creaming its parent's variables.  Specifically,
+	context->howManyInBlock is getting above 64 (the size of the
+	block).  This causes "leftToFill" to become negative at line
+	195 and then things really fall apart.  This looks like a bug
+	to me, but it worked before... 
+
+	Fri Oct 13 10:14:37 CDT 2000
+	Goal for today:  Get through ueber^2-next loop.
+
+	Don't forget to look for that COOKIE ACK...
+
+	Fri Oct 13 16:52:11 CDT 2000
+	We have delivered a data packet all the way to the user from
+	the other user!  We do not seem to have either a COOKIE_ACK OR
+	a SACK.  Such is life...  More to do...  We do not deliver the
+	COMUP event either...
+
+	We sort of deliver the COMMUNICATION_UP message.  What a WASTE.
+
+	We REALLY need to get back to COOKIE_ACK/SACK.  By early next
+	week we MUST be all the way to SHUTDOWN_ACK.
+
+	Mon Oct 16 12:19:18 CDT 2000
+	We DID see that COOKIE_ACK/SACK.  We have received three
+	packets.  Check to make sure we got the second SACK.
+
+	Goal for today:  Generate a SHUTDOWN.  This means a new event
+	type for the state machine:  OTHER.
+	
+	Mon Oct 16 15:11:16 CDT 2000
+	We have finished sctp_close().
+
+	Mon Oct 16 20:52:42 CDT 2000
+	We got a SHUTDOWN processed.
+
+	The NO PENDING TSN event needs to be scheduled so that it
+	happens AFTER all the side effects for the PRIOR event.
+
+	Refactor the SACK processing OUT of sctp_outqueue.c--use the
+	empty handler.  REMEMBER TO WRITE THE TEST FIRST!
+	
+	Once all that works, continue on to generating SHUTDOWN ACK.
+
+	Goal for tomorrow: pass empty handler test, get back to the
+	point in the functional test where we are ready to generate
+	SHUTDOWN ACK.
+
+	Stretch goal for tomorrow:  Get to the end of the functional test.
+
+	Tue Oct 17 11:39:00 CDT 2000
+	We added sctp_delayed_side_effects() where we can execute side
+	effects which MUST happen after all other side effects are
+	processed.
+
+	The test for the empty queue feature now fails!
+
+	Tue Oct 17 11:54:51 CDT 2000
+	The test for the empty queue feature now passes!
+	
+	We have decided to put this off until post-Bakeoff:
+		Refactor the SACK processing OUT of
+		sctp_outqueue.c--use the empty handler.  REMEMBER TO
+		WRITE THE TEST FIRST!
+	P.S. We DO use the empty handler now, but SACK processing is
+	still partially embedded in outqueue.
+
+
+	DONE: sctp_do_9_2_final() should generate an event to send to the
+	ULP...
+	DONE: We need to deal with the possibility of an association
+	unlinking in the middle of an SK_FOR.
+	If there are undelivered notifications in association, delay
+	its freedom.
+
+	Tue Oct 17 18:17:07 CDT 2000
+	We completed the full protocol negotiation in funtest1.c!
+	Yahoo!
+	DONE: All that remains is to keep the association around
+	long enough to deliver the final notification.
+	DONE: Also, sctp_do_4_C needs to generate a ULP event too...
+	The three major tools... No, four...
+
+	Goal for tomorrow: 
+	1) Running functional test by lunch time.
+	2) Make the kernel link.
+	
+	Wed Oct 18 10:42:40 CDT 2000
+	We now set the destination address correctly.  (We think...)
+	
+	Wed Oct 18 12:42:05 CDT 2000
+	The unit tests run again.  Setting destination addresses broke
+	a couple of them...
+
+	Wed Oct 18 14:45:26 CDT 2000
+	Yeehaw!  The functional test passes!
+
+	Wed Oct 18 15:23:26 CDT 2000
+	The kernel links!
+
+	Tasks:
+	Write a kernel functional test.  Make it fail.
+	Write sctp_sendmsg().
+	Register all the SCTP structs in the right places...
+	Move funtest1.c:test_run_network functionality into the
+	kernel.
+
+	Wed Oct 18 16:44:30 CDT 2000
+	funtest2 now fails!  Yay!  It features cool error messages...
+
+	goals for tomorrow:
+	DONE: 1) Write sctp_sendmsg().
+	DONE: 2) Register all the SCTP structs in the right places...
+
+	Thu Oct 19 12:09:43 CDT 2000
+	We have a first draft of sctp_sendmsg().
+	DONE: Write lower level functions for sctp_sendmsg().
+	DONE: Fix the retval misuses in sctp_recvmsg().
+	DONE: Check all of sctp_socket.c for user space memory references.
+
+	Thu Oct 19 18:10:27 CDT 2000
+	FIXED: We are failing to generate SACKS.  It appears that pop_inqueue
+	is deciding that eop is not happening for data chunks.
+
+	Thu Oct 19 21:32:36 CDT 2000
+	It appears that at least the three key structures (sctp_prot,
+	sctp_protocol, and inet_seqpacket_ops) are properly
+	registered.
+
+	We also sort of fixed a problem with queue_xmit--it needs to
+	be transport specific.  We still do not set it properly in the
+	transport structure, but as a hack, we steal it from the ep.
+
+	goals for Friday:
+	1) Move funtest1.c:test_run_network functionality into the
+	 kernel.
+	2) Have a real kernel panic!
+	3) Move the repository onto one of the laptops...
+
+
+	Fri Oct 20 18:23:43 CDT 2000
+	test_inqueue now fails after changing handler handling
+	(i.e. item 1 above)!
+
+	Fri Oct 20 18:39:30 CDT 2000
+	test_inqueue now passes! (as do test_outqueue & test_ULPqueue)
+	funtest1, anyone?
+
+	We refactored to get rid of sctp_sm_delayed_sideeffects().
+	This led to outqueue empty processing getting a LOT cleaner.
+	This also forced us to fix the empty test in test_outqueue and
+	feed it a REAL(ish) SACK.  This led us in turn to a VERY
+	subtle TSN bug.  XP RULES!  YOW YOW YOW!!!!
+
+	Fri Oct 20 23:28:57 CDT 2000
+	We passed the functional test and all the unit tests.  We
+	think we have something we MIGHT be able to link into a kernel
+	and test...
+
+	3) Move the repository onto one of the laptops...
+
+	Goal for Monday:
+	2) Have a real kernel panic!
+
+
+	Tue Oct 24 16:10:44 CDT 2000
+	Still no kernel panic, but we have some things which seem to work!  Yowza!
+
+	Specifically, sctp_socket(), and sctp_bind() appear to work.  We get an
+	-EFAULT when we call sctp_sendmsg().  In sctp_recvmsg() we had a hang.
+	
+	Tue Oct 24 16:57:05 CDT 2000
+	unit tests pass (again)!  Yahoo!
+	
+	Wed Oct 25 10:57:59 CDT 2000
+	funtest3 rewritten to use getopt and support addresses other
+		than the loopback.
+	Wed Oct 25 11:47:18 CDT 2000
+	funtest3 --listen fails!
+		
+
+	Thu Oct 26 00:18:43 GMT-6 2000
+	Why are we getting EINVAL? 
+	- We are certain that the address going to bind is in kernel space.
+	- Add the endpoint port--we wish to differentiate the two
+	  possible failures. 
+
+	Wed Oct 25 16:38:56 CDT 2000
+	We are setting the peer's port to network byte order in one or
+	both of the following: sctp_create_asoc(), sctp_add_transport().
+	We are trying to make funtest1 pass again...
+
+	We are trying to not panic in funtest3 --listen.
+
+	Thu Oct 26 14:23:08 CDT 2000
+	Created the macro DEBUG_PRINT() and a matching unit test
+	(foolishly put in funtest1.c...).  It failed!  It passes!
+
+	By the end of the day we completed a full INIT-DATA-SHUTDOWN
+	sequence with the user space refimpl!  We listened and the
+	usref initiated.
+
+	Fri Oct 27 08:46:41 CDT 2000
+	Goal for today:  Do the equivalent of funtest2 with funtest3
+	(interoperate both directions with the usref).
+
+	Fri Oct 27 10:13:39 CDT 2000
+	funtest3 --send fails!
+
+Tue Jan 16 01:54:34 CST 2001
+        We have two bugs:
+	1) Line 277 in sctp_endpointola.c.
+	2) We need to handle non-existent ep properly, almost
+        everywhere.
+	We need to add a blow-away-the-endpoint test to one of the
+        functional tests.
+
+Wed Jan 17 02:19:18 CST 2001
+	We fixed bug 1, and now cherish bug 2 wholeheartedly.
+
+	We don't (?) need a blow-away-ep test, but we eventually need
+	to work on the out-of-the-blue-packet story.
+
+	We now pass funtest1 and funtest1b (Yeah!).
+
+	Next up: funtest3 with back to back associating, and (dare we
+	hope?) funtest2. (Note: _No_ _work_ will be done to fix
+	funtest2 until after the Developers' Release.)
+
+Tue Jan 30 16:00:26 CST 2001
+    We have a simple-minded merge of our SCTP changes into 2.4.1.
+    This merely resolved the conflicts--tag 'linux-2_4_1+sctp' will
+    NOT compile.  We need to do all the data structure changes.
+
+
+Tue Feb 27 20:07:52 CST 2001
+
+In the middle of getting funtest1 to work (again), test_print_message
+prints a bad type for a message.  May be a related CORE_DUMP in there
+somewhere too...
+
+Fri Mar  2 20:50:22 CST 2001
+
+We believe that sctp_flush_outqueue is pretty-much ready except for
+starting the timers.  We need to stop the timers in 
+need to generate the timeouts (
+
+6.3.2 R2 tells us to turn off T3-rtx when we get acks for all data on
+    an address...
+
+We REALLY want a per-transport transmitted queue.  What we want to do
+is a outqueue-private component of the transport data structure.
+
+DONE: PLAN FOR MONDAY:  Make a release w/o lost_data packet.
+PLAN FOR Wednesday after next:  Release including lost data packet and
+whatever else we jam in...
+
+DONE: Write a unit test for bundling.
+Pass the unit test for bundling.
+Make the transmitted queues transport based because we need a per
+transport timer which gets turned off when there is nothing in flight.
+Make ft_frame_lostpacket pass.
+
+Tue Mar 13 19:44:27 CST 2001
+We are working on getting test_outqueue to work again, this time with
+bundling.  The code compiles, but still dumps core.  It looks like a
+bug in the test frame (q->asoc is NULL).
+
+Wed Mar 14 14:07:51 CST 2001
+The unit tests (including the bundling mods for test_outqueue) pass.
+The mods were to comment out sock_hold in the set_owner..., since it
+kept landing us in the real kernel code (asm/atomic.h).  We thought
+this was due to string.h, but that gets called in somewhere magically
+too.
+
+Final mod was an if around the last sctp_transmit_packet for when the
+payload size isn't > 0. I (KK) added a catcher for payload_size < 0.
+
+Now on to making the transmitted queues transport based.(?)
+
+Wed Mar 14 16:26:59 CST 2001
+Have added transmitted (not private) to SCTP_transport and initted in
+sctp_add_transport().  Next would be sctp_flush_outqueue().
+
+Thu Mar 15 19:15:24 CST 2001
+Whew.  We added transport-transmitted to sctp_empty_outqueue(),
+sctp_flush_outqueue() and sack_outqueue().  We also took the
+check-transmitted-queue logic out of sctp_sack_outqueue() and added
+sctp_check_transmitted(). 
+
+We also isolated a wacky SK_FOR behavior that had us stumped for a
+while.  If you pass a local variable to SK_FOR as the_list, it has
+trouble ending the for loop since the local variable is on the stack
+(for the calling function), but the end iteration for the for"ing"
+(the real the_list) would be whereever it was before being copied into
+the local variable.
+
+Anyhow, the unit tests pass (although we haven't committed yet.)
+
+Fri Mar 16 19:19:01 CST 2001
+We fixed a padding problem with the bundling code (and its attendant
+problems with the ULPqueue/recvmsg code).  The unit tests and all
+ft_frame tests (except lostpacket, naturally) pass!  Have not run
+ft_kernel_basic yet.  Despite this, I'm committing, since La Monte and
+I(KK) will be at the IETF next week.  I also need to remember to put
+Perry's name in the code he's worked on.
+
+
+Mon Mar 19 17:31:37 CST 2001
+We were creating a new kind of smart pipe, the SCTP_packet.  Stuff
+packets in the top until they transmit.
+
+Tue Mar 27 11:26:26 CST 2001
+Write the unit test for SCTP_packet.
+
+Fri Apr  6 01:18:32 CDT 2001
+We THINK we have a full implementation of the sockets protocol table.
+We will have a go at integrating af[6]_inet.c into our test frame so
+we can write tests for it...
+
+Tue Apr 10 11:39:13 CDT 2001
+Finish SCTP_packet today.
+
+Tue Apr 10 21:39:25 CDT 2001
+Yeah, right.
+
+OK, we're in the middle of transforming transmitted_queue and
+sacked_queue into struct list_head's so that we can avoid copying
+chunks when putting them in packets.
+
+What remains:
+DONE: Make test_outqueue compile.
+UNDONE: Make test_outqueue fail.
+DONE: Finish transforming SCTP_outqueue to the new interfaces.
+DONE: Make test_outqueue pass.
+
+DONE: Make test_packet compile.
+DONE: Make test_packet fail.
+DONE: Write SCTP_packet (sctp_output.c).
+DONE: Make test_packet pass.
+
+DOING: Get on with lost packet.
+
+Wed Apr 11 16:38:52 CDT 2001
+Yay!  We have test_outqueue passing...
+
+Thu Apr 12 10:23:01 CDT 2001
+Goal for today:  Make test_packet compile and fail.
+Do an intermediate commit.
+
+Thu Apr 12 16:56:53 CDT 2001
+We hit our goal for the day!
+We've just finished the horrible table in sctp_append_chunk().
+We need to write sctp_transmit_packet().
+
+Mon Apr 16 10:39:27 CDT 2001
+DONE: Goal for the day:  Get all unit tests to pass (test_packet being the
+current red-headed-stepchild.)
+
+Mon Apr 16 15:36:42 CDT 2001
+Yay!  We've hit today's goal!
+
+Mon Apr 16 17:22:44 CDT 2001
+Milestone: all ft_frame passes except lostpacket (Almost out of the
+refactoring quagmire...).
+
+Mon Apr 16 19:12:37 CDT 2001
+Milestone: ft_frame_lostpacket now fails (after being rewritten a bit).
+
+SKIPPED: Fix up the statefun retval to communicate timer updates properly.
+DONE: Start the rtx timer.
+DONE: Make sure the rtx timer set/clear events are generated by the
+      appropriate state functions.
+DONE: Create the rtx timeout state function.
+Update the side effects to:
+       SKIPPED: Process rtx timer updates.
+       DONE: Move chunks from transmitted to retransmit.
+       DONE: Call flush with rtx_timeout set.
+
+Plan for tomorrow:
+DONE: Create the timeout event.
+DONE: Make ft_frame_lostpacket pass.
+DONE: Run ft_kernel_basic, make it pass.
+DONE: Run sctp_darn tests. (They failed, though...)
+
+Tue Apr 17 17:27:15 CDT 2001
+ft_frame_lostpacket passes!  Yeeha!
+
+Tue Apr 17 19:01:22 CDT 2001
+ft_kernel_basic passes--insignificant changes needed for compilation.
+
+Wed Apr 18 14:58:30 CDT 2001
+DONE: Write ft_frame_evenpackets.
+DONE: Have it compile and fail.
+DONE: Write sack timer support code.
+DONE: Have it compile and succeed.
+
+Wed Apr 18 16:36:17 CDT 2001
+We did a small refactoring where we changed most instances of
+struct timeval into jiffies.  We can't do this for every struct timeval
+since sk->stamp is a struct timeval and we use this to check cookie
+lifetimes.   C'est la vie.  So geht es in Leben.
+
+ft_frame_evenpackets fails!  Yeeha!
+All unit tests pass!
+
+Thu Apr 19 10:34:04 CDT 2001
+Goal for morning: ft_frame_evenpackets passes.
+To make it pass, the sack timer should be:
+DONE:  - initialized
+DONE:  - started
+DONE:  - stopped
+DONE:  - event (expiration)
+DONE:  - state function
+
+DONE:  - sctp_do_timerWork       
+   
+Thu Apr 19 13:17:08 CDT 2001
+We've written the sack timer code and it compiles, but the ft still
+fails.
+
+Thu Apr 19 15:39:58 CDT 2001
+ft_frame_evenpackets passes!  Yay!
+
+What we need to do for multihoming:
+DONE: Extend test frame for multilink.
+Write ft_frame_lostlink.
+Make ft_frame_lostlink compile.
+Make ft_frame_lostlink fail.
+Write multi-homing support:
+- Add counter events to OTHER table
+- Stroke error counts (8.2)
+DONE: - Write sctp_bindx() (API 8.1)
+- Clear error counter when RTX timer is stopped. (8.2)
+- Do failover state function (8.2, 6.4.1)
+- Do failover side effects
+- Change sctp_transmit_packet() to modify the socket for the chosen
+  destination address.
+- Change transport selection to skip inactive destinations (bakeoff 3.6)
+Make ft_frame_lostlink pass.
+
+Thu Apr 19 23:01:11 CDT 2001
+We need to refactor the whole INIT/INIT ACK/COOKIE ECHO startup
+sequence to make the INIT header processing more symmetric.  In
+particular, we are going to put the whole INIT chunk (with all
+parameters) into the cookie and simplify the cookie as much as
+possible.  This allows both sides to take a skeletal association and
+an INIT packet and build a full association.
+
+Check whether the initial destination address needs to be
+automagically added to the list of IP addresses for the association.
+
+Fri Apr 20 17:28:42 CDT 2001
+We're in the middle of the aforementioned refactoring.  We are working
+our way through the function do_5_1B_init().  Credo that
+sctp_make_temp_asoc() is now properly rewritten.  Next to rewrite is
+sctp_make_init_ack().
+
+tar up THIS directory heirarchy
+copy to both laptops
+check out the most recent CVS'd stuff on both laptops
+
+
+Sat Apr 21 18:31:28 CDT 2001
+I'm in the middle of sctp_unpack_cookie().  Make sure that everything
+lines up properly...  I THINK the static parts of the INIT are still
+unaccounted for.  Maybe.  Maybe not...  No, I think those are part of
+asoc->c, in which case, they are properly handled.
+
+Check that we do all three passes through the variable-length
+parameters: INIT, INIT ACK, COOKIE ECHO (INIT is in the cookie).
+
+Sun Apr 22 01:46:21 CDT 2001
+See the FIX ME in sctp_unpack_cookie();
+
+Tue Apr 24 16:43:30 CEST 2001
+sctp_make_cookie_echo() in sctp_side_effects() returns a malformed chunk.
+
+Thu Apr 26 10:44:15 CEST 2001
+We have a buildable kernel and we pass all unit and functional tests
+except ft_frame_lostlink.  ft_kernel_basic remains untested.  The plan
+for today is to get some interop test run with Sun and perhaps some
+others...
+
+Thu Apr 26 18:36:54 CEST 2001
+We have a deadly INIT packet from Sun.  We are trying to make a test
+frame from the deadly packet.
+
+Added WORD_ROUND() to sctp_addto_chunk() to support correct parameter
+bounding...
+
+Added some infrastructure to support replacing arbitrary packets in a
+transaction.  This doesn't work yet and isn't quite as flexible as we
+really want.
+
+Fri Apr 27 11:34:22 CEST 2001
+Start the SSN at 0, not 1.
+Increment the SSN.
+
+Tue May  1 16:11:17 CDT 2001
+These are the changes that piggy made on the airplane from Nice:
+
+DONE: Do duplicate checking in sctp_bind_endpoint().
+
+DONE: Add struct bare_ip_sctp_packet.
+
+DONE: Modify CHUNK_TYPE() so that it can work even if an IP header is present.
+
+DONE: Fix the calls to CHUNK_TYPE().  The first call is on an IP packet with
+    a header.
+
+Wed May  9 15:39:23 CDT 2001
+
+Implement Jon Grimm's suggestion about sctp_init().  
+
+DONE: 1.  Take the sctp_proto_initted check out of sctp_get_protocol(). 
+
+DONE: 2.  Call module_init(sctp_init) at the end of sctp_protocol.c
+          (Less random, but more thoughtful, placement.)
+
+DONE: 3.  Modify the frame tests to call sctp_init() directly.
+DONE: 4.  Test the simulated daylights out of it.
+UNDONE: 5.  Test the living daylights out of it.
+
+
+Wed May  9 16:41:47 CDT 2001
+DONE: Include <sys/sctp.h> from sctpConstants.h.
+DONE: Go through sctpConstants.h looking for stuff needed by the user and
+   moving it to sys/sctp.h.
+DONE: Go through sctpEvent.h looking for stuff needed by the user and
+   moving it to sys/sctp.h.
+DONE: Test the simulated daylights out of it.
+DONE: Test the living daylights out of it.
+
+Thu May 10 11:55:57 CDT 2001
+We moved kernel/include/sys/sctp.h to linux/include/linux/sctp.h.  The
+kernel does NOT have an include/sys/ directory, and
+include/linux/tcp.h has sortof similar semantics...
+
+Move linux/include/linux/sctp.h to kernel/include/net/sctp/sctp_user.h
+and copy THAT to kernel/usr_include/netinet/sctp.h.
+
+Thu May 10 16:34:35 CDT 2001
+Here are all the horrible places we need to put "132":
+DONE: /usr/include/linux/socket.h
+DONE: /usr/include/linux/in.h
+DONE: /usr/include/netinet/in.h
+These are all in kernel/usr_include and kernel/Makefile has been
+modified appropriately.
+
+DONE:Tomorrow:  Describe the hijack attack in detail in an email message to
+                Randy and Qiaobing.
+
+Fri May 11 15:43:46 CDT 2001
+Next possible tricks are to work up tests for the SACK processing/RTX
+work, the spicy INIT, or ft_frame_lostlink.
+
+We will extend ft_frame_lostpacket to include multiple lost packets
+and we will have it check reordering.
+
+Wed May 16 14:50:29 CDT 2001
+First pass priority list: Develop tests for these bugs encountered at
+the 3rd bakeoff.  (For Wednesday, go for the low hanging fruit.)
+
+BUG:    We ignore ABORT.
+TRACE:  compaq3_paddedinitackOK.tcp 
+TEST:   ft_frame_abort
+
+BUG:    We will send extra data before we get a COOKIE ACK...
+TRACE:  datakinectics_2 
+        We really lucked out and this implementation ran fine...
+TEST:   <ft_frame_delayed_cookie_ack, this involves adding a packet
+        delay queue to the network simulation>
+
+BUG:	We have an INIT that causes an oops.
+TRACE:  sun (lost trace)
+TEST:   ft_frame_init_bomb
+
+BUG:   This INIT ACK causes an oops.
+TRACE: telesoft2_lostsendings.tcp, telesoft3_spicyinitack.tcp
+TEST:  <new test: modified ft_frame_init_bomb>
+
+BUG:   We don't gap ACK.
+BUG:   We retransmitted a TSN which they had gap ack'd.
+TRACE: datakinectics_3, ulticom_3
+TEST:  <extend ft_frame_lostpackets to add tests for gap acking>
+
+BUG:   We produce MANY SACK's in a row.  Bleah.  This isn't officially
+       a bug.  Is it legal for us to look ahead in our input buffer?
+       Well, Stevens thinks that this is correct behaviour.  We should
+       NOT look ahead in our input buffer.
+TRACE: adax2_goodsend.tcp
+TEST:  no test needed
+
+BUG:   We did not bundle retransmissions.
+TRACE: adax2_goodsend.tcp
+TEST:  <modify ft_frame_lost_packets, catch the retransmissions and
+       inspect them on the wire (in Internet[]).>
+
+Mon May 21 15:56:47 CDT 2001
+Today and Tuesday are SCTP days. (Like Crazy Days, only more SCTP and
+less street fair.) 
+
+Write the ABORT test.
+
+Tue May 22 18:49:51 CDT 2001
+Once again, we are changing the end-of-packet handling to solve some
+nasty problem.  There are two issues here:
+FIXED: - sctp_tq_sideeffects is global and very dangerous (i.e. wrong)
+FIXED: - sctp_gen_sack can be called on an aborted association--it
+       still has a pointer to the free'd memory...
+
+Solution:
+We are marking the last chunk in a packet as the final chunk.
+DONE: - Add the eop flag to SCTP_chunk.
+DONE: - Set the eop flag for the final chunk (sctp_pop_inqueue()).
+DONE: - Initialize the eop flag when we create a new chunk (sctp_chunkify()).
+DONE: - Add gensack to the retval structure.
+DONE: - Modify the data state function to set retval->gensack if eop is set.
+
+DONE: - Set up gensack side effect.
+DONE: - Fix up the prototype for sctp_gen_sack().
+
+DONE: - Create asoc->sack_needed.
+DONE: - Dispose of asoc->peer.dataSeen
+DONE: - Dispose of asoc->counters[SctpCounterAckState]
+DONE: - Dispose of chunk->counted
+
+DONE? - Dispose of sctp_tq_sideeffects and friends.
+DONE: -- call sctp_other_no_pending_TSN() from sctp_side_effects().
+DONE: -- eliminate handlers.empty, etc...
+
+Wed May 23 14:43:44 CDT 2001
+Pass the rest of the ABORT test.  This means we want to GENERATE
+aborts.  This is the function tabort_8_4_8.
+
+Since we need to generate ABORTs in the CLOSED state, we want to have
+a way to send them without having to build a temporary association.
+
+We will  generate a packet for this purpose
+and will call sctp_transmit_packet() on it at the appropriate time.
+
+DONE: - extract relevant data from chunk and endpoint.
+DONE: - change sctp_init_packet to not require the association.
+- build packet
+DONE: - build transport
+DONE: -- refactor sctp_add_transport() to create a sctp_make_transport().
+DONE: --- Add fields for storing af_specific in proto.
+DONE: --- Initialize the af_specific parts of proto.
+DONE: --- Add a mechanism for fetching af_specific from proto.
+DONE: - add retval->packet
+DONE: - add retval->packet handling to SCTP_DISPOSITION_DISCARD.
+DONE: - add prototype for sctp_get_af_specific()
+DONE: - add prototype for sctp_make_transport()
+DONE: - fix call to t_new()
+
+DONE: - Update the state tables to call tabort.
+
+Tue May 29 11:53:18 CDT 2001
+We are applying Jon Grimm's patch.
+DONE: - Edit patch
+DONE: - Apply patch
+DONE: - Add Jon's contact info
+DONE: - unit_test
+DONE: - frametest
+
+Add Xingang Guo's patch.
+DONE: - Edit patch
+DONE: - Apply patch
+DONE: - Check the lock coverage paths
+
+Main changes from patch:
+-- sctp_{lock|release}_sock()
+-- moved locking in sctp_sendmsg() to right before looking up association
+-- checking return values of copy_{to|from}_user
+-- goto out_unlock for EVERY setting of err in sctp_sendmsg()
+-- sctp_setsockopt() had returns with locked socket.
+
+DONE: - Update copyright and credits
+DONE: - is emsg->msg_flags properly initialized somewhere?
+      -- Yes, but it might not conform to the API draft...
+DONE: - unit_test
+DONE: - frametest
+
+DONE: - kerneltest
+
+DONE: - Make new release
+DONE: - publish release to Source Forge.
+DONE: - Send note to list detailing changes to Xingang's patch...
+
+Thu Jun 14 17:41:04 CDT 2001
+A plan for patch application.  We have 5 patches:
+
+jgrimm_delayed_ia_01_Jun.patch (subsumed by next one)
+jgrimm_tsn_lt_04_Jun.patch (subsumed by next one)
+EDITED: jgrimm_ecn_06_Jun.patch
+
+DONE: We still want to edit Jon's patch to deal with the ecn_allowed vs.
+      ecn_capable issue.
+
+Mon Jun 18 12:07:32 CDT 2001
+DONE: xingang_patch.debug.v011
+xingang_patch.INIT_ACK.v011
+
+Wed Jun 20 18:06:20 CDT 2001
+Fix Daisy's bug:  Null pointer check needed for chunks
+
+sctp_make_chunk() may return a NULL pointer, therefore, 
+every place that sctp_make_chunk() is called needs to 
+verify the return value to prevent from using any NULL 
+pointer down the road. Right now, in 2_4_1-0_1_1, all 
+of these routines, such as sctp_make_init(), 
+sctp_make_data_empty(), sctp_make_sack(), etc, uses the 
+return value from sctp_make_chunk() assuming that it is 
+non-NULL.
+
+Here are functions which are propigating the NULL bug:
+sctp_make_init
+
+Wed Aug  1 13:25:18 CDT 2001
+DONE: Apply Jon's patch
+DONE: Remove definitions of *Unified*
+DONE: Add comments on deviation from CWR rules.
+DONE: Make myNextTSN an atomic_t.
+DONE: Create sctp_config_packet(vTag, ecn_handler), and (*packet->config)()
+Move last_cwr_tsn adjustment into sctp_handle_congestion().
+Move CWR generation into the state function?
+
+Fri Aug 17 18:38:29 CDT 2001
+We're going through sctp_ipv6.0_1_2.patch.  We've read everything but
+the tests.
+
+Mon Aug 20 15:37:47 CDT 2001
+We're about to plunge back into the ipv6 patch, mostly after the SCTP
+Business meeting at 4pm, hopefully after we commit the latest changes
+(the ones to the style guide and to sctp_v4_rcv().)
+
+Thu Aug 23 13:45:53 CDT 2001
+We cleared all outstanding integration (bug fixes, cmd_seq_t,
+ChunkDesc overallocation...).  We also refactored the retval timers to
+be sctp_cmd_seq_t's.  Now the trick is to get a test to fail because
+of the sctp_gen_sack() timer issue.
+
+Fri Aug 24 18:51:20 CDT 2001 
+
+Well, we got the test (ft_frame_sack) to fail.  Not quite where we
+wanted...but we have a pretty cool test to make up for it.  Where we
+*do* fail is by sending one too many SACKs (for the test, Piggy).  We
+send a SACK for every odd numbered packet without considering SACK
+timeouts.  This is legal, but inelegant and screwy.
+
+On Monday, we're going to check and see how much torture this will be
+to refactor.  Then we'll probably do it anyway, code-starved as we
+are.
+
+Mon Aug 27 18:04:01 CDT 2001
+OK, we are now passing ft_frame_sack, but ft_frame_ecn_basic fails.
+The problem is that we need to do ECN processing BEFORE we generate
+the SACK, but we are now generating the SACK in the side effects
+interpreter, which runs BEFORE the rest of all that stuff.  The fix is
+to convert ECN processing to use retval->commands.
+
+Tue Aug 28 17:50:27 CDT 2001
+Notes on ft_frame_lostpackets (mysterious dup TSNs):
+??? Shouldn't we be sacking 98d? 
+AAA No, because c and d are in the same packet
+??? How many times do we start the SACK timer per packet? Should this be
+conditional on end_of_packet?
+AAA I think once per packet, since we're running a small danger of ST
+expiration before all data is processed.  Might as well wait.  We do now.
+
+NNN In the non-sequential case, our sack doesn't gap ack (that's one),
+also, we sack on the reception of the middle data in that test, and
+then (presumably) stop the sack timer so the "forward time until sack"
+there does nothing.
+
+NNN When the rtx timer expires, we naturally deliver all 3 things in
+queue, and the middle one (a dup TSN) kills the test.
+
+So: a) we should gap ack, and b) dup TSNs shouldn't kill the test.
+
+SACK hunt:
+doTSNupdate looks ok.
+In sctp_gen_sack(), we would (I think) have sent f because it's an
+alternate data packet, but we also send it because it's a gap--
+(AP(max_tsn_seen) is above the AP(CTSNAckP)).
+AHA!  sctp_make_sack() evades the whole topic of gap acking!
+That'll do it...
+
+Wed Aug 29 10:41:31 CDT 2001
+Upgraded ft_frame_lostpackets to see a gap-ack-unconditional sack.
+
+??? How can we fail the test when we don't gap ack without failing on
+dup TSNs?
+
+Wed Aug 29 15:15:29 CDT 2001
+We've now created a stub for duplicate reporting--a duplicate TSN is
+no longer an error.
+
+We're going to eliminate our duplicate detection test and see if we
+now could pass ft_frame_lostpackets...  Yep!  The new test is
+meaningful!
+
+Our new goal is to make the revised ft_frame_lostpackets pass by
+implementing gap acks.  But first...
+
+Change to using Jon's new data structure!
+Integrate sctp_tsnmap_t.
+Implement gap acks.
+
+Wed Aug 29 16:34:55 CDT 2001
+We are going through lksctp-2_4_1-0_1_13.tsnmap.patch2 preparing
+comments and massaging the patch.  We need to finish this and apply
+the patch.
+
+Thu Aug 30 18:00:54 CDT 2001
+We applied Jon's patches and refactored the TSN map code to use them.
+
+Tomorrow,  Gap Acks!
+
+Fri Aug 31 14:44:37 CDT 2001
+DONE: Add a descriptive comment for sctp_check_transmitted().
+DONE: Remove the comment at sctp_outqueue.c:636.
+
+Fri Aug 31 15:59:34 CDT 2001
+OK, frametest and unit_test both pass completely.
+Unfortunately, we seem to have fixed ft_frame_biggap.  Since we did
+NOT implement fast retran, we were not expecting this.  We want this
+test to fail again.
+
+There are two possibilities:
+1) The test is wrong--it does not truely generate the big gap condition.
+2) We introduced a bug which masks the big gap bug.
+3) We really did fix the bug.
+
+It was possibility 3.  Oops.  We did not implement fast retran, but we
+DID make big gap a command rather than an error.
+
+Tue Sep  4 11:09:20 CDT 2001
+
+We successfully transferred 10M of data from the user space
+implementation to a live lksctp.  Throughput was pretty raw--about
+25k/sec on a 100Mbit link with a PII-400, and 100 byte chunks.  The
+fact that we do not advertise a growing rwnd hurts us a lot--we'd be
+about 1.8X faster if we did.  That's still not extraordinarily
+fast--we really want to try this with the printk()s removed.
+
+Mon Sep 10 17:49:29 CDT 2001
+A little integration makes the world go round.  (patch.inaddr_any.04)
+

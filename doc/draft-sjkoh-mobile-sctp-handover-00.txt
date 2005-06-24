@@ -1,0 +1,605 @@
+
+ Internet Draft                                             Seok Joo Koh 
+ Internet Engineering Task Force                          Hee Young Jung 
+ Category: Informational                                    Sung Han Kim 
+ February 2003                                              Jun Seob Lee 
+ Expires August 2003                                                ETRI 
+  
+     
+     
+                    Use of SCTP for Seamless Handover 
+                                     
+                <draft-sjkoh-mobile-sctp-handover-00.txt> 
+  
+  
+ Status of this Memo 
+  
+    This document is an Internet-Draft and is in full conformance with 
+    all provisions of Section 10 of RFC2026. 
+     
+    Internet-Drafts are valid for a maximum of six months and may be 
+    updated, replaced, or obsoleted by other documents at any time.  It 
+    is inappropriate to use Internet-Drafts as reference material or to 
+    cite them other than as a "work in progress". 
+     
+    The list of current Internet-Drafts can be accessed at 
+    http://www.ietf.org/ietf/1id-abstracts.txt 
+    The list of Internet-Draft Shadow Directories can be accessed at 
+    http://www.ietf.org/shadow.html. 
+  
+  
+ Abstract 
+  
+    The Stream Control Transmission Protocol (SCTP) is a new reliable 
+    transport protocol that provides the multihoming feature. Without 
+    support of routers in the networks, the SCTP with the ADDIP 
+    extension (called mobile SCTP) can be used to provide seamless 
+    handover for the mobile host that is changing its IP subnetworks 
+    during the session. In the present form, the use of mobile SCTP is 
+    targeted for handover of the mobile sessions that are originated 
+    from the mobile clients (located in mobile networks) toward the 
+    fixed servers (located in the fixed networks). The support for the 
+    opposite directional session (initiated by fixed node to mobile 
+    node) requires an additional location management scheme such as 
+    Mobile IP. In this document, we discuss the generic procedures for 
+    seamless handover of mobile SCTP and the concerned implementation 
+    issues.  
+      
+      
+  
+  
+
+
+   
+ sjkoh, et al             Expires August 2003                 [Page 1] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+ 1. Introduction 
+  
+    SCTP (Stream Control Transmission Protocol), as defined in RFC 2960 
+    [1, 2, 3], is a reliable transport layer protocol. The SCTP is 
+    featured multi-streaming and multihoming, differently from TCP. It 
+    is noted that the multihoming feature of SCTP enables the SCTP to 
+    support the IP mobility.  
+     
+    More specifically, the SCTP with the ADDIP extension [4], which is 
+    called mobile SCTP (mSCTP) in this document, can be used to provide 
+    seamless handover for mobile hosts that are moving into different 
+    IP network regions during the active session [5, 6].  
+      
+    The mobile SCTP may be used as an alternative scheme against the 
+    handover schemes based on Mobile IP [7, 8, 9, 10]. Differently from 
+    the Mobile IP based handover schemes, which rely on the support of 
+    network routers for tunneling between access routers, the mobile 
+    SCTP provides the handover management at the transport layer 
+    without help of routers. 
+      
+    The mobile SCTP, in the present form, is targeted for the client-
+    server service model, in which the mobile client initiates an SCTP 
+    session with the fixed server. To be applicable for the peer-to-
+    peer model, in which a fixed node is allowed to initiate an SCTP 
+    session with a mobile node, the mSCTP must be used along with an 
+    additional location management scheme such as Mobile IP, which is 
+    discussed in [11]. 
+      
+    This document is intended to continue a discussion to explore the 
+    use of SCTP for IP mobility support. Please send comments to the 
+    mailing list <mobile@sctp.de>. To subscribe to this mailing list, 
+    please send a mail to <mobile-request@sctp.de>. 
+  
+ 1.1 Terminology 
+  
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", 
+    "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in 
+    this document are to be interpreted as described in RFC 2119. 
+     
+ 1.2 Acknowledgement 
+  
+    The authors would like to give special thanks to the following 
+    people in ETRI for their valuable comments: 
+     
+        Jae Hong Min 
+        Jung Soo Park 
+        Juyoung Park 
+        Mee Jung Lee 
+         
+  
+
+   
+ sjkoh, et al             Expires August 2003                 [Page 2] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+ 2. Use of Mobile SCTP for IP Mobility Support 
+  
+    In this section, we discuss motivations on the use of SCTP for IP 
+    mobility support, in the viewpoint of IP mobility management issues 
+    and SCTP multihoming feature. 
+      
+ 2.1 IP Mobility Management Issues 
+  
+    At the time of the fixed-mobile convergence trends, the IP mobility 
+    management issues have been focused and are regarded as a core 
+    technology required for providing seamless mobility in the wireless 
+    mobile networks such as WLAN, 3G Cellular. 
+     
+    IP mobility management issues can be classified into Location 
+    Management and Handover Management as follows:  
+     
+    a. Location Management 
+        
+       Location Management is used to identify the current location of 
+       mobile nodes and also to keep track of the their location 
+       changes as they move on. 
+        
+       In Mobile IP [7, 8], the mobility agents such as Home Agent (HA) 
+       and Foreign Agent (only for IPv4) are employed for location 
+       management as well as data transport. In the schemes, Home 
+       Address (HoA) and Care-of Address (CoA) are used for a terminal 
+       identifier and a location identifier of the IP host, 
+       respectively. For location management, the Mobile IP uses the 
+       binding update messages, in which a mobile node has to inform 
+       its current location (CoA) to its HA. 
+  
+    b. Handover Management 
+  
+       The handover management is targeted to provide the mobile hosts 
+       for seamless handover whenever they change their point of 
+       attachment to IP networks (as represented by cell regions or IP 
+       subnets). The main objective of the handover management is to 
+       minimize the service disruption due to data loss and/or handover 
+       latency during handover. 
+        
+       In Mobile IP, the Low Latency handover for MIPv4 (LMIPv4) [9] 
+       and Fast Handover for MIPv6 (FMIPv6) [10] schemes have been 
+       designed for handover management. These schemes rely on the 
+       tunneling between old and new access routers for seamless 
+       handover.  
+     
+    The mobile SCTP can be used as an alternative scheme against LMIPv4 
+    and FMIPv6 for seamless handover. Differently from the Mobile IP 
+    handover schemes that rely on the help of network routers for 
+    tunneling between access routers, the mobile SCTP provides the 
+    handover management at the transport layer without help of routers. 
+   
+ sjkoh, et al             Expires August 2003                 [Page 3] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+      
+ 2.2 SCTP Multihoming Feature 
+  
+    The SCTP intrinsically provides the multihoming feature [1, 2, 3], 
+    in which a mobile node is allowed to simultaneously bind multiple 
+    IP addresses to its network interface.  
+     
+    The recent works on the SCTP include the ADDIP extension [4]. The 
+    ADDIP extension enables the SCTP to add, delete and change the IP 
+    addresses during active SCTP association. 
+     
+    In this document, the SCTP implementation with the ADDIP extension 
+    is called the mobile SCTP (mSCTP) [5]. The mSCTP can be used for 
+    seamless handover while the mobile node is moving into different IP 
+    network regions over the session period. This document aims at 
+    discussing the use of mSCTP for seamless handover, which includes 
+    the specific handover procedures and associated implementation 
+    issues. 
+  
+  
+ 2.3 Session Type considered in Mobile SCTP 
+  
+    Sessions considered in mobile communications can be classified into 
+    the following two types: 
+      
+        a. Session originated from mobile host toward fixed host 
+         
+        b. Session originated from fixed host toward mobile host 
+      
+     The mobile sessions in (a) seem to be a natural extension of the 
+     client-server model, in which the mobile host originating the 
+     session can be viewed as a client, while the counter endpoint will 
+     function as a server. 
+      
+    On the other hand, the case (b) requires the additional location 
+    management functionality for the session originator to find the 
+    current location of the mobile host and to keep track of the 
+    location changes, which has so far been addressed by Mobile IP [7, 
+    8].  
+     
+    The mobile SCTP, in the present form, is targeted for seamless 
+    handover of mobile session associated with the case (a). To support 
+    the session type of the case (b), the mSCTP must be used along with 
+    an additional location management scheme such as Mobile IP, which 
+    is discussed in [11]. 
+     
+  
+
+
+
+
+   
+ sjkoh, et al             Expires August 2003                 [Page 4] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+ 3. Generic Procedures for Seamless Handover  
+  
+    The mobile SCTP (mSCTP) can be used to provide seamless handover 
+    for mobile client who is roaming between two different IP networks 
+    characterized by different IP address prefixes. 
+     
+    In this section, we describe the generic algorithm of mobile SCTP 
+    for handover in the procedural manner, which is designed based on 
+    the scheme in [5]. 
+      
+    More specifically, we consider a mobile client (MC) that initiates 
+    an SCTP association with a fixed server (FS), and then moves from 
+    Location A (2.2.2.x domain) to Location B (3.3.3.x domain), as 
+    shown in Figure 1. Figure 1 illustrates an example of the use of 
+    mobile SCTP for seamless handover in IPv4 networks. Based on this 
+    figure, the handover procedures are described in the succeeding 
+    sections. 
+  
+     
+                                 [1.1.1.2] 
+                                  +----+ 
+                                  | FS | 
+                                  +----+ 
+                                    || 
+                                ########## 
+                                # Router # [1.1.1.1] 
+                                ########## 
+                                    || 
+                                 ******* 
+                              ***       *** 
+                             **            ** 
+                             **   Internet   ** 
+                             **              **  
+                             **           **  
+                                ***       *** 
+                             ||  ******** || 
+                             ||           || 
+                          #######         ####### 
+             [2.2.2.1]   # AR1 #         # AR2 #  [3.3.3.1] 
+                         #######         ####### 
+                            |               | 
+                 Location A |               | Location B  
+                            |               | 
+                         +----+          +----+ 
+                         | MC |=========>| MC | 
+                         +----+          +----+ 
+                       [2.2.2.2]        [3.3.3.2] 
+     
+           Figure 1. Example of Mobile SCTP for Seamless Handover 
+  
+  
+   
+ sjkoh, et al             Expires August 2003                 [Page 5] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+ 3.1 Session Initiation by Mobile Client 
+  
+    We assume that the MC initiates an SCTP association with the FS. 
+    The resulting SCTP association has the set of IP addresses with 
+    [2.2.2.2] for MC and [1.1.1.2] for FS. It is also assumed that the 
+    MC can get an IP address ([2.2.2.2]) with help of a suitable 
+    address configuration mechanism such as DHCP or stateless address 
+    auto-configuration (in IPv6). 
+     
+    Note that the FS is in the single homing with [1.1.1.2], which will 
+    be discussed later more in details. The MC is also in single homing 
+    state, in which the IP address [2.2.2.2] is set to its primary IP 
+    address in the SCTP initiation process. 
+  
+ 3.2 Obtaining an IP address for a new location 
+  
+    Let us assume that the MC moves from Location A to Location B. In 
+    this phase, we also need to assume that the MC can obtain a new IP 
+    address belonging to the Location B, which may be possible with 
+    help of the DHCP or IPv6 address auto-configuration capability in 
+    the Location B. 
+     
+    Obtaining a new IP address may also rely on the support of the 
+    wireless signaling control at the physical layer, in order for the 
+    MC to get the IP address information via IP control packets from 
+    the Location B. 
+     
+    By SCTP implementations, the newly obtained IP address ([3.3.3.2] 
+    in the example) MUST be signaled or informed to the SCTP protocol 
+    stack, and then the SCTP will bind the new IP address to the 
+    existing IP address list managed by the SCTP association. 
+     
+ 3.3 Adding the new IP address to the SCTP association 
+  
+    After obtaining a new IP address, the SCTP of MC MUST inform the 
+    Fixed Server about the new IP address by sending Address 
+    Configuration Change (ASCONF) Chunk to the FS. The MC may receive 
+    the corresponding ASCONF-ACK Chunk from the FS. 
+     
+    The MC is now in the dual homing state. The old IP address is still 
+    used as the primary address ([2.2.2.2] in the example), while the 
+    new IP address ([3.3.3.2] in the example) will be used as the 
+    backup path against the data losses by the SCTP in the FS side. 
+  
+ 3.4 Changing the Primary IP address 
+  
+    While the MC continues to move toward the Location B, it needs to 
+    change its primary IP address to the new IP address according at an 
+    appropriate rule. Actually, the configuration of a specific rule 
+    for changing the primary IP address is a challenging issue of the 
+    mobile SCTP. 
+   
+ sjkoh, et al             Expires August 2003                 [Page 6] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+     
+    Some of the possible rules for triggering the primary IP address 
+    change are listed below: 
+     
+        a. As soon as a new IP address is detected  
+         
+           When a new IP address is detected, the MC may trigger the 
+           primary IP address change by sending the ASCONF Chunk 
+           containing the <Set Primary Address> parameter. 
+         
+           This choice may be preferred in terms of the handover 
+           latency, in particular, for the fast-moving MC. However, it 
+           is less suitable when the MC shows a so-called oscillation 
+           (or ping-pong) behavior across those two locations. 
+         
+        b. By using a threshold of the data losses experienced 
+         
+           This rule is applied when the SCTP of MC has a pre-
+           configured threshold on data loss. If the number or rate of 
+           the lost data chunks is greater than the threshold value, 
+           and if the MC is in the multi-homing state, then it can 
+           trigger the primary address change toward the FS.  
+            
+           The selection of an appropriate threshold value is for 
+           further study, and may depend on implementations and the 
+           mobility behavior considered. 
+            
+        c. By using an explicit indication from the underlying layer 
+           (e.g., by comparison of strength of the detected wireless 
+           signals) 
+     
+           If the underlying physical layer can detect and compare the 
+           signal strength of the physical media, and also inform the 
+           SCTP about a certain indication (possibly by using a up-
+           call), then the MC may trigger the primary address change 
+           according to the indication. 
+     
+           This rule is a more preferred choice, but seems to depend on 
+           the wireless system concerned and its implementations. 
+  
+    If once the primary address is changed, the FS will send the 
+    upcoming data over the new primary IP address, while the backup 
+    (old) address may be used to recover the lost data chunks. 
+     
+ 3.5 Deleting the old IP address from the SCTP association 
+  
+    As the MC progresses to move toward the Location B, if the old IP 
+    address gets inactive, the MC MUST delete the IP address from the 
+    address list. 
+     
+
+   
+ sjkoh, et al             Expires August 2003                 [Page 7] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+    The rule for determining that the IP address is inactive may also 
+    be implemented by using additional information from the underlying 
+    network or physical layer, as done in the previous step (for 
+    changing the primary address.) 
+  
+ 3.6 Repeating the handover procedures 
+  
+    The procedural steps for seamless handover described above, from 
+    3.1 through 3.5, will be repeated whenever the MC moves to a new 
+    location, until the SCTP association will be released. 
+  
+  
+ 4. Implementation Issues on Mobile SCTP 
+  
+ 4.1 Requirement for Mobile SCTP 
+  
+    The only requirement for providing the seamless handover based on 
+    SCTP is that the MC and FS hosts are equipped with the Mobile SCTP 
+    implementations, (i.e., SCTP with ADDIP extension.) 
+     
+    All the others issues described below depend on implementations. 
+  
+ 4.2 Number of IP addresses used by Fixed Server  
+  
+    In this document, we assume that the FS is in the single homing. As 
+    an alternative, the FS may assign two or more IP addresses to the 
+    network interface, so as to enable easy distinction of the two 
+    links at the MC. This allows SCTP to represent different links by 
+    different entries in the host routing table of the MC. For more 
+    information on this issue, please refer to [mSCTP] and [SCTP-Multi].  
+  
+ 4.3 Dynamic IP address configuration 
+     
+    The basic assumption for seamless handover to a new IP subnet 
+    region is that the MC is able to obtain a new IP address from the 
+    new location. Typically, this will be implemented by using DHCP in 
+    IPv4 networks and DHCPv6 or Stateless address auto-configuration in 
+    IPv6 networks.  
+     
+    The handover latency incurred for obtaining the new IP address via 
+    DHCP or IPv6 needs to be examined by experiments. The concerned 
+    handover latency also includes the delay required for the handover 
+    delay between the wireless links. 
+  
+ 4.4 AAA Functionality  
+  
+    It is envisioned that the deployment of mSCTP will be done along 
+    with the appropriate AAA server in the respective access network 
+    domains. The AAA server is used to authenticate and the MC in the 
+    locations, and also to authorize the new IP address configuration 
+
+   
+ sjkoh, et al             Expires August 2003                 [Page 8] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+    via DHCP and IPv6 stateless configuration. However, this issue is 
+    outside the scope of mSCTP. 
+     
+ 4.5 Link Layer Support of Multi-homing 
+  
+    It is noted that the multi-homing capability for Mobile Client is 
+    not easy to support, which actually depends on the characteristics 
+    of the wireless links considered such as Wireless LAN (WLAN) or 3G 
+    Cellular.  
+     
+    In a certain system such as WLAN, it may not be allowed for an MC 
+    to simultaneously bind two different Access Points (APs), in which 
+    the multi-homing is not easy to support. On the other hand, the 
+    wireless links used in Cellular systems are expected to easily 
+    support the link-level multi-homing features. 
+     
+    The multi-homing feature enables the mSCTP to support seamless 
+    handover by simultaneous binding of two different addresses while 
+    staying the overlapping region. Time interval for an MC to stay in 
+    the overlapping region will give impact on the performance of the 
+    handover procedures. 
+  
+ 4.6 Measuring the Wireless Signal Strength at the Physical Layer  
+  
+    Part of seamless handover based on mSCTP depends on the support of 
+    the underlying physical and link layers to measure the wireless 
+    signal strength. The measured signal strength information can 
+    helpfully used for the SCTP to trigger the addition and deletion of 
+    IP addresses, and the change of the primary address. The handover 
+    performance will depend on such capability in terms of data loss 
+    and delay during handover. 
+  
+  
+ 5. Security Considerations  
+  
+    This document discusses the use of mobile SCTP for seamless 
+    handover. The concerned security issues may be identified as the 
+    further works go on. 
+  
+  
+ 6. References 
+  
+    [1] Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer, 
+        H., Taylor, T., Rytina, I., Kalla, M., Zhang, L. and V. Paxson, 
+        "Stream Control Transmission Protocol", RFC 2960, October 2000 
+     
+    [2] Ong, L. and Yoakum, J., "An Introduction to the Stream Control 
+        Transmission Protocol (SCTP)", RFC 3286, May 2002 
+     
+    [3] Coene, L., "Stream Control Transmission Protocol Applicability 
+        Statement", RFC 3257, April 2002 
+   
+ sjkoh, et al             Expires August 2003                 [Page 9] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+     
+    [4] Stewart, R., "Stream Control Transmission Protocol (SCTP) 
+        Dynamic Address Reconfiguration", draft-ietf-tsvwg-addip-sctp-
+        05, May 2002 
+     
+    [5] Riegel, M. and Tuexen M., "Mobile SCTP", draft-riegel-tuexen-
+        mobile-sctp-01, August 2002 
+     
+    [6] Coene, L. (ed.), "Multihoming issues in the SCTP", draft-coene-
+        sctp-multihome-03, February 2002 
+     
+    [7] Perkins, C. (ed.), "IP Mobility Support for IPv4", RFC 3344, 
+        August 2002 
+     
+    [8] Johnson, D., et al., "Mobility Support in IPv6", draft-ietf-
+        mobileip-ipv6-20, January 2003 
+     
+    [9] Malki, K. L., et al., "Low Latency Handoffs in Mobile IPv4", 
+        draft-ietf-mobileip-lowlatency-handoffs-v4-04, June 2002 
+     
+    [10] Koodli, R., et al., "Fast Handovers for Mobile IPv6", draft-
+        ietf-mobileip-fast-mipv6-05, September 2002 
+     
+    [11] Koh, S. J., Jung, H. Y., Kim, S. H. and Lee, J. S., "SCTP with 
+        Mobile IP for IP Mobility Support", draft-sjkoh-mobile-sctp-
+        mobileip-00, February 2003 
+      
+  
+ Authors' Addresses 
+  
+          Seok Joo Koh 
+          sjkoh@etri.re.kr 
+          361 Kajung-Dong Yusung-Gu, Taejon 305-350, Korea 
+           
+          Hee Young Jung 
+          hyjung@etri.re.kr 
+          361 Kajung-Dong Yusung-Gu, Taejon 305-350, Korea 
+           
+          Sung Han Kim 
+          sh-kim@etri.re.kr 
+          361 Kajung-Dong Yusung-Gu, Taejon 305-350, Korea 
+           
+          Jun Seob Lee 
+          juns@etri.re.kr 
+          361 Kajung-Dong Yusung-Gu, Taejon 305-350, Korea 
+     
+
+
+
+
+
+   
+ sjkoh, et al             Expires August 2003                [Page 10] 
+ INTERNET DRAFT      Use of SCTP for Seamless Handover    February 2003 
+
+ Full Copyright Statement 
+  
+  Copyright (C) The Internet Society (2003).  All Rights Reserved. 
+  
+  This document and translations of it may be copied and furnished to 
+  others, and derivative works that comment on or otherwise explain it 
+  or assist in its implementation may be prepared, copied, published 
+  and distributed, in whole or in part, without restriction of any 
+  kind, provided that the above copyright notice and this paragraph are 
+  included on all such copies and derivative works. However, this 
+  document itself may not be modified in any way, such as by removing 
+  the copyright notice or references to the Internet Society or other 
+  Internet organizations, except as needed for the purpose of 
+  developing Internet standards in which case the procedures for 
+  copyrights defined in the Internet languages other than English. 
+  
+  The limited permissions granted above are perpetual and will not be 
+  revoked by the Internet Society or its successors or assigns. 
+  
+  This document and the information contained herein is provided on an 
+  "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING 
+  TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING 
+  BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION 
+  HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF 
+  MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE." 
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+ sjkoh, et al             Expires August 2003                [Page 11] 
+

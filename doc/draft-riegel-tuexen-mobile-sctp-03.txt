@@ -1,0 +1,842 @@
+
+
+
+Network Working Group                                          M. Riegel
+Internet-Draft                                                Siemens AG
+Expires: February 4, 2004                                 M. Tuexen, Ed.
+                                      Univ. of Applied Sciences Muenster
+                                                          August 6, 2003
+
+
+                              Mobile SCTP
+                 draft-riegel-tuexen-mobile-sctp-03.txt
+
+Status of this Memo
+
+   This document is an Internet-Draft and is in full conformance with
+   all provisions of Section 10 of RFC2026.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups. Note that other
+   groups may also distribute working documents as Internet-Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time. It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at http://
+   www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on February 4, 2004.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2003). All Rights Reserved.
+
+Abstract
+
+   Transport layer mobility management is presented in addition to
+   Mobile IP for providing seamless mobility in the Internet. By use of
+   SCTP (Stream Control Transmission Protocol) and some of its currently
+   proposed extensions a seamless handover can be fully accomplished in
+   the mobile client without any provisions in the network, only
+   assisted by functions embedded in Mobile SCTP enabled servers.
+
+   Client mobility management based on Mobile SCTP seems not to require
+   any new protocol development. It is a particular application of SCTP
+   eventually solving the requirements of transport layer mobility in
+   the Internet.
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 1]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+Table of Contents
+
+   1.    Introduction . . . . . . . . . . . . . . . . . . . . . . . .  3
+   1.1   Intention  . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   1.2   Network layer mobility . . . . . . . . . . . . . . . . . . .  3
+   1.3   Transport layer mobility . . . . . . . . . . . . . . . . . .  3
+   1.4   Acknowledgements . . . . . . . . . . . . . . . . . . . . . .  3
+   2.    Transport protocols  . . . . . . . . . . . . . . . . . . . .  3
+   2.1   Transport layer functions  . . . . . . . . . . . . . . . . .  3
+   2.2   Transport protocols supporting multihoming . . . . . . . . .  4
+   2.3   Mobility enabled transport protocols . . . . . . . . . . . .  4
+   3.    Transport layer mobility . . . . . . . . . . . . . . . . . .  4
+   3.1   Transport layer mobility by example  . . . . . . . . . . . .  5
+   3.1.1 Initial connection to the Internet . . . . . . . . . . . . .  5
+   3.1.2 Soft handover  . . . . . . . . . . . . . . . . . . . . . . .  6
+   3.1.3 Tear down of the initial link  . . . . . . . . . . . . . . .  6
+   3.1.4 The procedure continues... . . . . . . . . . . . . . . . . .  6
+   4.    Mobile SCTP, the mobility enabled profile of SCTP  . . . . .  6
+   4.1   Support of multihoming . . . . . . . . . . . . . . . . . . .  7
+   4.2   Dynamic addition and deletion of IP-addresses  . . . . . . .  7
+   5.    Requirements for Mobile SCTP enabled hosts . . . . . . . . .  7
+   5.1   Requirements for mobile clients  . . . . . . . . . . . . . .  8
+   5.2   Requirements for Mobile SCTP enabled servers . . . . . . . .  8
+   6.    Further considerations . . . . . . . . . . . . . . . . . . .  9
+   6.1   Crossing different network technologies  . . . . . . . . . .  9
+   6.2   Combination of link layer mobility and transport layer
+         mobility . . . . . . . . . . . . . . . . . . . . . . . . . .  9
+   6.3   Time multiplexed network interfaces  . . . . . . . . . . . . 10
+   6.4   Mobile servers . . . . . . . . . . . . . . . . . . . . . . . 10
+   7.    Security Considerations  . . . . . . . . . . . . . . . . . . 11
+   8.    IPR Considerations . . . . . . . . . . . . . . . . . . . . . 11
+         Normative References . . . . . . . . . . . . . . . . . . . . 11
+         Informative References . . . . . . . . . . . . . . . . . . . 11
+         Authors' Addresses . . . . . . . . . . . . . . . . . . . . . 12
+         Intellectual Property and Copyright Statements . . . . . . . 14
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 2]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+1. Introduction
+
+1.1 Intention
+
+   It is the intention of this I-D to continue a discussion to explore
+   the nits and nuts of transport layer mobility management. Please send
+   comments to the mailing list 'mobile@sctp.de'.
+   To subscribe to this mailing list, please send a mail to
+   mobile-request@sctp.de.
+
+1.2 Network layer mobility
+
+   Traditionally mobility in the Internet is accomplished by making sure
+   the moving host is reachable by its originally assigned IP address
+   even when the address leaves the network area the address belongs to.
+   To keep reachability by an address outside its assigned area the
+   protocol Mobile IP RFC2002 [4] can be used installing an agent in the
+   home area taking care of all packets sent to a mobile host currently
+   outside its native network area. The home agent knows about the
+   foreign location of the mobile host and forwards all packets
+   addressed to it to an agent in the foreign location which finally
+   delivers the packets to the mobile host. Home agent and foreign agent
+   are connected by a tunnel making the mobility enabled network layer
+   'circuit switched'.
+
+1.3 Transport layer mobility
+
+   Transport layer mobility management keeps the circuitless nature of
+   the network layer of the Internet untouched and implements the whole
+   functionality for providing mobility to hosts in the transport layer
+   entities at both ends of the network. The transport layer of the
+   Internet is the first layer going up the networking stack which
+   provides end-to-end control.
+
+1.4 Acknowledgements
+
+   The authors would like to thank M. Bokaemper, A. Chana, C. Ross, H.
+   J. Schwarzbauer and many others for their valuable comments and
+   suggestions.
+
+2. Transport protocols
+
+2.1 Transport layer functions
+
+   A client host accesses a particular service over the Internet by
+   establishing a transport layer connection to a server host providing
+   such service. This connection is typically made reliable by an
+   appropriate transport control protocol and carries the application
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 3]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   protocol elements and all the user data of a particular service
+   between the hosts over the Internet. Applications  needing a reliable
+   transport may use the Transmission Control Protocol (TCP) which
+   provides a reliable, duplicate free and in-sequence delivery of user
+   data.
+
+   The transport layer makes use of transport layer addresses. For the
+   Transmission Control Protocol this is a pair consisting on an
+   IP-address and a port number. A TCP connection is established between
+   two TCP endpoints, each of the TCP endpoints being identified by one
+   transport layer address of TCP.
+
+   It is important that the two TCP endpoints of a TCP connection can
+   not change during the lifetime of a TCP connection.
+
+   When a host changes its IP address, for example by attaching to a new
+   network, existing TCP connections can not use this new address
+   because the TCP endpoint can not be changed. This is one of the
+   reasons why today Mobile IP is used to provide the mobile host with a
+   constant IP address which is used for communication with the peer.
+
+2.2 Transport protocols supporting multihoming
+
+   A host is called multihomed if it has multiple network layer
+   addresses. In case of IP networks this means that the host has
+   multiple IP-addresses. This does not necessarily mean that the host
+   has also multiple link layer interfaces. Multiple IP addresses can be
+   configured on a single link layer interface.
+
+   A transport protocol supports multihoming if the endpoints can have
+   more than one transport layer addresses. These transport layer
+   addresses are considered as logically different paths of the peer
+   towards the endpoint with the multiple transport addresses.
+
+2.3 Mobility enabled transport protocols
+
+   Transport layer protocols allowing the modification of the endpoints
+   during the lifetime of a connection are called mobility enabled
+   transport protocols. A mobility enabled transport protocol allows for
+   the change of the IP address of the network layer while keeping the
+   end-to-end connection intact. If the transport protocol supports
+   multihoming and the host can attach to multiple networks the
+   transport protocol can make use of the simultaneous connection.
+
+3. Transport layer mobility
+
+   The mobility enabled transport layer shields the application not only
+   from the actual network beneath and provides virtual circuits end to
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 4]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   end through the Internet but also hides the change of underlying
+   network addresses. Most application protocols, except those using IP
+   addresses in messages of their own will continue to work when being
+   ported to a mobility enabled transport layer.
+
+   Since the mobility is now handled by the endpoints which reside in
+   the hosts and not in the network the transport layer mobility
+   connection harmonises fully with the nature of the Internet.
+
+3.1 Transport layer mobility by example
+
+   The following picture illustrates the concept of transport layer
+   mobility. This example is based on a mobility enabled transport
+   protocol supporting multihoming. Also only a mobile client connecting
+   to a server is considered
+
+    Loc A
+      ######### [2.0.0.2]              *******
+      #       #I- - - - -I       ********     **
+      #       #I         A     **  **    **     **
+      #########         / \___*    *    *******  *
+         | |                 *   *********  *  ***           +------+
+    Moving from A to B       ****               **  [8.0.0.4]|      |
+        \| |/                *     Internet  ***  *----------|      |
+    Loc B\ /                * *              **   * [8.0.0.5]+------+
+      #########             *  **   *    **   *   *           Server
+      #       #I            *    ********     *  *
+      #       #I- - - - -I   *        **     * **
+      ######### [4.0.0.3]A    *        *******
+     Mobile Client      / \____*          *
+                                 ********
+
+                                Figure 1
+
+
+3.1.1 Initial connection to the Internet
+
+   A mobile client connects to the Internet by some wireless technology
+   and gets assigned an IP address from the local address space at
+   location A [e.g. 2.0.0.2]. This can be accomplished by any of the
+   techniques currently known for dynamic address assignment, like PPP
+   or DHCP.
+
+   The mobile client being now reachable over the Internet establishes a
+   transport layer connection to a server anywhere 'in' the Internet
+   [e.g. 8.0.0.4] and starts using the provided service.
+
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 5]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+3.1.2 Soft handover
+
+   The mobile client moves from location A towards location B and gets
+   knowledge of reaching the coverage of another network by information
+   from the physical layer of its NIC. In addition to the already
+   existing link the mobile client establishes a link to the network at
+   location B and gets assigned an IP address of the network at location
+   B on its second network interface. Thus the mobile client becomes
+   multi-homed and is now reachable by two different networks.
+
+   The mobile client tells the corresponding server using the
+   established transport layer connection that it is now reachable by a
+   second IP address. Technically speaking, it adds the newly assigned
+   IP address to the association identifying the connection to the
+   server. To enable easy distinction of the two links at the mobile
+   client several IP addresses should be assigned to the network
+   interface of the server. This allows to represent different links by
+   different entries in the routing table of the mobile client.
+
+   On reaching location B the mobile client may leave the coverage of
+   the access point at location A and may loose the link for its first
+   IP address. The data stream between server and mobile client gets
+   interrupted and the reliability behavior of the transport protocol
+   ensures that all data is sent over the second link in the case of
+   permanent failure of the first link.
+
+   If the mobile client has access to information about the strength of
+   the wireless signal the handover to the second link will be initiated
+   before severe packet loss occurs, making the handover more soft.
+
+3.1.3 Tear down of the initial link
+
+   When the mobile client has proved by information from the physical
+   layer that the failure of the first link is permanent, it will inform
+   its peer that it is now no longer reachable by the first IP address
+   and removes this IP address from the association.
+
+3.1.4 The procedure continues...
+
+   When the mobile client moves on, it may reach the coverage of another
+   wireless network. It will repeat the procedure described above
+   gaining seamless mobility while keeping running applications working.
+
+4. Mobile SCTP, the mobility enabled profile of SCTP
+
+   The Stream Control Transmission Protocol (SCTP) as currently being
+   defined in RFC2960 [5] and RFC3309 [9] with the extension described
+   in ADDIP [2] is an example of a mobility enabled transport protocol
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 6]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   supporting multihoming.
+
+   A further extension to the SCTP protocol also enables the partial
+   reliable transport of data extending the applicability of transport
+   layer mobility management from applications based on a reliable
+   transport protocol (TCP, for example) to applications currently
+   realized on an unreliable transport protocol (UDP, for example). See
+   PRSCTP [3] for more details.
+
+4.1 Support of multihoming
+
+   An SCTP transport address is a pair of an IP-address and a port
+   number as in the case of TCP. But an SCTP endpoint can be identified
+   by a sequence of SCTP transport addresses all sharing the same port
+   number.
+
+   An association is a connection between two SCTP endpoints.
+
+   An SCTP endpoint can use multiple IP-addresses for an association.
+   These are exchanged during the initiation of the association.  The
+   multiple addresses of the peer are considered as different paths
+   towards that peer.
+
+   This means that a server must use multiple IP-addresses to provide
+   the mobile client with multiple paths. These will be used while
+   moving between locations.
+
+   It should be mentioned that this path-concept is used only for
+   redundancy, not for load sharing.  Therefore one path is used for
+   normal transmission of user data. It is called the primary path.
+
+   For a more detailed description see RFC2960 [5], RFC3257 [7], RFC3286
+   [8] and RFC3309 [9].
+
+4.2 Dynamic addition and deletion of IP-addresses
+
+   The SCTP extension described in ADDIP [2] makes SCTP a mobilty
+   enabled transport protocol. This means that it allows an SCTP
+   endpoint to change its IP-addresses.
+
+   Furthermore it is possible for an SCTP endpoint to signal to its peer
+   which IP-address it should use as the primary path. This is very
+   useful in case of multiple Internet acesses with different
+   parameters.
+
+5. Requirements for Mobile SCTP enabled hosts
+
+   The only general requirement is that the transport protocol must be
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 7]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   SCTP with the extensions described in ADDIP [2].
+
+5.1 Requirements for mobile clients
+
+   To motivate the requirements for the mobile client one has to
+   consider the situation where the client has connections to multiple
+   access point. The following figure shows this scenario with two
+   access points.
+
+                                       *******
+                      +--I       ********     **
+             [2.0.0.2]|  A     **  **    **     **
+                      | / \___*    *    *******  *
+      #########       |      *   *********  *  ***           +------+
+      #       #I------+      ****               **  [8.0.0.4]|      |
+      #       #I------+      *     Internet  ***  *----------|      |
+      #########       |     * *              **   * [8.0.0.5]+------+
+             [4.0.0.3]|     *  **   *    **   *   *
+                      +--I  *    ********     *  *
+                         A   *        **     * **
+                        / \____*        *******
+     Mobile Client               *********                    Server
+
+                                Figure 2
+
+   During the time where the mobile client is reachable via two
+   different access networks it has to make sure that it uses both
+   links. Thus, for example, the forwarding of the mobile client has to
+   be set up in a way that the traffic towards 8.0.0.4 uses the upper
+   link (interface 2.0.0.2) and the traffic towards 8.0.0.5 uses the
+   lower link (interface 4.0.0.3).
+
+   The mobile client also knows the quality of the two links and can
+   make sure that it uses the better one whenever appropriate. Using the
+   ability to request the server to modify its primary path it is also
+   possible that the mobile client makes sure that the traffic from the
+   server towards the mobile client uses the better link.
+
+   It should be mentioned that this link handover has to be done
+   carefully to avoid oscillation and frequent switching.
+
+   Summarizing this, the mobile client must use an implementation of
+   SCTP with the extension ADDIP [2]. Furthermore the forwarding table
+   of the mobile client has to be modified according the connectivity
+   state.
+
+5.2 Requirements for Mobile SCTP enabled servers
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 8]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   The server must use multiple IP-addresses and a SCTP implementation
+   supporting the extension ADDIP [2].
+
+6. Further considerations
+
+6.1 Crossing different network technologies
+
+   Keeping seamless connectivity while switching between different
+   network technologies, e.g. using wireless LAN in a hot-spot area and
+   automaticaly switching over to a second or third generation public
+   mobile network when leaving the hot-spot area, can be accomplished by
+   Mobile SCTP without any additional functionality.
+
+   It doesn't matter for Mobile SCTP whether the network interfaces
+   belong to the same technology or different technologies as long as it
+   is possible to establish a connection to the Internet via the
+   interfaces. Depending on the technology of the network interfaces
+   different strategies may be applied for selecting the link to be
+   used.
+
+6.2 Combination of link layer mobility and transport layer mobility
+
+   Some radio technologies like IEEE802.11 wireless LAN provide mobility
+   management functionalities in the link layer. Link layer handover is
+   mostly restricted to micro mobility but can be advantageously
+   combined with transport layer mobility management reducing the
+   processing requirements at the server side for handling all the
+   handovers.
+
+   If Mobile SCTP is used in a IEEE802.11 environment a mobile client
+   has o make four decisions:
+
+   o  Depending of physical parameters the mobile client has to decide
+      when to associate with a base station. For making this decision it
+      can take, for example, the signal strength into account.
+
+   o  After establishing the wireless link layer a method for
+      IP-configuration has to be used. But it makes only sense to do
+      this, if the wireless link is stable and there is a chance to
+      really use it.
+
+   o  After the configuration of the new link is completed a decision
+      has to be made when this new path is announced to the peer using
+      the ADDIP mechanisms.
+
+   o  The last decision is when to ask the peer to use the new pathas
+      the primary path.
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004                [Page 9]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   The first decision clearly depends on link layer parameters. All four
+   decisions have in common that they must be done in a way which avoids
+   oscillations. For doing this link layer information has to be used in
+   all four decisions. For example, you want to do the last decision
+   only when you are quite sure that the new path will have the best
+   transmission characteristics for some time.
+
+6.3 Time multiplexed network interfaces
+
+   All descriptions in this I-D assume mobile clients with at least two
+   network interfaces. Some kind of wireless technology might allow to
+   use one network interface card to establish several network
+   connections quasi in parallel in a time multiplexed manner. This
+   might lead to some considerable cost benefits for mobile clients, but
+   does not change the basic procedures of transport layer mobility
+   management.
+
+6.4 Mobile servers
+
+   The description up to now mostly focuses on mobile clients using
+   services from fixed servers. Sometimes the other way round might be
+   necessary: addressing mobile hosts from fixed hosts. In this case
+   there are two additional problems to solve:
+
+   o  Due to location dependent dynamic assignment of IP addresses to
+      mobile hosts there must be a way to address the mobile host
+      independently from their dynamically assigned addresses.
+
+   o  Mobile SCTP does not handle the simultaneous handover of both SCTP
+      endpoints. If both endpoints perform a handover at the same time,
+      the SCTP association will be lost. Please note, that Mobile SCTP
+      can handle handovers of both SCTP endpoints if they happen
+      sequentially.
+
+   The method to solve the above problems must take into account the
+   frequency of handovers. The second problem might not occur that often
+   compared to the first one.
+
+   One possible solution of the first problem can be based on special
+   adoptions to the DNS to take care of the IP-address changes. Such a
+   solution will not solve the second problem.
+
+   Another possible technique to handle the mobility of hosts can be
+   based on the RSerPool protocol suite. This allows to access a server,
+   or a pool element in RSerPool terminology, by using a pool handle.
+   The RSerPool protocol suite can be implemented on small devices like
+   cellular phones as required in RFC3237 [6].
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 10]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   Mobile host would be addressed by a pool handle and in case a mobile
+   host changes its IP-addresses it would reregister with the new
+   IP-Addresses itself. This information would be distributed
+   automatically between all RSerPool name servers. It should be noted,
+   that this solution might not be appropriate for the Internet but for
+   a smaller IP-based network correlating to an RSerPool operational
+   scope.
+
+   In case of the simultaneous handover the RSerPool session would stay
+   intact even if the SCTP association breaks. If the mobile node have
+   implemented a way of resynchronizing their states the communication
+   between them might only be affected slightly. RSerPool provides a
+   COOKIE mechanism which can be used in some scenarios for
+   resynchronizing the states.
+
+7. Security Considerations
+
+   If IPSec is used to secure the SCTP communication new security
+   associations have to be established during the addition/deletion of
+   IP addresses. This introduces an additional delay. If TLS RFC3436
+   [10] is used this can be avoided.
+
+8. IPR Considerations
+
+   This proposal in is full conformance with RFC2026 [1].
+
+   Siemens may have patent rights on technology described in this
+   document which employees of Siemens contribute for use in IETF
+   standards discussions. In relation to any IETF standard incorporating
+   any such technology, Siemens hereby agrees to license on fair,
+   reasonable and non-discriminatory terms, based on reciprocity, any
+   patent claims it owns covering such technology, to the extent such
+   technology is essential to comply with such standard.
+
+   There may be claims by other parties on technology described in this
+   document.
+   Please regard the IPR pages on the IETF web-site for further
+   information.
+
+Normative References
+
+   [1]  Bradner, S., "The Internet Standards Process -- Revision 3", BCP
+        9, RFC 2026, October 1996.
+
+Informative References
+
+   [2]   Stewart, R., "Stream Control Transmission Protocol (SCTP)
+         Dynamic Address  Reconfiguration",
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 11]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+         draft-ietf-tsvwg-addip-sctp-07 (work in progress), March 2003.
+
+   [3]   Stewart, R., "SCTP Partial Reliability Extension",
+         draft-ietf-tsvwg-prsctp-00 (work in progress), June 2003.
+
+   [4]   Perkins, C., "IP Mobility Support", RFC 2002, October 1996.
+
+   [5]   Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
+         H., Taylor, T., Rytina, I., Kalla, M., Zhang, L. and V. Paxson,
+         "Stream Control Transmission Protocol", RFC 2960, October 2000.
+
+   [6]   Tuexen, M., Xie, Q., Stewart, R., Shore, M., Ong, L., Loughney,
+         J. and M. Stillman, "Requirements for Reliable Server Pooling",
+         RFC 3237, January 2002.
+
+   [7]   Coene, L., "Stream Control Transmission Protocol Applicability
+         Statement", RFC 3257, April 2002.
+
+   [8]   Ong, L. and J. Yoakum, "An Introduction to the Stream Control
+         Transmission Protocol (SCTP)", RFC 3286, May 2002.
+
+   [9]   Stone, J., Stewart, R. and D. Otis, "Stream Control
+         Transmission Protocol (SCTP) Checksum Change", RFC 3309,
+         September 2002.
+
+   [10]  Jungmaier, A., Rescorla, E. and M. Tuexen, "Transport Layer
+         Security over Stream Control Transmission Protocol", RFC 3436,
+         December 2002.
+
+
+Authors' Addresses
+
+   Maximilian Riegel
+   Siemens AG
+   Hofmannstr. 51
+   81359 Munich
+   Germany
+
+   Phone: +49 89 722 49557
+   EMail: Maximilian.Riegel@siemens.com
+
+
+
+
+
+
+
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 12]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   Michael Tuexen (editor)
+   Univ. of Applied Sciences Muenster
+   Stegerwaldstr. 39
+   48565 Steinfurt
+   Germany
+
+   EMail: tuexen@fh-muenster.de
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 13]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   intellectual property or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; neither does it represent that it
+   has made any effort to identify any such rights. Information on the
+   IETF's procedures with respect to rights in standards-track and
+   standards-related documentation can be found in BCP-11. Copies of
+   claims of rights made available for publication and any assurances of
+   licenses to be made available, or the result of an attempt made to
+   obtain a general license or permission for the use of such
+   proprietary rights by implementors or users of this specification can
+   be obtained from the IETF Secretariat.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights which may cover technology that may be required to practice
+   this standard. Please address the information to the IETF Executive
+   Director.
+
+
+Full Copyright Statement
+
+   Copyright (C) The Internet Society (2003). All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works. However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice or references to the Internet Society or other
+   Internet organizations, except as needed for the purpose of
+   developing Internet standards in which case the procedures for
+   copyrights defined in the Internet Standards process must be
+   followed, or as required to translate it into languages other than
+   English.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the Internet Society or its successors or assignees.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+   TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 14]
+
+Internet-Draft                Mobile SCTP                    August 2003
+
+
+   HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Acknowledgment
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Riegel & Tuexen         Expires February 4, 2004               [Page 15]
+
+

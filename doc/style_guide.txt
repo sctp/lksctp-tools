@@ -1,0 +1,195 @@
+This is the style guide for the LKSCTP Project.
+<http://www.sf.net/projects/lksctp/>
+
+1.0 Introduction
+
+Use the Linux kernel coding style as the base,
+linux/Documentation/CodingStyle.
+
+This is intended as the IETF kernel reference code for RFC2960 and the
+SCTP API.  As such, readability is paramount.  We attempt to follow
+the names from RFC2960 as closely as practical given the constrains of
+C and the Linux kernel naming conventions.
+
+Here are the approximate naming rules we use.  Those marked
+[obsolescent] will go away once we purge the last vestiges of them.
+
+1) [obsolescent] If a name appears in RFC 2960 or the API draft we try
+   to use it as closely as permitted by C syntax without ADDING "_".
+   This usually means names of the form "xyzAbc".  E.g. "Duplicate TSN"
+   from RFC2960 became "DuplicateTSN", but "a_rwnd" is unaltered.
+
+New names should use this revised rule 1:
+
+   If a name appears in RFC 2960 or the API draft we try to use it as
+   closely as permitted by C syntax without using upper case letters.
+   This usually means names of the form "xyz_abc".  E.g. "Duplicate
+   TSN" from RFC2960 became "duplicate_tsn", but "a_rwnd" is
+   unaltered.  Remember the acronyms still need to be upper case in
+   comments.
+
+2) [obsolescent] If a name refers to a struct which appears on the wire we use
+the form "struct xyzAbc".  This is historically because we inherited most
+of these from the user space implementation.  E.g. "struct sctpHeader".
+
+3) There is no rule 3.
+
+4) All functions start with "sctp_".  Uh, yeah, well, uh...
+
+5) Constants have the form "XYZ_ABC" per K&R.
+
+6) [obsolecent] If "XYZ" is an acronym it SHOULD be capitalized as in
+   "XYZ_abc" or "XYZabc" unless overridden by rule 2 or rule 4. E.g.
+   "struct SCTP_association".
+
+New names should use this revised rule 6:
+
+   Names with anronyms SHOULD map them to lower case, E.g.
+   "struct sctp_association".
+
+7) All remaining names SHOULD use the form "xyz_abc".  E.g. "int too_big".
+
+8) Deviations from these rules are bugs and need to be fixed.
+
+
+2.0 Architectural and Procedural Standards
+
+The core metaphors are the state machine (sctp_do_sm(), related
+functions) and the smart pipe (inqueue, outqueue, ULPqueue, packet).
+
+The state machine breaks down into a pure functional core,
+sctp_sm_statefuns.c, with no side effects, and an explicit set of side
+effects, sctp_sm_sideeffects.c.  
+
+Every function, typedef, enum, and struct needs a descriptive comment.
+
+3.0 /* Comments */
+
+Except as noted below, make all comments full sentences.
+
+Proper behaviour is to spell-cheque your comments.  Those colourful
+American spellings will not be rejected.
+
+Start all sentences with a capital letter.  Do not begin sentences
+with symbols which must be all lower case.  Sentences end with a
+period, question mark, or exclamation point.  Punctuation at the end
+of a sentence has two trailing spaces or a trailing newline.
+
+Comments should confine themselves to expressing the INTENT of the code.
+
+If comments do not agree with the code, then we have a BUG.
+
+Passive voice should be avoided.
+
+Every function, typedef, enum, and struct needs a descriptive
+comment.
+
+/* All comments are C comments, */ 
+// not C++ comments.
+
+/* Multiline comments should
+ * look like this.
+ */
+
+Every #endif should include a comment describing the matching #if.
+E.g.
+
+#if 0
+#endif /* 0 */
+
+A struct sk_buff_head needs a comment describing the REAL type of its
+elements.
+
+To disable a section of code use
+#if 0
+#endif /* 0 */
+rather than /* */.  The if/endif pair safely interoperates with
+existing comments.
+
+4.0 Appearance & Pretty printing
+
+Put a space after every keyword.
+
+Here is an example function:
+
+retval_t my_fun(int foo, struct SCTP_struct *bar)
+{
+	statement;
+}
+
+Every switch statement should have a default clause.  If the default
+can never happen, default should crash or otherwise report failure.
+
+A loop with no body looks like this:
+
+        while (test()) {
+	      /* Do nothing. */
+	}
+
+If a compound condition or arithemetic expression extends beyond the
+79 character limit, put the operators at the end of the line.  E.g.
+
+	if ((NULL == map->tsn_map) ||
+	    (NULL == map->overflow_map) ||
+	    (map->len == 0)) {
+...
+
+
+The if/else style must follow that of K&R style, for example:
+
+	if (foo) {
+...
+	} else {
+...
+	}	   
+
+Unrequired whitespace should be removed from the end of lines and end of
+file.   Hardtabs should be used where possible.  
+
+
+5.0 Compiler and Behavior issues
+
+When comparing a constant to a variable, put the constant on the
+left.  The compiler will tell you if you ommited a '='.  E.g.
+
+	if (MY_CONSTANT == var) {
+        	whatever();
+	}
+
+Please eliminate all compiler warnings.  "Compilation errors are, in a
+way, unit test failures of their own.  They tell us that the
+implementation does not match the specification." -- check.sf.net tutorial
+
+Please make forward declarations for all functions in the appropriate
+header files.  This helps us detect interface changes.
+
+Whenever practical, allocate a large block of memory OUTSIDE a loop
+and then populate it inside the loop, rather than allocating many
+small blocks inside the loop.
+
+Do not use #ifdef TEST_FRAME unless absolutely necessary.  In
+particular, if you simply call kernel functions which are not defined
+in the test frame, please add them to the test frame.  The only case
+we know of which is difficult to handle is static inline functions.
+
+We require using this style of initialization:
+
+struct in_ifaddr eth2_ifa =
+      {.ifa_next = NULL, .ifa_dev =  NULL, .ifa_local = 0, .ifa_address = 0};
+
+Keyword initializations are less susceptible to bugs due to changes in
+the underlying structures.
+
+
+6.0 Version changes
+
+The lksctp-tools  packages uses the "M.m.p" versioning  model for both
+the package itself & the provided shared libraries:
+
+- (M)-ajor revision change means  both source & binary incompatibility
+  (user source code change might be required)
+
+- (m)-inor revision change means source compatibility, while ABI might
+  not be preserved (rebuild is required)
+
+- (p)-atchlevel change means that both API & ABI are preserved.

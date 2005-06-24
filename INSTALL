@@ -1,0 +1,198 @@
+                      HOW TO COMPILE, RUN AND INSTALL
+                      -------------------------------
+
+CONTENTS
+--------
+
+The lksctp-tools package is intended for two audiences.  
+	1) SCTP application developers
+	2) LKSCTP project developers
+
+For SCTP application developers, this package provides the user-level
+C language header files and a library for accessing SCTP specific
+application programming interfaces not provided by the standard sockets. 
+
+For LKSCTP project developers, this package provides the test framework or
+testframe, a test suite running the LKSCTP code in userspace.  
+
+For either role, this project provides sample code, utilities, and
+tests that one may find useful.  
+
+The below INSTALL directions are provided with in each of these roles.
+
+NOTE:  To build, run and install the lksctp-tools package, your system is 
+required to be running with linux-2.5.36, or a later version of the 
+kernel, configured with the Network options "SCTP Configuration" 
+support enabled.  
+
+WARNING:  The testframe is _very_ specific to a level of LKSCTP kernel code.
+Once we reach maturation, it is likely that the version independent code
+may be split into its own package, but for now LKSCTP developers should
+be highly aware that they need to keep both their kernel source and
+lksctp-tools source current.
+
+______________________________________________________________________
+
+
+INSTALLATION   
+-------------
+Prerequisite:  A Linux kernel with SCTP support.  This may come stock with 
+your distrbution (some day), or you will need to build your own 2.5.36 or
+later kernel.
+
+To install/build the lksctp-tools utilities/tests do the following:
+
+1) Download and install the following binary RPMs from the lksctp sourceforge
+   website at 
+	http://sourceforge.net/project/showfiles.php?group_id=26529
+   * lksctp-tools-x.y.z-1.i386.rpm
+   * lksctp-tools-x.y.z-devel-1.i386.rpm
+   * lksctp-tools-x.y.z-doc-1.i386.rpm
+
+   lksctp-tools-x.y.z-1.i386.rpm includes 
+   * SCTP run-time library.
+   * Sample SCTP applications: sctp_darn and sctp_test.
+   * withsctp: a tool when used with existing TCP binaries replaces TCP
+               with SCTP.
+
+   lksctp-tools-x.y.z-devel-1.i386.rpm includes
+   * SCTP header file /usr/include/netinet/sctp.h
+   * SCTP man pages.
+   * Source code for sample SCTP applications.
+
+   lksctp-tools-x.y.z-doc-1.i386.rpm includes
+   * SCTP RFC's and internet drafts. 
+
+   If you want to run and play with the included sample SCTP applications or 
+   develop your own SCTP applications, you can skip the rest of the
+   instructions.
+
+   If you are interested in running the functional regression tests included
+   in the lksctp-tools package, continue with the following instructions.
+
+2) Download and install the following source RPM form the lksctp sourceforge
+   website at 
+        http://sourceforge.net/project/showfiles.php?group_id=26529
+   * lksctp-tools-x.y.z-1.src.rpm
+   This will install the lksctp-tools gzipped tarball and RPM spec file. 
+
+3) Untar the lksctp-tools directory from the gzipped tarball. This creates a 
+   subdirectory called lksctp-tools-x.y.z. 
+
+   Ensure you have autoconf, automake and libtool packages installed on your
+   system.
+
+3) Run ./configure
+
+3) Run make
+
+4) To run the SCTP kernel regression tests,
+  
+   $ cd src/func_tests
+   $ make v4test (regression tests for the IPv4 socket support)
+   $ make v6test (regression tests for the IPv6 socket support)
+
+5) Run other SCTP test tools/applications in src/apps directory to verify the
+   running SCTP.
+
+6) If you are not a lksctp project developer, you can skip the rest of
+   the instructions. 
+
+
+INSTALLATION for lksctp developers
+----------------------------------
+
+7) Have a 2.6 kernel source tree ready on the system for build and development.
+   If you use BitKeeper, the project tree is located at
+	http://linux-lksctp.bkbits.net/lksctp-2.5.work
+   It may be possible the the stock kernel source is available from
+	ftp://ftp.kernel.org
+   Or, that a kernel patch is available from the lksctp project at
+	http://www.sf.net/projects/lksctp
+
+   If you plan to submit patches or otherwise participate in lksctp 
+   development, please keep your source up to date with BitKeeper trees,
+   as this will drastically improve your chances of having your 
+   contributions integrated into the project. 
+
+8) Set environment variable "LKSCTP_LINUX" to point to the kernel source tree 
+   where you are going to develop SCTP with.  For example, 
+	
+	export LKSCTP_LINUX=~/bk/lksctp-2.5
+
+9) Go to the kernel source tree, e.g. 
+	cd ~/bk/lksctp-2.5
+
+10) make xconfig
+   [Select Code Maturity->Development->Yes,
+	Networking->SCTP Configuration->SCTP Protocol-> y,  (or m)
+	Let us know if you discover something else...]
+
+You now have a complete source tree.  You will do most of your
+compiling while in either src/ (for functional tests or apps), tests/ (for
+user-space frame tests) or your kernel tree (for real kernels).
+
+Read on for more advanced directions relevant to both application and
+lksctp developers. 
+
+______________________________________________________________________
+
+
+Appendix A:  Advanced
+---------------------
+
+To build all the frametests or a single frametest
+-------------------------------------------------
+$ cd test
+
+Make sure that the environment variable "LKSCTP_LINUX" is set to a kernel 
+source tree where you are running tests with.  For example, 
+	
+	export LKSCTP_LINUX=~/bk/lksctp-2.5
+
+Default is "../../lksctp-2.5".
+
+$ make
+
+or 
+
+$ make <TESTNAME>	# to build individual test TESTNAME
+
+
+To run unit tests in test/
+---------------------------
+$ make unittest
+
+
+To run functional tests in test/
+---------------------------------
+$ make frametest
+
+and
+
+$ make frame6		# functional test for IPv6 support
+
+To build a kernel 
+-----------------
+Go to your kernel source tree and do a usual kernel compile.
+
+Use BitKeeper for development
+-----------------------------
+Please first refer to the documentation found on the BitKeeper website:
+	http://www.bitkeeper.com
+
+Additionally, please refer to documents under Documentation/BK-usage in 
+Linux 2.5 Kernel source for further refinements for using BitKeeper for
+kernel development.
+
+Patch should still be submitted to the lksctp SourceForge website at
+	http://www.sf.net/projects/lksctp
+and (optionally) also to the lksctp mailing list
+	lksctp-developers@lists.sourceforge.net
+
+HOWEVER, lksctp and lksctp-tools patches should be submitted as two
+files since their respective sources reside in two separate repositories.
+
+Additionally, if you feel comfortable with submitting BK patches this too
+is agreeable.   If the changes can be pulled from (i.e 'bk pull') this
+is even better.  Normal, 'diff' based patches are still acceptable too.   

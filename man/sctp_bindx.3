@@ -1,0 +1,90 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_BINDX 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_bindx \- Add or remove bind addresses on a socket.
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_bindx(int " sd ", struct sockaddr * " addrs ", int " addrcnt ,
+.BI "               int " flags );
+.fi
+.SH DESCRIPTION
+.BR sctp_bindx
+adds or removes a set of bind addresses passed in the array
+.I addrs
+to/from the socket
+.I sd.
+.I addrcnt
+is the number of addresses in the array and the
+.I flags
+paramater indicates if the addresses need to be added or removed.
+.PP
+If
+.I sd
+is an IPv4 socket, the addresses passed must be IPv4 addresses. If
+.I sd
+is an IPv6 socket, the addresses passed can be either IPv4 or IPv6
+addresses.
+.PP
+.I addrs
+is a pointer to an array of one or more socket addresses. Each address is
+contained in its appropriate structure(i.e. struct sockaddr_in or struct
+sockaddr_in6). The family of the address type must be used to distinguish
+the address length. The caller specifies the number of addresses in the
+array with
+.I addrcnt. 
+.PP
+The
+.I flags
+parameter can be either
+.B SCTP_BINDX_ADD_ADDR
+or
+.B SCTP_BINDX_REM_ADDR.
+An application can use
+.B SCTP_BINDX_ADD_ADDR
+to associate additional addresses with an endpoint after calling
+.BR bind(2). 
+.B SCTP_BINDX_REM_ADDR
+directs SCTP to remove the given addresses from the association.
+A caller may not remove all addresses from an association. It will
+fail with
+.B EINVAL.
+.SH "RETURN VALUE"
+On success, 0 is returned. On failure, \-1 is returned, and
+.I errno
+is set appropriately.
+.SH ERRORS
+.TP
+.B EBADF
+.I sd
+is not a valid descriptor.
+.TP
+.B ENOTSOCK
+.I sd
+is a descriptor for a file, not a socket.
+.TP
+.B EFAULT
+Error while copying in or out from the user address space.
+.TP
+.B EINVAL
+Invalid port or address or trying to remove all addresses from an association.
+.TP
+.B EACCES
+The address is protected, and the user is not the super-user.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_sendmsg (3),
+.BR sctp_recvmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),
+.BR sctp_opt_info (3),

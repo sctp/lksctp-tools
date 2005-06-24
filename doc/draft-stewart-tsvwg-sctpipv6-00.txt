@@ -1,0 +1,161 @@
+Network Working Group                                     R. R. Stewart
+INTERNET-DRA                                                 S. Deering
+                                                                  Cisco
+
+expires in six months                                      June  1,2001
+
+
+
+         IPv6 addressing and Stream Control Transmission Protocol 
+                   <draft-stewart-tsvwg-sctpipv6-00>
+
+Status of This Memo
+
+    This document is an Internet-Draft and is in full conformance with
+    all provisions of Section 10 of [RFC2026]. Internet-Drafts are
+    working documents of the Internet Engineering Task Force (IETF), its
+    areas, and its working groups. Note that other groups may also
+    distribute working documents as Internet-Drafts.
+
+    The list of current Internet-Drafts can be accessed at
+    http://www.ietf.org/ietf/1id-abstracts.txt
+
+    The list of Internet-Draft Shadow Directories can be accessed at
+    http://www.ietf.org/shadow.html.
+
+Abstract
+
+    Stream Control Transmission Protocol [RFC2960] provides transparent
+    multi-homing to its upper layer users. This multi-homing is
+    accomplished through the passing of address parameters in the
+    initial setup message used by SCTP. In an IPv4 network all addresses
+    are passed with no consideration for their scope and routeablility.
+    In a IPv6 network special considerations MUST be made to properly
+    bring up associations between SCTP endpoints that have IPv6
+    [RFC2460] addresses bound within their association.  This document
+    defines those considerations and enumerates general rules
+    that an SCTP endpoint MUST use in formulating both the INIT and
+    INIT-ACK chunks.
+
+
+Table Of Contents
+
+
+
+
+1. Introduction
+
+
+    Stream Control Transmission Protocol [RFC2960] provides transparent
+    multi-homing to its upper layer users. This multi-homing is
+    accomplished through the passing of address parameters in the
+    initial setup message used by SCTP. In an IPv4 network all addresses
+    are passed with no consideration for their scope and routeablility.
+    In a IPv6 network special considerations MUST be made to properly
+    bring up associations between SCTP endpoints that have IPv6
+    [RFC2460] addresses bound within their association.  This document
+    defines those considerations and enumerates general rules
+    that an SCTP endpoint MUST use in formulating both the INIT and
+    INIT-ACK chunks.
+
+    The emphasis in the rules laid out in this document are to prevent
+    an SCTP endpoint from listing an IPv6 address that is outside of its
+    routeable scope to a peer endpoint. This will prevent black-hole
+    conditions that may cause the unexpected failure of SCTP associations.
+
+2. Conventions
+
+   The keywords MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD,
+   SHOULD NOT, RECOMMENDED, NOT RECOMMENDED, MAY, and OPTIONAL, when
+   they appear in this document, are to be interpreted as described in
+   [RFC2119].
+
+3. Special rules for IPv6 address scoping
+
+    When selecting IPv6 addresses to include as parameters in the INIT
+    chunk the following rules MUST be applied:
+
+    A1) The INIT chunk SHOULD NOT include any IPv6 Link Local
+        address parameters unless the source or destination address
+        in the IPv6 header is a Link Local address.
+
+    A2) If IPv6 Link Local address parameters are included in the 
+        INIT chunk, Link Local addresses that are NOT on the same 
+	physical Link as that of the destination or source
+        IPv6 address (found in the IPv6 header) MUST NOT be included.
+
+    A3) The INIT chunk SHOULD NOT include any IPv6 Site Local
+        address parameters unless the source or destination address
+        in the IPv6 header is a Site Local address.
+
+    A4) If IPv6 Site Local addresses are included in the INIT chunk,
+        Site Local address that are NOT on the same site MUST NOT 
+        be included.
+
+    A5) If the destination and source address of the INIT is an 
+        IPv6 Global address then the sender SHOULD NOT include any 
+        Site Local or Link Local IPv6 address parameters in the 
+        INIT chunk.
+
+    When responding to an INIT chunk and selecting IPv6 address
+    parameters to be included in the INIT-ACK chunk, the following rules
+    MUST be applied:
+
+    B1) The INIT-ACK chunk SHOULD NOT include any IPv6 Link Local
+        address parameters unless the source or destination address
+        in the IPv6 header of the INIT chunk is a Link Local address.
+
+    B2) If IPv6 Link Local address parameters are included in the 
+        INIT-ACK chunk, Link Local addresses that are NOT on the same 
+	physical Link as the source or destination address in the
+        IPv6 header of the INIT chunk MUST NOT be included.
+
+    B3) The INIT-ACK chunk SHOULD NOT include any IPv6 Site Local
+        address parameters unless the source or destination address
+        in the IPv6 header of the INIT chunk is a Site Local address.
+
+    B4) If IPv6 Site Local addresses are included in the INIT-ACK 
+        chunk, Site Local address that are NOT on the same site 
+        as the received INIT chunk MUST NOT be included.
+ 
+    B5) If the destination and source address of the INIT is an 
+        IPv6 Global address then the sender SHOULD NOT include any 
+        Site Local or Link Local IPv6 address parameters in the 
+        INIT-ACK chunk.
+
+4. Authors addresses
+
+
+   Randall R. Stewart
+   24 Burning Bush Trail.
+   Crystal Lake, IL 60012
+   USA
+   Phone: +1 815 477 2127
+   EMail: rrs@cisco.com
+
+   Stephen E. Deering
+   Cisco Systems, Inc.
+   170 West Tasman Drive
+   San Jose, CA 95134-1706
+   USA
+
+   Phone: +1 408 527 8213
+   Fax:   +1 408 527 8254
+   EMail: deering@cisco.com
+
+
+5. References
+
+   [RFC2026]  Bradner, S., "The Internet Standards Process -- Revision
+              3", BCP 9, RFC 2026, October 1996.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
+
+   [RFC2460]  S. Deering, R. Hinden, "Internet Protocol, 
+              Version 6 (IPv6) Specification." December 1998.
+
+   [RFC2960]  R. R. Stewart, Q. Xie, K. Morneault, C. Sharp,
+              H. J. Schwarzbauer, T. Taylor, I. Rytina, M. Kalla, L. Zhang,
+              and, V. Paxson, "Stream Control Transmission Protocol," RFC
+              2960, October 2000.

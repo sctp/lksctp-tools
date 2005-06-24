@@ -1,0 +1,74 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_GETLADDRS 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_getladdrs \- Returns all locally bound addresses on a socket. 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_getladdrs(int " sd ", sctp_assoc_t " assoc_id ,
+.BI "                   struct sockaddr **" addrs );
+.sp
+.BI "void sctp_freeladdrs(struct sockaddr *" addrs );
+.fi
+.SH DESCRIPTION
+.BR sctp_getladdrs
+returns all locally bound addresses on a socket. On return,
+.I addrs
+will point to a dynamically allocated packed array of
+.B sockaddr
+structures of the appropriate type for each local address. The caller
+should use 
+.BR sctp_freeladdrs
+to free the memory. Note that the in/out parameter
+.I addrs
+must not be NULL.
+.PP
+If
+.I sd
+is an IPv4 socket, the addresses returned will be all IPv4 addresses. If
+.I sd
+is an IPv6 socket, the addresses returned can be a mix of IPv4 or IPv6
+addresses.
+.PP
+For one-to-many style sockets,
+.I id
+specifies the association to query. For one-to-one style sockets,
+.I id
+is ignored.
+.PP
+If the
+.I id
+field is set to 0, then the locally bound addresses are returned 
+without regard to any particular association. 
+.PP
+.BR sctp_freeladdrs
+frees all the resources allocated by
+.BR sctp_getladdrs
+.SH "RETURN VALUE"
+On success,
+.BR sctp_getladdrs
+returns the number of local addresses bound to the socket. If the socket
+is unbound, 0 is returned and the value of 
+.I *addrs
+is undefined. On error,
+.BR sctp_getladdrs
+returns -1 and the value of
+.I *addrs
+is undefined.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_sendmsg (3),
+.BR sctp_recvmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_opt_info (3),

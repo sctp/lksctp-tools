@@ -1,0 +1,59 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_RECVMSG 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_recvmsg \- Receive a message from a SCTP socket. 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_recvmsg(int " sd ", void * " msg ", size_t * " len ,
+.BI "                 struct sockaddr * " from ", socklen_t * " fromlen , 
+.BI "                 struct sctp_sndrcvinfo * " sinfo ", int * " msg_flags);
+.fi
+.SH DESCRIPTION
+.BR sctp_recvmsg
+is a wrapper library function that can be used to receive a message from
+a socket while using the advanced features of SCTP. 
+.I sd
+is the socket descriptor on which the message pointed to by
+.I msg
+of length
+.I len
+is received.
+.PP
+If
+.I from
+is not NULL, the source address of the message is filled in. The argument
+.I fromlen
+is a value-result parameter. initialized to the size of the buffer associated
+with 
+.I from ,
+and modified on return to indicate the actual size of the address stored.
+.PP
+.I sinfo
+is a pointer to a sctp_sndrcvinfo structure to be filled upon receipt of the
+message.
+.I msg_flags
+is a pointer to a integer that is filled with any message flags like
+.B MSG_NOTIFICATION or
+.B MSG_EOR.
+.SH "RETURN VALUE"
+On success,
+.BR sctp_recvmsg
+returns the number of bytes received or -1 if an error occurred.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_sendmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),
+.BR sctp_opt_info (3),

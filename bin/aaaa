@@ -1,0 +1,20 @@
+#! /bin/sh
+#
+# Run all the stuff we need to generate the configure and Makefile.in
+# in the automake process.
+#
+# The order needs to be that. If autoheader does not run after
+# autoconf, it doesn't get all the symbols right. As automake requires
+# config.h.in, created by autoheader, it needs to run after it.
+#
+# $Id: aaaa,v 1.1.1.1 2002/08/06 22:31:05 inaky Exp $
+
+
+set -ex
+
+aclocal
+autoconf
+autoheader
+# Set GNU strictness
+#automake --foreign
+automake --gnu

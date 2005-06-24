@@ -1,0 +1,60 @@
+# -*-makefile-*-
+#
+# Define here directories you want
+
+rootbindir = /bin
+rootsbindir = /sbin
+rootlibdir = /lib
+
+localedir = $(datadir)/locale
+pkgsysconfdir = $(sysconfdir)/@PACKAGE@
+pkgdocdir = $(datadir)/@PACKAGE@
+
+vpkgsysconfdir = $(pkgsysconfdir)/v@VERSION@
+vpkgdatadir = $(pkgdatadir)/v@VERSION@
+vpkglibdir = $(pkglibdir)/v@VERSION@
+vpkgdocdir = $(docdir)/v@VERSION@
+
+# List here all the directories you want listed in the file to be used
+# in your programs:
+
+directories := \
+	localedir \
+	pkgsysconfdir \
+	rootbindir \
+	rootlibdir \
+	rootsbindir \
+	vpkgdatadir \
+	vpkgdocdir \
+	vpkglibdir \
+	vpkgsysconfdir \
+	\
+	bindir \
+	datadir \
+	libdir \
+	pkgdatadir \
+	pkgdocdir \
+	pkglibdir \
+	sbindir
+
+# To modify this target for another language, just copy, paste and
+# modify the target to generate directories.h. We depend on
+# config.status and Makefile.dirs, as anything changed is going to be
+# reflected there.
+
+# This is for generating the list in C/C++
+directories.h: $(top_builddir)/config.status $(top_srcdir)/Makefile.dirs
+	@rm -f $@
+	@echo -n "Creating $@ ..."
+	@echo "#ifndef __$(subst .,_,$@)__" > $@
+	@echo "# define __$(subst .,_,$@)__" >> $@
+	@echo "" >> $@
+	@echo -e $(foreach v,$(directories),$(shell echo 'D_$(v) \"$($v)\"\\n')) \
+	  | sed 's/^ *D_/# define D_/' >> $@
+	@echo "#endif" >> $@
+	@echo " done"
+
+DISTCLEANFILES += directories.h
+MAINTAINERCLEANFILES += directories.h
+
+## FIXME: Your stuff here

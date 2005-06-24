@@ -1,0 +1,729 @@
+These are more random design notes I need to keep track of.
+
+Perhaps counterWork() should be replaced with direct counter
+manipulation.  This violates the functional style of the state
+functions, but only a little bit...
+
+IRRELEVANT: The vtag return value should be subsumed into repl.
+IRRELEVANT: sctp_make_chunk() should NOT be called directly from these
+IRRELEVANT: functions. 
+
+I am very unhappy with retval->link.  That means a LOT of copying.
+
+DONE: Basic principle for host or network byte order:
+DONE:       Network byte order should be as close to the network as
+DONE:       possible.
+DONE: This means that the first routine to manipulate a particular header
+DONE:       should convert from network byte order to host byte order as
+DONE:       soon as it removes it gets it from the next lowest layer.
+DONE:       Outbound, the last routine to touch a header before passing it
+DONE:       to the next lower layer should convert it to network order.  For
+DONE:       queues, the routine at the top (closer to user space) does the
+DONE:       conversion--inbound queues are converted to host order by the
+DONE:       reader, outbound queues are converted to network order by the
+DONE:       writer.
+DONE: 
+DONE: Forget that smoke.  The problem is that this entails reparsing the
+DONE: header when it comes time to pass it to the lower layer (e.g. you need
+DONE: to check the SCTP header for optional fields).  The code which fills
+DONE: in a field should put it in network order.
+DONE: 
+DONE: POSSIBLY on inbound, the code which parses the header should convert
+DONE: it to host order...  But on outbound, packets should ALWAYS be in
+DONE: network byte order!
+
+
+OK, we need to add some stream handling.  This means that we are
+updating sctp_create_asoc() among many other functions.  I think we
+want some functions for dereferencing streams...
+
+
+DONE: NOTES FOR TSNMap
+DONE: 
+DONE: Variables:
+DONE: uint8_t *TSNMap			Array counting #chunks with each TSN
+DONE: uint8_t *TSNMapEnd		TSNMap+TSN_MAP_SIZE
+DONE: uint8_t *TSNMapOverflow		counters for TSNMapBase+TSN_MAP_SIZE;
+DONE: uint8_t *TSNMapCumulativePtr	Cell for highest CumulativeTSNAck
+DONE: uint32_t TSNMapCumulative	Actual TSN for *TSNMapCumulativePtr
+DONE: uint32_t TSNMapBase		Actual TSN for *TSNMap
+DONE: long TSNMapGap			chunk.TSN - TSNMapBase
+DONE: 
+DONE: Constants:
+DONE: TSN_MAP_SIZE
+DONE: 
+DONE: TSNMap and TSNMapOverflow point at two fixed buffers each of length
+DONE: TSN_MAP_SIZE.  When TSNMapCumulativePtr passes TSNMapEnd (i.e. we send
+DONE: the SACK including that value), we swap TSNMap and TSNMapOverflow,
+DONE: clearing TSNMap.
+DONE: 
+DONE: This work should be done OUTSIDE the state functions, as it requires
+DONE: modifying the map.  It is sufficient for the state function to return
+DONE: TSNMapGap.  Take care that TSNMapGap is never 0--we reserve this value
+DONE: to mean "no TSNMapGap".
+
+
+DONE: FIGURE THIS OUT--which structures represent PEER TSN's and which
+DONE: structures represent OUR TSN's.
+DONE: 
+DONE: Rename the elements to peerTSN* and myTSN*.
+
+
+ERROR IN Section 6.1:
+
+  Note: The data sender SHOULD NOT use a TSN that is more than 
+  2**31 - 1 above the beginning TSN of the current send window.
+
+SHOULD be 2**16-1 because of the GAP ACKs.
+
+ERROR IN 12.2 Parameters necessary per association (i.e. the TCB):
+Ack State   : This flag indicates if the next received packet 
+            : is to be responded to with a SACK. This is initialized
+            : to 0.  When a packet is received it is incremented. 
+            : If this value reaches 2 or more, a SACK is sent and the 
+            : value is reset to 0. Note: This is used only when no DATA 
+            : chunks are received out of order. When DATA chunks are 
+            : out of order, SACK's are not delayed (see Section 6).
+
+NOWHERE in Section 6 is this mentioned.  We only generate immediate
+SACKs for DUPLICATED DATA chunks.  Is this an omission in Section 6 or
+a left-over note in section 12.2?
+
+
+Section 6.1:
+
+	Before an endpoint transmits a DATA chunk, if any received DATA
+	chunks have not been acknowledged (e.g., due to delayed ack), the
+	sender should create a SACK and bundle it with the outbound DATA
+	chunk, as long as the size of the final SCTP packet does not exceed
+	the current MTU. See Section 6.2.
+
+I definately won't do this.  What AWFUL layering!
+
+We have this REALLY WIERD bugoid.  We SACK the first data chunk of the
+second packet containing data chunks.  A careful reading of the spec
+suggests that this is legal.  It kinda works, but we end up with more
+SACK timeouts than we might otherwise have...  The fix is to split off
+the SACK generation code from the TSN-handling code and run it when we
+get either a NEW packet, or an empty input queue.
+
+
+
+OK: Section 6.2 does not explicitly discuss stopping T3-rtx.  The worked
+OK: example suggests that T3-rtx should be canceled when the SACK is
+OK: lined up with the data chunk...  Ah!  Section 6.3...
+
+
+We really ought to do a sctp_create_* and sctp_free_* for all of the
+major objects including SCTP_transport.
+
+{DONE: Copy af_inet.c and hack it to support SCTP.
+
+If we were going to do SCTP as a kernel module, we'd do this:
+
+We can then socket.c:sock_unregister() the whole INET address family
+and then sock_register() our hacked af_inet...
+}
+
+
+SCTP_ULP_* is really two groups of things--request types and response
+types...
+
+DONE: We want to know whether the arguments to bind in sock.h:struct proto
+DONE: are user space addresses or kernel space addresses.  To do that we
+DONE: want to find the tcp bind call.  To do THAT we are looking for the
+DONE: place that struct proto *prot gets filled in for a TCP struct sock.
+
+
+API issue--how do you set options per association?  Normal setsockopt
+will operate on an endpoint.  This is mostly an issue for the
+UDP-style api.  The current solution (v02) is that all associations on
+a single socket should all have the same options.  I still don't like
+this.
+
+Write a free_endpoint().  Remember to free debug_name if allocated...
+
+DONE: Make sure that the API specifies a way for sendto() to use some kind
+DONE: of opaque identifier for the remote endpoint of an association.  As
+DONE: observed before, it is a bad thing to use an IP address/port pair as
+DONE: the identifier for the remote endpoint...
+
+General BUG--sctp_bind() needs to check to see if somebody else is
+already using this transport address (unless REUSE_ADDR is set...)...
+
+sctp_do_sm() is responsible for actually discarding packets.  We need
+a sctp_discard_packet_from_inqueue().
+
+Be sure to schedule the top half handling in sctp_input.c:sctp_v4_rcv().
+
+Keycode 64 is Meta_L, should be Backspace (or whatever that really
+is)...
+
+DONE: Should sctp_transmit_packet() clone the skb?  [Yes.  In fact we
+DONE: need a deep copy because of a bug in loopback.  This problem
+DONE: sort of goes away with the creation of SCTP_packet.]
+
+- memcpy_toiovec() is for copying from a blob to an iovec...
+- after(), before(), and between() are for comparing 32bit wrapable
+  numbers...
+
+Where do theobromides live?  Are they fat soluable?
+
+printf "D %x\nC %x\nI %x\nP %x\nT %x\n", retval->skb->data, retval->chunk_hdr, retval->subh.init_hdr, retval->param_hdr, retval->skb->tail
+
+
+set $chunk = retval->repl->chunk_hdr
+set $init = (struct sctpInitiation *)(sizeof(struct sctpChunkDesc) + (uint8_t *)$chunk)
+set $param1 = (struct sctpParamDesc *)(sizeof(struct sctpInitiation) + (uint8_t *)$init)
+set $param2 = (struct sctpParamDesc *)(ntohs($param1->paramLength) + (uint8_t *)$param1)
+set $sc = (struct sctpStateCookie *)$param2
+
+DONE: run_queue sctp_tq_sideffects needs while wrapper.
+
+OK: Important structures:
+OK: 	  protocol.c:	struct inet_protocol tcp_protocol (IP inbound linkage)
+OK: 	  tcp_ipv4.c:	struct proto tcp_prot (exceptions to inet_stream_ops)
+OK: 	  af_inet.c:	struct proto_ops inet_stream_ops (sockets interface)
+
+Another unimplemented feature:  sctp_sendmsg() should select an
+ephemeral port if a port is not already set...
+
+Path MTU stuff:  Send shutdown with rewound CumuTSNack.  Is this a 
+protocol violation?
+
+NO: Use larger TSN increment than 1?  Allows subsequencing [This is
+NO: patently illegal.  The correct solution involves MTU calculations...]
+
+Lowest of 3 largest MTU's for fragmentation?  Probably.
+Allows 2 RWINs worth of backup?
+
+Immediate heartbeat on secondary when primary fails?
+(Use fastest response on heartbeat to select new primary, keeping MTU in mind)
+This is probably illegal.  v13 added stricter rules about generating
+heartbeats.
+
+[p- use 3 largest RWINs to select...]
+
+[jm- pick top 3 thruputs (RWIN/Latency), pick lowest MTU for the new primary
+ address ]
+
+
+Here is what we did to set up the repository:
+
+$ cd /usr/src/linux_notes
+$ bzcat ~/linux-2.4.0-test11.tar.bz2 | tar xfp -
+$ CVSROOT=:pserver:knutson@postmort.em.cig.mot.com:/opt/cvs
+$ export CVSROOT
+$ cd linux
+$ cvs import -m "plain old 2.4.0 test11" linux knutson start
+[Note that this EXCLUDES net/core.]
+$ cd ..
+$ mv linux linux-2.4.0-test11
+$ cvs co linux
+$ cd linux-2.4.0-test11/net
+$ tar cfv - core | (cd ../../linux/net;tar xfp -)
+$ cd ../../linux
+$ cvs add net/core
+$ cvs add net/core/*.c
+$ cvs add net/core/Makefile
+$ cd net
+$ cvs commit -m "add core"
+$ cd ..
+[Now we create the branch.]
+$ cvs tag -b uml
+[Move to that branch.]
+$ cvs update -r uml
+$ touch foo
+$ bzcat ~/patch-2.4.0-test11.bz2 | patch -p1
+$ for a in $(find . -newer foo | grep -v CVS); do echo $a; cvs add $a; done 2>&1 | tee ../snart
+$ cvs commit -m "UML patch for 2.4.0-test11"
+$ cvs tag latest_uml
+
+2001 Jan 11
+When we close the socket, it shouldn't de-bind the endpoint.  Any new
+socket attempting to bind that endpoint should get an error until that
+endpoint finally dies (from all of its associations dying).
+
+This issue comes up with the question of what should happen when we
+close the socket and attempt to immediately open a new socket and bind
+the same endpoint.  Currently, we could bind the same endpoint in SCTP
+terms which would be a new endpoint in data structure terms and buy
+ourselves some confusion.
+
+DONE: Tue Jan 16 23:08:51 CST 2001
+DONE: 
+DONE: We find that when we closed the socket (and nulled the ep->sk
+DONE: reference to it), we caused problems later on with chunks created for
+DONE: transmit.  When we looked at TCP, we found that closing a TCP socket
+DONE: does not destroy it immediately--TCP also has post-close transactions.
+DONE: 
+DONE: Solution:  We use the ep->moribund flag to indicate when the socket is
+DONE: closed and do not immediately null the reference in ep.
+
+Wed Jan 17 01:21:40 CST 2001
+
+What happens when loop1 == loop2 in funtest1b (i.e., when the source &
+destination endpoints are identical)?  We found out.  You get a *real*
+simultaneous init and a burning desire to designate two loop addresses
+so you don't inadvertently put yourself in the same situation again.
+
+We will investigate more later, as this situation promises to test a
+potential weak point in the protocol (cf. siminit above).
+
+Tue Jan 30 14:50:39 CST 2001
+vendor: Linus
+release tag: linux-2_4_1
+
+DONE: We really ought to have a small utility functions file for test stuff
+DONE:       (both live kernel and test frame).
+
+Here are all the timers:
+T1-init (per association)
+T1-cookie (per association)
+T3-rtx (per destination)
+heartbeat timer (per association)
+T2-shutdown (per association)
+?Per Destination Timer? (presumed to be T3-rtx)
+
+Mark each chunk with the transport it was transmitted on.
+
+When we transmit a chunk, we turn on the rtx timer for the destination
+if not on already.  The chunk is then copied to q->transmitted.  When
+we receive a sack, we turn off each timer corresponding to a TSN ACK'd
+by the SACK CTSN.  This is because either everything got through, or
+the chunk outbound longest for a given destination got through.
+We then start the timers for destinations which still have chunks on
+q->transmitted, after moving the appropriate chunks to q->sacked.
+
+When a rtx timer expires for a destination, all the chunks on
+q->transmitted for that destination get moved to q->retransmit,
+which then get transmitted (a: at that time, b: when any chunks are
+transmitted, retransmissions go first, c: other).
+
+WHEN PUSHING A CHUNK FOR TRANMISSION
+
+
+
+WHEN TRANSMITTING A CHUNK
+Assign a TSN (if it doesn't already have one).
+Select a transport.
+If the T3-rtx for the transport is not running, start it.
+Make a copy to send.  Move the original to q->transmitted.
+
+WHEN PROCESSING A SACK
+Walk q->transmitted, moving things to q->sacked if they were sacked.
+
+Walk chunk through q->sacked.
+     if chunk->TSN <= CTSN {
+	stop chunk->transport->T3RTX
+	free the chunk
+     }
+
+
+WHEN RTX TIMEOUT HAPPENS
+Walk chunk through q->transmitted
+     if chunk->transport is the one that timed out,
+     move chunk to q->retransmit.
+Trigger transmission.
+
+
+DONE: Cases for transport selection:
+DONE: 1) <silent>L</silent>User is idiot savant, picks path
+DONE: 2) Transmit on primary path
+DONE: 3) Retransmit on secondary path
+
+sctp_add_transport() does not check to see if the transport we are
+adding already exists.  This COULD lead to having to fail the same
+transport address twice (or more...).  A valid INIT packet will not
+list the same address twice (in which case the OTHER guy is screwing
+himself) and we haven't implemented add_ip.
+
+THE PLAN (for adding lost packet handling):
+DONE: Initialize the timer for each transport when the transport is created.
+Generate timer control events according to 6.3.2.
+Write the state function for 6.3.3.
+Write the timer side-effects function.
+
+      Here are random things we would put in an SCTP_packet:
+      
+      SCTP header contents:
+            	sh->source		= htons(ep->port);
+		sh->destination		= htons(asoc->c.peerInfo.port);
+		sh->verificationTag	= htonl(asoc->c.peerInfo.init.initiateTag);
+      A list of of chunks
+      The total size of the chunks (incl padding)
+      
+      Here are random things we would do to an SCTP_packet:
+      
+      sctp_chunk_fits_in_packet(packet, chunk, transport)
+      sctp_append_chunk(packet, chunk)
+      sctp_transmit_packet(packet, transport)
+      INIT_PACKET(asoc, &packet)
+
+
+
+
+/* Try to send a chunk down to the network.  */
+int
+sctp_commit_chunk_to_network(struct SCTP_packet *payload,
+                             struct SCTP_chunk *chunk,
+                             struct SCTP_transport *transport)
+{
+	int transmitted;
+        transmitted = sctp_append_chunk(payload, chunk, transport)) {
+        switch(transmitted) {
+        case SCTP_XMIT_PACKET_FULL:
+        case SCTP_XMIT_RWND_FULL:
+		sctp_transmit_packet(...);
+		INIT_PACKET(payload);
+		transmitted = sctp_append_chunk(payload, chunk, transport);
+                break;
+        default:
+                break;  /* Default is to do nothing.  */
+	}
+	return(transmitted);
+}
+
+sctp_append_chunk can fail with either SCTP_XMIT_RWND_FULL,
+SCTP_XMIT_MUST_FRAG (PMTU_FULL), or SCTP_XMIT_PACKET_FULL.
+
+
+/* This is how we handle the rtx_timeout single-packet-transmit.  */
+			if (pushdown_chunk(payload, chunk, transport)
+			    && rtx_timeout) {
+				return(error);
+			}
+
+
+Thu Apr  5 16:04:09 CDT 2001
+Our objective here is to replace the switch in inet_create() with a
+table with register/unregister methods.
+
+#define PROTOSW_PREV           
+#define PROTOSW_NEXT           
+
+struct inet_protosw inetsw[] = {
+       {list: {next: PROTOSW_NEXT,
+               prev: PROTOSW_PREV,
+               },
+        type:       SOCK_STREAM,
+        protocol:    IPPROTO_TCP,
+        prot4:       &tcp_prot,
+        prot6:       &tcpv6_prot,
+        ops4:        &inet_stream_ops,
+        ops6:        &inet6_stream_ops,
+
+        no_check:    0,
+        reuse:       0,
+        capability:  -1,
+       },
+
+#if defined(CONFIG_IP_SCTP) || defined(CONFIG_IP_SCTP_MODULE)
+       {type:       SOCK_SEQPACKET,
+        protocol:    IPPROTO_SCTP,
+        prot4:       &sctp_prot,
+        prot6:       &sctpv6_prot,
+        ops4:        &inet_seqpacket_ops,
+        ops6:        &inet6_seqpacket_ops,
+
+        no_check:    0,
+        reuse:       0,
+        capability:  -1,
+       },
+
+       {type:        SOCK_STREAM,
+        protocol:    IPPROTO_SCTP,
+        prot4:       &sctp_conn_prot,
+        prot6:       &sctpv6_conn_prot,
+        ops4:        &inet_stream_ops,
+        ops6:        &inet6_stream_ops,
+
+        no_check:    0,
+        reuse:       0,
+        capability:  -1,
+       },
+#endif /* CONFIG_IP_SCTP || CONFIG_IP_SCTP_MODULE */
+
+       {type:        SOCK_DGRAM,
+        protocol:    IPPROTO_UDP,
+        prot4:       &udp_prot,
+        prot6:       &udpv6_prot,
+        ops4:        &inet_dgram_ops,
+        ops6:        &inet6_dgram_ops,
+
+        no_check:    UDP_CSUM_DEFAULT,
+        reuse:       0,
+        capability:  -1,
+       },
+
+
+       {type:        SOCK_RAW,
+        protocol:    IPPROTO_WILD,	/* wildcard */
+        prot4:       &raw_prot,
+        prot6:       &rawv6_prot,
+        ops4:        &inet_dgram_ops,
+        ops6:        &inet6_dgram_ops,
+
+        no_check:    UDP_CSUM_DEFAULT,
+        reuse:       1,
+        capability:  CAP_NET_RAW,
+       },
+
+}; /* struct inet_protosw inetsw */
+
+Here are things that need to go in that table:
+
+The first two fields are the keys for the table.
+struct inet_protosw {
+     struct list_head   list;
+     unsigned short	type;
+     int		protocol;	/* This is the L4 protocol number.  */
+     struct proto	*prot;
+     struct proto_ops	*ops;
+
+     char               no_check;
+     unsigned char	reuse;
+     int                capability;
+};
+
+Set type to SOCK_WILD to represent a wildcard.
+Set protocol to IPPROTO_WILD to represent a wildcard.
+Set no_check to 0 if we want all checksums.
+Set reuse to 0 if we do not want to set sk->reuse.
+Set 'capability' to -1 if no special capability is needed.
+
+
+*		protocol = IPPROTO_TCP;  /* Layer 4 proto number */
+*		prot = &tcp_prot;        /* Switch table for this proto */
+*		sock->ops = &inet_stream_ops; /* Switch tbl for this type */
+
+		sk->num = protocol;
+-		sk->no_check = UDP_CSUM_DEFAULT;
+-		sk->reuse = 1;
+
+
+                
+		if (type == SOCK_RAW && protocol == IPPROTO_RAW)
+                		sk->protinfo.af_inet.hdrincl = 1;
+
+
+if (SOCK_RAW == sock->type) {
+	if (!capable(CAP_NET_RAW))
+		goto free_and_badperm;
+	if (!protocol)
+		goto free_and_noproto;
+	prot = &raw_prot;
+	sk->reuse = 1;
+	sk->num = protocol;
+	sock->ops = &inet_dgram_ops;
+	if (protocol == IPPROTO_RAW)
+		sk->protinfo.af_inet.hdrincl = 1;
+} else {
+  lookup();
+}
+
+
+Supporting routines:
+int inet_protosw_register(struct inet_protosw *p);
+int inet_protosw_unregister(struct inet_protosw *p);
+
+
+Tue Apr 10 12:57:45 CDT 2001
+Question:  Should SCTP_packet be a dependent subclass of
+SCTP_outqueue, or should SCTP_outqueue and SCTP_packet be independent
+smart pipes which we can glue together?
+
+Answer:  We feel that the independent smart pipes make independent
+testing easier.
+
+
+Sat Apr 21 18:17:06 CDT 2001
+OK, here's what's going on.  An INIT and an INIT ACK contain almost
+exactly the same parameters, except that an INIT ACK must contain a
+cookie (the one that the initiator needs to echo).  In OUR
+implementation, we put the INIT packet in the cookie, so we really do
+most of the processing on the INIT when we get the COOKIE ECHO.
+
+Dilemma:
+
+	When do we convert the INIT to host byte forder?  We want to
+	use the same code for all three cases: INIT, INIT ACK, COOKIE
+	ECHO.  But if we convert for INIT, then the INIT packet in the
+	cookie (which is processed with the COOKIE ECHO) will be in
+	host byte order.
+
+Options:
+	1. Leave the INIT in network byte order.  All access must convert
+	to host byte order as needed.  Blech.  This violates our
+	existing conventions.  Hmm.  As long as we don't walk the
+	parameters again, we might be OK...
+
+	2. Add an argument to sctp_process_param() telling whether or
+	not to convert the parameter.
+
+We chose option 1.
+
+We REALLY should unify sctp_make_init() and sctp_make_init_ack().  The
+only difference is the cookie in the INIT ACK.
+
+We might one day need a version of sctp_addto_chunk() called
+sctp_addto_param() which does NOT add extra padding.
+
+How can we get the initial TSN in sctp_unpack_cookie without first
+having processed the INIT packet buried in the cookie?
+
+Sat Apr 28 15:03:48 CDT 2001
+This MIGHT be a bug--look for places we use sizeof(struct iphdr)--
+possibly we might need to grub around in the sk_buff structure
+to find the TRUE length of the iphdr (including options).
+One of the places is where we initialize a struct SCTP_packet--we
+really need to know how big the ip header options are.
+
+I've walked all the way through to the point where we pass INIT_ACK
+down to IP--it looks OK.  We DO parse the parameters correctly...
+
+Two bugs--bind loop1a not loop1 in the second bind, and
+sctp_bind_endpoint() should not let you bind the same address twice.
+There should be an approriate errno in the bind man page.  EINVAL.
+
+
+Tue May 15 15:35:28 CDT 2001
+compaq3_paddedinitackOK.tcp 
+   We ignore ABORT.
+datakinectics_2
+   We will send extra data before we get a COOKIE ACK...
+   We really lucked out and this implementation ran fine...
+sun (lost trace)                                    
+   We have an INIT that causes an oops.
+telesoft2_lostsendings.tcp
+telesoft3_spicyinitack.tcp
+   This INIT ACK causes an oops.
+datakinectics_3
+ulticom_3
+   They transmitted GAP reports and we retransmitted a TSN which had
+   been gap ack'd.
+adax2_goodsend.tcp
+   We produce MANY SACK's in a row after delaying way too long.
+   The retransmissions did not get bundled.
+
+Mon May 21 17:06:56 CDT 2001
+sctp_make_abort() needs to build an SCTP packet, not just a chunk...
+How do we handle cause codes?
+
+I don't know, but here's some random lines pruned from
+sctp_init_packet...
+
+	packet->source_port = asoc->ep->port;
+	packet->destination_port = asoc->peer.port; 
+	packet->verificationTag = asoc->peer.i.initiateTag; 
+
+
+
+CHANGES NEEDED IN THE LINUX KERNEL to support SCTP:
+* - sockreg 
+- both saddr and daddr need to be explicit arguments to the function
+  which takes packets for transmission--move these OUT of the
+  socket... Decouple d_addr from struct sock
+- bindx()
+- glue (elt in sk->tp_pinfo, etc...)
+
+We THINK we have the following items:
+- Per packet frag control (v6)
+- Unified PMTU discovery
+- iov-like sk_buff (to minimize copies)
+
+Fri Aug 17 10:58:35 CDT 2001
+Current thinking:  
+
+INADDR_ANY semantics for TCP imply an abstraction of the IP
+interfaces--use any that exist, TCP could care less.  This means if
+you add or delete interfaces at a lower level, this doesn't require
+more configuration for TCP.
+
+What this means for SCTP is that INADDR_ANY should also abstract the
+IP interfaces, so that when an association is initiated, we use all
+available IP interfaces, even if some have been added or deleted since
+boot.
+
+At bind, we grub for all interfaces and add them to the endpoint.
+After bind, if an interface is added...we know about it because
+ a) a connection came in on it and we're bound to INADDR_ANY--we add
+    the new transport to the list and use that for the association.
+ b) we initiate and...regrub for all existing interfaces?
+ c) hooks may exist to inform us when new IP interfaces rise
+    phoenix-like from the void (not pointer).
+
+Fri Aug 17 18:24:01 CDT 2001
+
+We need to look in ip6_input.c for IPPROTO_TCP and IPPROTO_UDP.  This
+probably needs to use the registration table to do some
+comparisons...
+
+There are several functions in tcp_ipv6.c that we want for sctp.  They
+are currently static; we want them to be exported.
+
+Tue Aug 21 13:09:09 CDT 2001
+
+This is a revised list of changes we need in the 2.4.x kernels to
+support SCTP.  These are based in part on Bidulock's code:
+
+MUST HAVE:
++ inet_listen() hook for transport layer
++ Make tests for SOCK_STREAM more specific (add IPPROTO_TCP checks)
+? Look for references to IPPROTO_TCP and IPPROTO_UDP to see if they
+  are sufficiently uniform.
+
+REALLY OUGHT TO HAVE:
+- bindx() (Daisy)
+- sockreg (done, need to use)
+- netfilter
+
+Interface
+
++ inet_getname() hook for transport layer?
+  - small & simple hooks here.
+
++ The ability to append things to proc files (/proc/sys/net
+  specifically...)
+
+TCP-one-true-transport cruft
+- ip_setsockopt() hook (See SOCK_STREAM below.)
+- unified PMTU discovery (allegedly done, need to use)
+(See tcp_sync_mss)
+     SOLUTIONS:
+     - We could move the extension headers and PMTU stuff out to the socket.
+     - We could intercept this socket call in sctp_setsockopt, and do
+       the relevant fix up there.  (LY characterizes as "flippin'
+       disgusting")
+     - We could use dst->pmtu (after all, TCP does...sort of...)
+
+Performance
+- decouple d_addr from struct sock (Andi Kleen)
+- zero-copy (done, need to use)
+- per packet IPv6 fragmentation control (allegedly done, need to use)
+  - Why did LY ask for this--he doesn't recall...
+
+---------------------------------------------------------------------------
+Tue Feb 10 11:26:26 PST 2004   La Monte
+
+One significant policy change which 1.0.0 should include is a bias toward
+performance issues.  
+
+One principle I want to make sure survives performance improvements is
+readability.  In particular, I still would like to put together a site
+hyperlinking LKSCTP with RFC2960 and supporting docs.  It should be
+possible to ask "What code implements THIS section?" and "What mandated
+THIS piece of code?"
+
+Consequently, a performance enhancement should either improve readability
+or define a separate clearly marked fast-path.  In particular, that class
+of speedups which collapses multiple decisions from different sections of
+the RFCs should probably use separate fast-path code.
+
+Separate fast-path code creates a maintenance problem, so fast-path code
+REALLY needs comments which point explicitly to the slow path. The slow-
+path code should where possible point to the corresponding fast path. It
+then becomes easier to check whether fixes for one path are relevant for
+the other as well.
+
+

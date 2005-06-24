@@ -1,0 +1,560 @@
+
+
+Network Working Group                                         R. Stewart
+Internet-Draft                                       Cisco Systems, Inc.
+Expires: November 30, 2003                                     M. Tuexen
+                                      Univ. of Applied Sciences Muenster
+                                                               June 2003
+
+
+      Stream Control Transmission Protocol (SCTP) Bakeoff Scoring
+                draft-stewart-tsvwg-sctpscore-01.txt
+
+Status of this Memo
+
+   This document is an Internet-Draft and is in full conformance with
+   all provisions of Section 10 of RFC2026.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as
+   Internet-Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at http://
+   www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+   This Internet-Draft will expire on November 30, 2003.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2003).  All Rights Reserved.
+
+Abstract
+
+   This memo describes some of the scoring to be used in the testing of
+   Stream Control Transmission Protocol (SCTP) at upcoming bakeoffs.
+
+
+
+
+
+
+
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 1]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.  Base protocol  . . . . . . . . . . . . . . . . . . . . . . . .  3
+   2.1 Basic Communication  . . . . . . . . . . . . . . . . . . . . .  3
+   2.2 Beyond Basic Communication . . . . . . . . . . . . . . . . . .  4
+   3.  Protocol Extensions  . . . . . . . . . . . . . . . . . . . . .  6
+   3.1 Partial reliable SCTP  . . . . . . . . . . . . . . . . . . . .  6
+   3.2 AddIP  . . . . . . . . . . . . . . . . . . . . . . . . . . . .  6
+   4.  Bonus Points . . . . . . . . . . . . . . . . . . . . . . . . .  7
+       References . . . . . . . . . . . . . . . . . . . . . . . . . .  7
+       Authors' Addresses . . . . . . . . . . . . . . . . . . . . . .  8
+       Intellectual Property and Copyright Statements . . . . . . . .  9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 2]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+1. Introduction
+
+   This document will be used as a basis for point scoring at upcoming
+   SCTP bakeoffs.  Its purpose is similar to that described in RFC1025.
+   It is hoped that a clear definition of where and how to score points
+   will further the development of SCTP RFC2960 [4].
+
+   Note that while attending a bakeoff no one else will score your
+   points for you.  We trust that all implementations will faithfully
+   record their points that are received honestly.  Note also that these
+   scores are NOT to be used for marketing purposes.  They are for the
+   use of the implementations to know how well they are doing.  The only
+   reporting that will be done is a basic summary to the Transport Area
+   Working Group but please note that NO company or implementation names
+   will be attached.
+
+   Note Bene: Checksums must be enforced.   No points will be awarded if
+   the checksum test is disabled.
+
+2. Base protocol
+
+   The base protocol is described in the follwing documents:
+
+      RFC2960 [4]
+
+      RFC3309 [5]
+
+      IMPLGUIDE [6]
+
+      SCTPIPV4 [9]
+
+      SCTPIPV6 [10]
+
+
+2.1 Basic Communication
+
+   These points will be scored for EACH peer implementation that you
+   successfully communicate with.
+
+      2 points for being the sender of the INIT chunk and completing
+      setup of an association.
+
+      2 points for being the sender of the INIT-ACK chunk and completing
+      setup of an association.
+
+      1 point for sending data on the association where you sent the
+      INIT.
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 3]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+      1 point for sending data on the association where you sent the
+      INIT-ACK.
+
+      2 points for gracefully ending the conversation by being the
+      sender of the SHUTDOWN.
+
+      2 points for gracefully ending the conversation by being the
+      sender of the SHUTDOWN-ACK.
+
+      4 points for repeating the above without reinitializing the SCTP.
+
+   In order to receive all of the above points (14) an implementation
+   will need to:
+
+   o  send a INIT chunk and setup an association.
+
+   o  send a data chunk on that association.
+
+   o  receive a data chunk on that association.
+
+   o  send a SHUTDOWN chunk and bring the association to a close.
+
+   o  receive a INIT-ACK and setup a new association (after the previous
+      one is closed).
+
+   o  send a data chunk on that association.
+
+   o  receive a data chunk on that association.
+
+   o  receive a SHUTDOWN chunk and send a SHUTDOWN-ACK and close the
+      association.
+
+   o  without restarting repeat these steps once.
+
+   You can get 5 extra points if you do not include any address
+   parameter in the INIT-/INIT-ACK chunk in case you are using ony one
+   of your addresses.
+
+2.2 Beyond Basic Communication
+
+      10 points for bring up multiple associations at the same time to
+      different implementations.  The implementation must send and
+      receive data on both associations simultaneously.
+
+      15 points for correctly handling ECN.
+
+      10 points for correctly handling both Transmission Sequence Number
+      (TSN) and Stream Sequence Number (SSN) wrap around.
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 4]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+      5  points for correctly being able to process a "Kamikaze" packet
+      (AKA nastygram, christmas tree packet, lamp test segment, et al.).
+      That is, correctly handle a segment with the maximum combination
+      of features at once (e.g., a  COOKIE-ECHO, SACK, ASCONF,
+      UNKNOWN-CHUNK, SHUTDOWN).
+
+      5  additional points if the response to the "Kamikaze" packet is
+      bundled.
+
+      10 additional points if the implementation supports ECN and thus
+      the "Kamikaze" packet is expanded to include COOKIE-ECHO, SACK,
+      ECN, ASCONF, UNKNOWN-CHUNK, SHUTDOWN.
+
+      30 points for KOing your opponent with legal blows.  (That is,
+      operate a connection until one SCTP or the other crashes, the
+      surviving SCTP has KOed the other.  Legal blows are chunks that
+      meet the requirements of the specification.)
+
+      20 points for KOing your opponent with dirty blows.  (Dirty blows
+      are packets or chunks that violate the requirements of the
+      specification.)
+
+      10 points for showing your opponents checksum is disabled or using
+      the old checksum aka Adler-32 RFC3309 [5].
+
+      10 points for showing you can fast-retransmit.
+
+      10 points for showing your t3-timer retransmits to an alternate
+      destination (aka uses the multi-homed facility during
+      retransmission).
+
+      10 points for properly demonstrating the partial delivery API.
+
+      10 points for demonstrating recognition and proper handling of
+      restart.
+
+      10 points for correctly handling INIT collision.
+
+      10 points for correctly handling the STALE COOKIE case (sending of
+      the error chunk).
+
+      10 points an automatic resend of the INIT in case of a STALE
+      COOKIE with an appropiate COOKIE-PRESERVATIVE parameter such that
+      the association gets established.
+
+      10 points for doing bulk transfer for over 10 Minutes at a high
+      constant rate.
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 5]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+      5 points for handling the restart with a data transfer after that.
+
+      10 points for proving that your opponent accepts additional
+      addresses during the restart compared to the original association.
+
+      2 points for the correct handling of an unknown chunk with high
+      order bits 00, 01, 10, and 11.  2 additional points (10 in total)
+      for handling all four cases correctly.
+
+      2 points for the correct handling of an unknown parameter with
+      high  order bits 00, 01, 10, and 11.  2 additional points (10 in
+      total) for handling all four cases correctly.
+
+
+3. Protocol Extensions
+
+3.1 Partial reliable SCTP
+
+   This extension is currently being described in PRSCTP [8]
+
+      10 points for sending a FWD-TSN to skip a "timed-out" data chunk.
+
+      10 points for correctly adopting the new cumulative-ack point
+      indicated by a FWD-TSN.
+
+      10 points for freeing data chunks to the application that were
+      held awaiting the FWD-TSN.
+
+      10 points for properly handling the partial-delivery API where the
+      last part of a message already being delivered is subjected to a
+      FWD-TSN.
+
+
+3.2 AddIP
+
+   This extension is currently being described in ADDIP [7].
+
+      10 points for adding an IP address to an existing association.
+
+      10 points for deleting an IP address from an existing association.
+
+      10 points for requesting that your peer set a primary address.
+
+      10 points for showing that you honored the request to set a
+      primary address and thus adopted a new primary address.
+
+      10 points for showing that your opponent does not do the address
+      scoping as described in SCTPIPV4 [9] and SCTPIPV6 [10] correctly.
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 6]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+4. Bonus Points
+
+   You can also Bonus Points (directly from RFC1025 [1] :>)
+
+      10 points for the best excuse.
+
+      20 points for the fewest excuses.
+
+      30 points for the longest conversation.
+
+      40 points for the most simultaneous connections.
+
+      50 points for the most simultaneous connections with distinct
+      SCTPs.
+
+      50 points for hijacking an existing association between other
+      participants.
+
+References
+
+   [1]   Postel, J., "TCP and IP bake off", RFC 1025, September 1987.
+
+   [2]   Bradner, S., "The Internet Standards Process -- Revision 3",
+         BCP 9, RFC 2026, October 1996.
+
+   [3]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
+         Levels", BCP 14, RFC 2119, March 1997.
+
+   [4]   Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
+         H., Taylor, T., Rytina, I., Kalla, M., Zhang, L. and V. Paxson,
+         "Stream Control Transmission Protocol", RFC 2960, October 2000.
+
+   [5]   Stone, J., Stewart, R. and D. Otis, "Stream Control
+         Transmission Protocol (SCTP) Checksum Change", RFC 3309,
+         September 2002.
+
+   [6]   Stewart, R., Ong, L., Arias-Rodriguez, I., Poon, K., Conrad,
+         P., Caro, A. and M. Tuexen, "Stream Control Transmission
+         Protocol (SCTP) Implementer's Guide",
+         draft-ietf-tsvwg-sctpimpguide-08 (work in progress), March
+         2003.
+
+   [7]   Stewart, R., Ramalho, M., Xie, Q., Tuexen, M., Rytina, I.,
+         Belinchon, M. and P. Conrad, "Stream Control Transmission
+         Protocol (SCTP) Dynamic Address Reconfiguration",
+         draft-ietf-tsvwg-addip-sctp-07 (work in progress), February
+         2003.
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 7]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+   [8]   Stewart, R., Ramalho, M., Xie, Q., Tuexen, M. and P. Conrad,
+         "SCTP Partial Reliability Extension",
+         draft-stewart-tsvwg-prsctp-03 (work in progress), March 2003.
+
+   [9]   Stewart, R. and M. Tuexen, "IPv4 Address handling for SCTP",
+         draft-stewart-tsvwg-sctpipv4-00 (work in progress), May 2002.
+
+   [10]  Stewart, R. and S. Tuexen, "IPv6 addressing and Stream Control
+         Transmission Protocol", Internet-Draft
+         ddraft-stewart-tsvwg-sctpipv6-01, April 2002.
+
+
+Authors' Addresses
+
+   Randall R. Stewart
+   Cisco Systems, Inc.
+   8725 West Higgins Road
+   Suite 300
+   Chicago, IL  60631
+   USA
+
+   Phone: +1-815-477-2127
+   EMail: rrs@cisco.com
+
+
+   Michael Tuexen
+   Univ. of Applied Sciences Muenster
+   Stegerwaldstr. 39
+   48565 Steinfurt
+   Germany
+
+   EMail: tuexen@fh-muenster.de
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 8]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+Intellectual Property Statement
+
+   The IETF takes no position regarding the validity or scope of any
+   intellectual property or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; neither does it represent that it
+   has made any effort to identify any such rights.  Information on the
+   IETF's procedures with respect to rights in standards-track and
+   standards-related documentation can be found in BCP-11.  Copies of
+   claims of rights made available for publication and any assurances of
+   licenses to be made available, or the result of an attempt made to
+   obtain a general license or permission for the use of such
+   proprietary rights by implementors or users of this specification can
+   be obtained from the IETF Secretariat.
+
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights which may cover technology that may be required to practice
+   this standard.  Please address the information to the IETF Executive
+   Director.
+
+
+Full Copyright Statement
+
+   Copyright (C) The Internet Society (2003).  All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice or references to the Internet Society or other
+   Internet organizations, except as needed for the purpose of
+   developing Internet standards in which case the procedures for
+   copyrights defined in the Internet Standards process must be
+   followed, or as required to translate it into languages other than
+   English.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the Internet Society or its successors or assignees.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+   TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+
+
+
+Stewart & Tuexen       Expires November 30, 2003                [Page 9]
+
+Internet-Draft              Bakeoff Scoring                    June 2003
+
+
+   HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Acknowledgement
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart & Tuexen       Expires November 30, 2003               [Page 10]
+

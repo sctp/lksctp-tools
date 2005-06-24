@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# -*- sh -*-
+set -ex					# exit on error
+libtoolize --force --copy
+aclocal
+autoheader
+automake --foreign --add-missing --copy
+autoconf
+if [ "$1" = "-a" ]; then
+	./configure --prefix=/usr --enable-shared --enable-static
+	make
+	make dist
+fi

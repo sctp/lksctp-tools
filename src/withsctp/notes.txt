@@ -1,0 +1,6 @@
+Fri Dec 26 16:20:36 EST 2003
+
+It would be nice for withsctp to provide more facilities.
+
+Perhaps we could capture the bind call and allow substitution such as the
+arguments to sctp_darn.

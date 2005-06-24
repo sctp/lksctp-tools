@@ -1,0 +1,590 @@
+
+
+Network Working Group                  Richard Price, Siemens/Roke Manor 
+INTERNET-DRAFT                        Robert Hancock, Siemens/Roke Manor 
+Expires: August 2001                  Stephen McCann, Siemens/Roke Manor 
+                                           Mark West, Siemens/Roke Manor 
+                                     Abigail Surtees, Siemens/Roke Manor 
+                                          Paul Ollis, Siemens/Roke Manor 
+                                              Christian Schmidt, Siemens 
+                                                                         
+                                                       February 23, 2001 
+    
+                 Robust SCTP/IP Compression Using EPIC 
+                    <draft-price-rohc-epic-sctp-00.txt> 
+    
+Status of this Memo 
+ 
+   This document is an Internet-Draft and is in full conformance with 
+   all provisions of Section 10 of RFC2026. 
+    
+   Internet-Drafts are working documents of the Internet Engineering 
+   Task Force (IETF), its areas, and its working groups. Note that other 
+   groups may also distribute working documents as Internet-Drafts. 
+    
+   Internet-Drafts are draft documents valid for a maximum of six months 
+   and may be updated, replaced, or obsoleted by other documents at any 
+   time. It is inappropriate to use Internet-Drafts as reference 
+   material or to cite them other than as "work in progress." 
+    
+   The list of current Internet-Drafts can be accessed at 
+   http://www.ietf.org/ietf/1id-abstracts.txt 
+    
+   The list of Internet-Draft Shadow Directories can be accessed at 
+   http://www.ietf.org/shadow.html. 
+    
+   This document is a submission to the IETF ROHC WG. Comments should be 
+   directed to the mailing list of ROHC, rohc@cdt.luth.se. 
+    
+    
+Abstract 
+    
+   The Efficient Protocol Independent Compression [EPIC] scheme is a 
+   general mechanism for providing additional profiles for use within 
+   the [ROHC8] framework. The EPIC inputset is a list of fields from the 
+   protocol stack to be compressed, and for each field a choice of 
+   encoding techniques together with the probabilities that they will be 
+   used. The output of EPIC is a set of optimally efficient compressed 
+   header formats for the chosen protocol stack, and an automatic 
+   mechanism for translating between compressed and uncompressed packet 
+   formats. 
+    
+   This document describes an EPIC inputset for the robust compression 
+   of [SCTP]. 
+    
+    
+    
+
+Price et al.                                                  [PAGE 1] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+Table of contents 
+    
+   1.  Introduction.................................................2 
+   2.  Sub-Context Control Field....................................2 
+   3.  General SCTP/IP Profile......................................4 
+   3.1.  Miscellaneous Information fields...........................7 
+   3.2.  UNCOMPRESSED encodings.....................................7 
+   3.3.  INFERRED encodings.........................................8 
+   4.  Security considerations......................................8 
+   5.  Acknowledgements.............................................8 
+   6.  Intellectual Property Considerations.........................8 
+   7.  References...................................................9 
+   8.  Authors' Addresses...........................................9 
+ 
+1.  Introduction 
+    
+   SCTP is the new reliable transport protocol from the IETF. It offers 
+   a number of features not available in other reliable transport 
+   protocols such as TCP, including multi-streaming (described in 
+   Chapter 2), multi-homing and resistance to flooding and masquerade 
+   attacks. SCTP is designed to transport PSTN signaling messages over 
+   IP networks but its rich feature set makes it capable of many broader 
+   applications. 
+    
+   The [ROHC8] scheme offers an efficient and flexible framework for 
+   robust header compression. The ROHC framework is designed to accept 
+   new "profiles" for the compression of different protocol stacks, and 
+   the [EPIC] scheme is a method for generating these profiles. EPIC is 
+   basically a programmable compressor that can be configured to handle 
+   any protocol stack. 
+    
+   The robust compression of SCTP/IP headers is greatly simplified by 
+   the EPIC scheme. EPIC allows the SCTP field behaviors to be specified 
+   in the form of an inputset, and then uses this information to 
+   automatically build an optimally efficient set of compressed header 
+   formats. This profile slots into the robust header compression 
+   framework specified in [ROHC8]. 
+    
+   The following chapter discusses the new features of the SCTP protocol 
+   and how they may be efficiently compressed. 
+    
+2.  Sub-Context Control Field 
+    
+   One of the most important innovations of SCTP is the multi-streaming 
+   function. This feature allows data to be partitioned into multiple 
+   streams where each stream is delivered independently, so in-sequence 
+   delivery can be guaranteed only for packets within a single stream. 
+   The advantage of this technique is that when a packet is lost, only 
+   the data from the corresponding stream is delayed whilst the packet 
+   is retransmitted. Packets from other streams are unaffected by the 
+   loss. 
+    
+   From the header compression point of view the multi-streaming 
+   function raises a host of new issues to solve. Most importantly a 
+
+Price et al.                                                  [PAGE 2] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   single SCTP header has two distinct types of fields: the general 
+   fields common to every packet delivered to a given port, and the 
+   stream-specific fields that behave differently depending on the 
+   stream to which they belong. To obtain maximum compression efficiency 
+   it is important to maintain a separate context for the stream-
+   specific fields from each stream, but to use a shared context for all 
+   general fields. This cannot be accomplished using the techniques 
+   currently offered by [ROHC8] or [EPIC]. 
+    
+   The solution is to add a new control field to the EPIC scheme. Recall 
+   from Chapter 7 of [EPIC] that a control field transmits information 
+   from the compressor to the decompressor that is not part of the 
+   uncompressed header - for example the header CRC field. Control 
+   fields are often used by the compressor to switch the decompressor 
+   into a new mode of operation, for example changing from Reliable Mode 
+   to Unidirectional Mode if the feedback channel becomes unavailable. 
+    
+   The new control field is called the Sub-Context field. Its purpose is 
+   to specify the stream to which each header belongs, so that the 
+   header can be decompressed relative to the correct stream. 
+    
+   An example of the Sub-context field in action is given in the 
+   following EPIC input table: 
+    
+   STREAM-SPECIFIC-ENCODING: STREAM("0","1","2","3") 
+    
+   +------------------------+----------------------------+-------------+ 
+   |      Field Name(s)     |      Encoding Method       | Probability | 
+   +------------------------+----------------------------+-------------+ 
+   |      Sub-Context       |          INFERRED          |     100%    | 
+   | Stream Sequence Number |                            |             | 
+   +------------------------+----------------------------+-------------+ 
+   |         U Flag         |           STATIC           |    99.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(1)        |     0.1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |        BE Flag         |           STATIC           |      99%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(2)        |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   | Payload Protocol Ident |           STATIC           |    99.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       IRREGULAR(32)        |     0.1%    | 
+   +------------------------+----------------------------+-------------+ 
+    
+   This input table compresses all of the stream-specific fields in an 
+   SCTP data chunk. The compressor and decompressor maintain a separate 
+   context for each stream, and MUST compress and decompress the stream-
+   specific fields relative to the context selected by the Sub-context 
+   field. 
+    
+   The Sub-Context field covers all of the fields in a single input 
+   table, but not the fields described in different input tables. For 
+   these general fields the compressor and decompressor MUST compress 
+
+Price et al.                                                  [PAGE 3] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   and decompress relative to the last packet received regardless of the 
+   stream to which it belongs. 
+    
+3.  General SCTP/IP Profile 
+    
+   The EPIC inputset for a general SCTP/IP profile is given below. 
+   Further information on how to construct and process an inputset can 
+   be found in [EPIC]. 
+    
+   SCTP/IPv4-ENCODING: 
+    
+   +------------------------+----------------------------+-------------+ 
+   |      Field Name(s)     |      Encoding Method       | Probability | 
+   +------------------------+----------------------------+-------------+ 
+   |          CRC           |        IRREGULAR(3)        |      99%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(7)        |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   | Master Sequence Number |          LSB(4,0)          |      99%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |         LSB(7,112)         |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |      SCTP Header       |       SCTP-ENCODING        |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |   Inner IPv4 Header    |       IPv4-ENCODING        |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |  Optional Extensions   |     EXTENSION-ENCODING     |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+    
+   Notes: 
+    
+   The CRC checksum covers the uncompressed header and ensures that 
+   decompression has occurred successfully for each packet. 
+    
+   The SCTP profile is robust against dropped, retransmitted and 
+   reordered packets. Up to 14 packets may be lost consecutively and 
+   packets may be retransmitted over 100 places out of sequence without 
+   causing a decompression failure. 
+    
+   The IPv4-ENCODING and EXTENSION-ENCODING are the same as for 
+   RTP/UDP/IPv4 compression, and can be found in [EPIC]. 
+    
+   The encoding method for the SCTP header itself is described below: 
+    
+   SCTP-ENCODING: CHUNKS{"1"} 
+    
+   +------------------------+----------------------------+-------------+ 
+   |      Field Name(s)     |      Encoding Method       | Probability | 
+   +------------------------+----------------------------+-------------+ 
+   |      Source Port       |           STATIC           |     100%    | 
+   |    Destination Port    |                            |             | 
+   +------------------------+----------------------------+-------------+ 
+   |    Verification Tag    |          INFERRED          |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+
+Price et al.                                                  [PAGE 4] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   +------------------------+----------------------------+-------------+ 
+   | Verification Tag Value |        UNCOMPRESSED        |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |     SCTP Checksum      |       IRREGULAR(32)        |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |        TSN LSBs        |        IRREGULAR(0)        |      99%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(8)        |     0.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       IRREGULAR(16)        |    0.09%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       IRREGULAR(32)        |    0.01%    | 
+   +------------------------+----------------------------+-------------+ 
+   |   Chunks Per Packet    |           STATIC           |    99.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |     WRITE(2,CHUNKS,1)      |     0.1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |       Data Chunk       |    DATA-CHUNK-ENCODING     |     100%    | 
+   |      Sub-Context       |                            |             | 
+   +------------------------+----------------------------+-------------+ 
+    
+   Notes: 
+    
+   The term "Data Chunk" refers to all of the fields in a Payload Data 
+   Chunk as defined in Section 3.3.1 of [SCTP]. 
+    
+   The current SCTP profile only compresses a single data chunk per 
+   packet. If a packet contains more than one chunk, or if it contains a 
+   control chunk, the remaining chunks MUST be transmitted uncompressed 
+   as part of the payload data. 
+    
+   The Transmission Sequence Number (TSN) can be compressed in a very 
+   similar manner to the TCP Sequence Number. It can usually be inferred 
+   by adding one to the previous TSN for every data chunk in the SCTP 
+   packet. The Master Sequence Number increases by one for every 
+   consecutive SCTP packet, and hence indicates whether packets have 
+   been lost between the compressor and decompressor. Any lost packets 
+   are assumed by the decompressor to contain the number of data chunks 
+   specified by the "Chunks Per Packet" field. The only problem occurs 
+   when a packet does not contain the expected number of data chunks, 
+   which can be accommodated by transmitting the TSN in part or in full 
+   to override the 'guess' made by the decompressor. 
+    
+   The SCTP Checksum is transmitted in full to prevent violation of the 
+   end-to-end principle. 
+    
+   The following encoding compresses the fields in a Payload Data Chunk: 
+    
+    
+    
+    
+    
+    
+    
+
+Price et al.                                                  [PAGE 5] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   DATA-CHUNK-ENCODING: 
+    
+   +------------------------+----------------------------+-------------+ 
+   |      Field Name(s)     |      Encoding Method       | Probability | 
+   +------------------------+----------------------------+-------------+ 
+   |          TSN           |          INFERRED          |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |         Length         |           STATIC           |      80%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |          LSB(4,8)          |      15%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |         LSB(8,128)         |       4%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       IRREGULAR(16)        |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |          Type          |     VALUE("00000000")      |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |        Reserved        |       VALUE("00000")       |     100%    | 
+   +------------------------+----------------------------+-------------+ 
+   |   Stream Identifier    |           STATIC           |      80%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       READ(STREAM,4)       |      19%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |     WRITE(16,STREAM,4)     |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |      Sub-Context       |  STREAM-SPECIFIC-ENCODING  |     100%    | 
+   | Stream Sequence Number |                            |             | 
+   |         U Flag         |                            |             | 
+   |        BE Flag         |                            |             | 
+   | Payload Protocol Ident |                            |             | 
+   +------------------------+----------------------------+-------------+ 
+    
+   Notes: 
+    
+   The TSN can be inferred from the Master Sequence Number as explained 
+   in Section 3.3. 
+    
+   The Length field cannot be inferred from the overall packet size 
+   because the packet may contain more than one chunk. However it can 
+   still be compressed effectively using LSB (Least Significant Bit) 
+   encoding. 
+    
+   The fields that require separate contexts for every SCTP stream are 
+   compressed separately using the STREAM-SPECIFIC-ENCODING table. This 
+   table is given below: 
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+Price et al.                                                  [PAGE 6] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   STREAM-SPECIFIC-ENCODING: STREAM("0","1","2","3") 
+    
+   +------------------------+----------------------------+-------------+ 
+   |      Field Name(s)     |      Encoding Method       | Probability | 
+   +------------------------+----------------------------+-------------+ 
+   |      Sub-Context       |          INFERRED          |     100%    | 
+   | Stream Sequence Number |                            |             | 
+   +------------------------+----------------------------+-------------+ 
+   |         U Flag         |           STATIC           |    99.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(1)        |     0.1%    | 
+   +------------------------+----------------------------+-------------+ 
+   |        BE Flag         |           STATIC           |      99%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |        IRREGULAR(2)        |       1%    | 
+   +------------------------+----------------------------+-------------+ 
+   | Payload Protocol Ident |           STATIC           |    99.9%    | 
+   |                        +----------------------------+-------------+ 
+   |                        |       IRREGULAR(32)        |     0.1%    | 
+   +------------------------+----------------------------+-------------+ 
+    
+   Notes: 
+    
+   The profile currently handles up to four simultaneous SCTP streams, 
+   although this number can be increased by adding more entries to the 
+   STREAM lookup table at a cost of reduced compression efficiency. 
+    
+3.1.  Miscellaneous Information fields 
+    
+   The Miscellaneous Information fields are used by EPIC to carry 
+   control information from the compressor to the decompressor. These 
+   fields are not present in the decompressed header. The SCTP profile 
+   requires the following Miscellaneous Information fields: 
+    
+   TSN LSBs: This field carries the LSBs (Least Significant Bits) of the 
+   TSN whenever a packet does not contain the expected number of chunks 
+   specified by the "Chunks Per Packet" field. The TSN LSBs ensure that 
+   the TSN is decompressed correctly even if packets are lost. 
+    
+   Verification Tag Value: This field carries the uncompressed value of 
+   the Verification Tag in the two cases that it cannot be inferred. The 
+   first case is when the packet contains a SHUTDOWN-COMPLETE chunk and 
+   the second case is when it contains an ABORT chunk. If neither of 
+   these cases occur then the field is left empty. 
+    
+   Chunks Per Packet: If packets are dropped then the decompressor 
+   infers the Transmission Sequence Number on the assumption that the 
+   dropped packets contain this number of chunks. The TSN LSBs are used 
+   to refine this guess if necessary. 
+    
+3.2.  UNCOMPRESSED encodings 
+    
+   The length of the Verification Tag Value field is inferred at the 
+   decompressor by checking whether the packet contains a SHUTDOWN-
+
+Price et al.                                                  [PAGE 7] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   COMPLETE chunk or an ABORT chunk. If this is the case then the field 
+   is 4 bytes long, otherwise it is empty. 
+    
+3.3.  INFERRED encodings 
+    
+   The Verification Tag is copied directly from the Verification Tag 
+   Value field when the packet contains a SHUTDOWN-COMPLETE chunk or 
+   when it contains an ABORT chunk. If neither of these cases occur then 
+   the Verification Tag field can be inferred from the Initiate Tag 
+   received from the peer endpoint. 
+    
+   The Sub-Context field is inferred from the index of the Stream 
+   Identifier. Note that the Sub-Context field is 2 bits long since the 
+   SCTP profile currently handles at most 4 simultaneous streams. 
+    
+   The TSN field is inferred by adding the number of data chunks 
+   contained in the previous packet to the TSN field value in the 
+   context. Any dropped packets are assumed to contain the number of 
+   chunks specified by the "Chunks Per Packet" field. If TSN LSBs are 
+   sent then they are used to replace the LSBs of the estimated TSN. 
+    
+   The Stream Sequence Number is inferred from the Master Sequence 
+   Number. 
+    
+    
+4. Security Considerations 
+    
+   EPIC generates compressed header formats for direct use in ROHC 
+   profiles. Consequently the security considerations for EPIC match 
+   those of [ROHC8]. 
+    
+    
+5. Acknowledgements 
+    
+   Header compression schemes from [ROHC8] have been important sources 
+   of ideas and knowledge. Basic Huffman encoding [HUFF] was enhanced 
+   for the specific tasks of robust, efficient header compression. 
+    
+      Thanks to 
+    
+         Carsten Bormann (cabo@tzi.org) 
+         Max Riegel (maximilian.riegel@icn.siemens.de) 
+    
+      for valuable input and review. 
+    
+    
+6. Intellectual Property Considerations 
+    
+   This proposal in is full conformity with [RFC-2026]. 
+    
+   Siemens may have patent rights on technology described in this 
+   document which employees of Siemens contribute for use in IETF 
+   standards discussions. In relation to any IETF standard incorporating 
+   any such technology, Siemens hereby agrees to license on fair, 
+
+Price et al.                                                  [PAGE 8] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   reasonable and non-discriminatory terms, based on reciprocity, any 
+   patent claims it owns covering such technology, to the extent such 
+   technology is essential to comply with such standard. 
+    
+    
+7. References 
+    
+   [SCTP]        "Stream Control Transmission Protocol", Stewart et al, 
+                 RFC 2960, Internet Engineering Task Force, October 2000 
+    
+   [EPIC]        "Efficient Protocol Independent Compression (EPIC)", 
+                 Price et al, <draft-price-rohc-epic-01.txt>, Internet 
+                 Engineering Task Force, February 23, 2001 
+    
+   [ROHC8]       "RObust Header Compression (ROHC)", Carsten Bormann et 
+                 al, <draft-ietf-rohc-rtp-08.txt>, Internet Engineering 
+                 Task Force, February 7, 2001 
+    
+   [HUFF]        "The Data Compression Book", Mark Nelson and Jean-Loup 
+                 Gailly, M&T Books, 1995 
+                 
+   [IMPL]        http://www.roke.co.uk/networks/epic/epic.html 
+    
+   [RFC-2026]    "The Internet Standards Process - Revision 3", Scott 
+                 Bradner, Internet Engineering Task Force, October 1996 
+    
+                      
+    
+8.  Authors' Addresses 
+    
+   Richard Price        Tel: +44 1794 833681 
+   Email:               richard.price@roke.co.uk 
+    
+   Robert Hancock       Tel: +44 1794 833601 
+   Email:               robert.hancock@roke.co.uk 
+ 
+   Stephen McCann       Tel: +44 1794 833341 
+   Email:               stephen.mccann@roke.co.uk 
+    
+   Mark A West          Tel: +44 1794 833311 
+   Email:               mark.a.west@roke.co.uk 
+    
+   Abigail Surtees      Tel: +44 1794 833131 
+   Email:               abigail.surtees@roke.co.uk 
+    
+   Paul Ollis           Tel: +44 1794 833168 
+   Email:               paul.ollis@roke.co.uk 
+    
+   Roke Manor Research Ltd 
+   Romsey, Hants, SO51 0ZN 
+   United Kingdom 
+    
+    
+    
+
+Price et al.                                                  [PAGE 9] 
+
+INTERNET-DRAFT           SCTP/IP Compression        February 23, 2001 
+ 
+   Christian Schmidt    Tel: +49 89 722 27822 
+   Email:               christian.schmidt@icn.siemens.de 
+    
+   Siemens ICM N MR ST1  
+   Munich 
+   Germany 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Price et al.                                                 [PAGE 10] 
+

@@ -1,0 +1,606 @@
+
+
+ Internet Draft                                             Seok Joo Koh 
+ Internet Engineering Task Force                                    ETRI 
+ Expires February 2004                                      Qiaobing Xie 
+ August 2003                                                    Motorola 
+                                                                         
+     
+                                       
+            mSCTP with Mobile IP for Transport Layer Mobility 
+                                      
+                <draft-sjkoh-mobile-sctp-mobileip-02.txt> 
+                                       
+                                       
+                                       
+ Status of this Memo 
+  
+    This document is an Internet-Draft and is in full conformance with 
+    all provisions of Section 10 of RFC 2026 [1]. 
+  
+    Internet-Drafts are valid for a maximum of six months and may be 
+    updated, replaced, or obsoleted by other documents at any time.  It 
+    is inappropriate to use Internet-Drafts as reference material or to 
+    cite them other than as a "work in progress". 
+     
+    The list of current Internet-Drafts can be accessed at 
+    http://www.ietf.org/ietf/1id-abstracts.txt 
+     
+    The list of Internet-Draft Shadow Directories can be accessed at 
+    http://www.ietf.org/shadow.html. 
+  
+  
+  
+ Abstract 
+  
+    Mobile SCTP (mSCTP) is defined as SCTP with the ADDIP extension. The 
+    mSCTP can be used for providing seamless handover by exploiting its 
+    multi-homing feature. On the other hand, the Mobile IP basically 
+    provides the location management. In this document, we discuss the 
+    use of mSCTP along with Mobile IP for Internet mobility support in 
+    the transport layer. The use of SCTP with Mobile IP is focused on the 
+    mobile sessions that are initiated by CN to MN.  
+                                      
+
+
+
+
+
+
+
+
+
+  
+  
+ Koh and Xie                                                   [Page 1] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+                                      
+                                      
+                                      
+                                      
+                                      
+                                      
+                            Table of Contents 
+     
+    1. Introduction..................................................3 
+    2. Terminology...................................................3 
+    3. Mobility Support by Mobile IP.................................3 
+       3.1 Location Management in Mobile IP..........................3 
+       3.2 Handover Management in Mobile IP..........................4 
+    4. Overview of mobile SCTP.......................................4 
+    5. Location Management in mSCTP with Mobile IP...................5 
+    6. Use of SCTP with Mobile IP....................................6 
+       6.1 SCTP Initialization.......................................6 
+       6.2 Association Initiation in mSCTP with Mobile IP............7 
+       6.3 Data Transport and Handover during the Association........9 
+       6.4 Usage Scenarios for SCTP with Mobile IPv6.................9 
+    7. Discussion....................................................9 
+       7.1 Requirements for SCTP over Mobile IP......................9 
+       7.2 Route Optimization........................................9 
+       7.3 Other Issues.............................................10 
+    8. Security Considerations......................................10 
+    9. Acknowledgement..............................................10 
+    10. References..................................................10 
+    Author's Addresses..............................................11 
+     
+     
+  
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  Koh and Xie                                                 [Page 2] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+ 1. Introduction 
+     
+    The Stream Control Transmission Protocol (SCTP) [3] that provides the 
+    multihoming feature. Without support of routers in the networks, the 
+    SCTP with the ADDIP extension [4] that is called mobile SCTP (mSCTP) 
+    can be used to provide seamless handover for the mobile sessions that 
+    are originated by Correspondent Nodes (CN) toward to Mobile Nodes 
+    (MN) [5, 6].  
+     
+    The mSCTP can also be used to support Internet mobility for the 
+    sessions that are initiated by CN toward MN, if it is used along with 
+    the Mobile IP [7, 8]. In this case, the Mobile IP is used for 
+    location management, and then the mSCTP will be used for seamless 
+    handover instead of the MIP-based handover schemes [9, 10].  
+     
+    Specifically, Mobile IP will be used only for the CN to find the 
+    current location of MN and to establish an SCTP association. Once the 
+    SCTP association has been established, the SCTP session will be 
+    supported by the mSCTP seamless handover procedures [5, 6]. 
+     
+    This document is intended to continue a discussion to explore the use 
+    of SCTP for Internet mobility support. Please send comments to the 
+    mailing list <mobile@sctp.de>. To subscribe to this mailing list, 
+    please send a mail to <mobile-request@sctp.de>. 
+     
+  
+ 2. Terminology 
+  
+    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", 
+    "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this 
+    document are to be interpreted as described in RFC 2119 [2]. 
+     
+  
+ 3. Mobility Support by Mobile IP 
+  
+    Generically, Internet mobility issues are divided into Location 
+    Management and Handover Management.  
+     
+ 3.1 Location Management in Mobile IP 
+  
+    Location Management is to identify the current location of a mobile 
+    node and keep track of its changes as it moves on. Basically, the 
+    location management is done so as to prepare the call setup for the 
+    sessions that are requested to mobile nodes (MN) from correspondent 
+    nodes (CN). With help of location management, the CN will be able to 
+    locate the MN and to establish a session via an appropriate call 
+    setup process. 
+     
+
+
+  
+  
+  Koh and Xie                                                 [Page 3] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+    In Mobile IPv4 [7], Home Agent (HA) and Foreign Agent (FA) are 
+    employed for location management. The Home Address (HoA) is used as a 
+    host identifier of an MN, whereas the Care-of Address (CoA) is used 
+    as a location identifier of the MN. The HA maintains the information 
+    on the current location of each mobile node by binding CoA of FA to 
+    HoA of MN. In case that a Collaborated CoA (CCoA) is used instead of 
+    CoA, MIPv4 need not use the FA. By this, an external CN will be able 
+    to establish a session with an MN. 
+     
+    In Mobile IPv6 [8], the HA is employed for location management. 
+    Similar to MIPv4, HoA and CoA are used as a host identifier and a 
+    location identifier of the MN, respectively. The CoA of MIPv6 is the 
+    same as CCoA of MIPv4. By using MIPv6, an external CN will be able to 
+    establish a session with an MN. 
+     
+    In Mobile IP, it is noted that the HoA is also used by the 
+    applications of an MN, since the MN binds its applications to the HoA. 
+    In this respect, HoA is also used for IP packet data transport. 
+  
+  
+ 3.2 Handover Management in Mobile IP 
+  
+    Handover Management is used to provide mobile hosts for seamless 
+    handover, whenever they move into different IP network regions during 
+    a session. The main objective of the seamless handover is to minimize 
+    the service disruption due to data loss and/or latency during the 
+    handover period. 
+     
+    In Mobile IP, the Low Latency handover for MIPv4 [9] and Fast 
+    Handover for MIPv6 [10] have been designed for handover management. 
+    These MIP-based handover schemes rely on the tunneling between old 
+    and new Access Routers (ARs).  
+  
+  
+ 4. Overview of mobile SCTP 
+  
+    In terms of mobile Internet services, a session involved by a mobile 
+    node can be classified into one of the following two types: 
+      
+        a. Session originated from MN toward CN 
+         
+        b. Session originated from CN toward MN 
+         
+    The mobile sessions in (a) seem to be a natural extension of the 
+    classical client-server model, in which the mobile host originating 
+    the session can be viewed as a client, while the counter endpoint 
+    will function as a server. For this type of session, the location 
+    management is not a crucial requirement. Only the seamless handover 
+    will be required in terms of Internet mobility management. 
+
+  
+  
+  Koh and Xie                                                 [Page 4] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+      
+    On the other hand, the case (b) requires the location management by 
+    which the session originator, CN, can locate the mobile host, MN, as 
+    supported in Mobile IP. 
+     
+    Mobile SCTP (mSCTP) [5, 6], in its present form, is targeted for 
+    mobile sessions that are initiated by MNs toward CNs located in the 
+    fixed networks. The mSCTP is used to provide seamless handover for 
+    mobile nodes that change their IP addresses by continual moving 
+    across different IP subnets. These sessions do not require location 
+    management. The detailed schemes for seamless handover using mSCTP 
+    are described with some implementation issues in [5, 6].  
+     
+    The mSCTP can be used to provide an alternative scheme for seamless 
+    handover instead of the LMIPv4 and FMIPv6 schemes. The basic 
+    difference between the MIP-based handover schemes and mSCTP is that 
+    the mSCTP intrinsically realizes the handover in the transport layer 
+    without any support of network routers, whereas the MIP-based schemes 
+    rely on the support of routers support for tunneling between old and 
+    new ARs. 
+     
+    To support the mobile sessions that are initiated by a CN toward an 
+    MN, the mSCTP may be used along with a location management scheme 
+    such as Mobile IP. 
+     
+    In this scenario, the MIP will be used for a CN to locate an MN and 
+    to establish an SCTP association with the MN. After an SCTP 
+    association is successfully setup, the mobile SCTP will be used for 
+    providing seamless handover for the MN, as described in [5, 6]. 
+     
+     
+ 5. Location Management in mSCTP with Mobile IP  
+  
+    For the present, the use of SCTP with MIP is focused on the mobile 
+    sessions that are initiated by CN to MN. The sessions initiated by MN 
+    can be supported only by mobile SCTP. Specifically, Mobile IP will be 
+    used only for location management, by which the CN locates the 
+    location of MN and establishes an SCTP association. Once the SCTP 
+    association has been established, the on-going SCTP session will be 
+    supported by the mSCTP seamless handover procedures [5, 6]. 
+     
+    A part of the MIP functionality for data transport, will not be used 
+    in SCTP with MIP. If once the association is established, the data 
+    transport between MN and CN relies on SCTP over IP. The tunneling 
+    between HA and MN is not used. Furthermore, the Home Address (HoA) of 
+    MN is not used for the data transport. Note that the HoA is used for 
+    only the location management. 
+     
+     
+
+  
+  
+  Koh and Xie                                                 [Page 5] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+ 6. Use of SCTP with Mobile IP  
+     
+ 6.1 SCTP Initialization 
+     
+    As described in RFC 2960 [1], the SCTP initialization is done from CN 
+    and MN as follow (also see Figure 1): 
+     
+      a. CN sends INIT chunk to MN for triggering the association setup. 
+     
+      b. MN responds with INIT-ACK chunk to CN. 
+     
+      c. Then, CN and MN exchange COOKIE-ECHO and COOKIE-ACK each other.  
+       
+     
+                    CN                    MN 
+                     |                     | 
+                     |        INIT         | 
+                     |-------------------->| 
+                     |                     | 
+                     |      INIT-ACK       | 
+                     |<--------------------| 
+                     |                     | 
+                     |     COOKIE-ECHO     | 
+                     |-------------------->| 
+                     |                     | 
+                     |     COOKIE-ACK      | 
+                     |<--------------------| 
+     
+                   
+                  Figure 1. SCTP Initialization 
+     
+     
+    As shown in the figure, the establishment of an SCTP association is 
+    ready by exchanging INIT and INIT-ACK and completed by exchanging 
+    COOKIE-ECHO and COOKIE-ACK between CN and MN. 
+     
+    In Mobile IP, the HA will have information on the current location of 
+    an MN, which is updated by Registration or Binding Update procedures 
+    of the MN located at a foreign link. The location management of 
+    Mobile IP can be used to convey the INIT chunk message of CN to the 
+    MN via HA. 
+     
+    After receiving the INIT chunk, the MN responds with INIT-ACK chunk 
+    directly to CN (not by way of HA) so as to complete the initiation of 
+    SCTP association. The responding INIT-ACK must contain the CCoA (in 
+    MIPv4) or CoA (in MIPv6), which can be addressable to the MN. 
+     
+     
+     
+
+  
+  
+  Koh and Xie                                                 [Page 6] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+ 6.2 Association Initiation in mSCTP with Mobile IP 
+     
+    Mobile IPv4 considers two options to represent the location of the 
+    foreign link: CoA and CCoA. The CoA is the IP address of FA (possibly 
+    a router), whereas the CCoA is dynamically assigned by using an 
+    address allocation mechanism such as DHCP. 
+     
+    Unfortunately, the CoA in MIPv4 cannot be applicable to SCTP, since 
+    it is an address of FA and thus cannot be used within the MN host 
+    (for its SCTP association). Note that SCTP is an end-to-end transport 
+    layer protocol, not a network-layer one. On the other hand, the CCoA 
+    in MIPv4 can be used within the SCTP hosts. Specifically, the SCTP of 
+    MN could bind the CCoA to an SCTP association. For this reason, in 
+    this document, we focus on the use of SCTP over MIPv4 for the MN 
+    hosts with CCoA in a foreign link. The case of using CoA is for 
+    further study. 
+     
+    Let us consider an example of MIPv4 networks, which consists of CN, 
+    MN and HA. The MN is now at Location A (a foreign link), and will 
+    then move into Location B, as shown in Figure 2. 
+     
+                                 [1.1.1.2] 
+                                  +----+ 
+                                  | CN | 
+                                  +----+ 
+                                    ||                         
+                                 ******* 
+                              ***       *** 
+                             **            **    ############## 
+                            **   Internet   **---# Home Agent # 
+                            **              **   ##############  
+                             **           **      [1.1.1.1] 
+                              ***       *** 
+                             ||  ******** || 
+                             ||           || 
+                          #######         ####### 
+                         # AR1 #         # AR2 #  
+                         #######         ####### 
+                            |               | 
+                 Location A |               | Location B  
+                            |               | 
+                         +----+          +----+ 
+                         | MN |=========>| MN | 
+                         +----+          +----+ 
+                     CCoA=[2.2.2.2]    CCoA=[3.3.3.2] 
+                     HoA=[1.1.1.2]     HoA=[1.1.1.2]   
+     
+                 Figure 2. SCTP with Mobile IPv4 using CCoA 
+     
+
+  
+  
+  Koh and Xie                                                 [Page 7] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+     
+    We assume that the MN has already obtained a CCoA ([2.2.2.2]) from 
+    the DHCP server attached to AR1, and also registered the CCoA with HA 
+    by using the MIPv4 Registration Procedures. 
+     
+    We also assume that the applications of MN can initially bind the 
+    CCoA as well as HoA via the socket interface. After initialization of 
+    SCTP association, the HoA may be released from the application, as 
+    described below. It is noted that the HoA will still be used for MN 
+    to update its new CCoAs to HA according to the MIPv4 mechanisms. 
+     
+    Now the CN initiates an SCTP association with the MN by sending INIT 
+    chunk message over HoA ([1.1.1.2]). The INIT chunk will first be 
+    routed to HA, and the HA then forwards the INIT chunk to MN by 
+    referring to CCoA ([2.2.2.2]) and using a tunneling mechanism. 
+     
+     
+              CN                    HA                    MN 
+              |                     |                     | 
+              |        INIT         |       INIT          | 
+              |-------------------->|-------------------->| 
+              |                     |                     | 
+              |       INIT-ACK (CCoA=primary address)     | 
+              |<------------------------------------------| 
+              |                     |                     | 
+              |       COOKIE-ECHO (over CCoA)             | 
+              |------------------------------------------>| 
+              |                     |                     | 
+              |                     |      COOKIE-ACK     | 
+              |<------------------------------------------| 
+              |                     |                     | 
+              |          SCTP Data Transport              | 
+              |<----------------------------------------->| 
+              |                     |                     | 
+     
+              Figure 3. SCTP Initiation in SCTP with MIPv4 
+     
+    In response to the INIT chunk, the MN sends INIT-ACK chunk to the CN. 
+    The INIT-ACK contains the CCoA address (as the Primary address) and 
+    HoA address. Here, the HoA address may only be used for the CN to 
+    check whether the responding MN is the authorized host or not (for 
+    somewhat security reason). In fact, the HoA will not be referred to 
+    by CN (see the Section 4 for more detailed discussion). The source 
+    address and destination address of IP packet containing the INIT 
+    chunk are CCoA [2.2.2.2] and CN [1.1.1.2], respectively. 
+     
+    In turn, the COOKIE-ECHO and COOKIE-ACK chunks will be exchanged 
+    between CN and MN.  
+     
+
+  
+  
+  Koh and Xie                                                 [Page 8] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+     
+ 6.3 Data Transport and Handover during the Association 
+  
+    After the association is established, the CN transmits data chunks to 
+    MN over the CCoA address, and the MN sends data chunks to CN directly. 
+     
+    When the MN moves from Location A to Location B, the MN gets a new 
+    CCoA address [3.3.3.2] from Location B. According to the MIPv4 
+    mechanism, the MN will update its new location to HA, which is done 
+    in the Mobile IP layer regardless of the on-going SCTP association.  
+     
+    On the other hand, the MN will perform the seamless handover, as it 
+    moves into a new IP subnet area, according to the mobile SCTP by 
+    adding the new IP address to the on-going association, as described 
+    in 2.2.1. These procedures will be repeated until the association has 
+    been completed. 
+     
+  
+ 6.4 Usage Scenarios for SCTP with Mobile IPv6 
+  
+    The usage scenarios for SCTP with MIPv6 are similar to those for SCTP 
+    with MIPv4 that are described so far. 
+     
+    In MIPv6, the CoA is used instead of CCoA in MIPv4. The CoA may be 
+    obtained from the foreign location via DHCPv6 or stateless address 
+    auto-configuration. 
+  
+  
+ 7. Discussion 
+  
+    This section discusses comparison of SCTP/MIP with the MIP-only 
+    scheme and some issues. Again, this comparison is valid for the 
+    mobile sessions that are initiated by CN toward to MN. 
+     
+ 7.1 Requirements for SCTP over Mobile IP  
+     
+    The requirement for using SCTP over Mobile IP is that the CN and MN 
+    hosts must be aware of the mobile SCTP. In addition, the MN must be 
+    able to bind the CoA as well as HoA to its applications. In MIP, only 
+    HoA is bound to the applications of MN. 
+     
+     
+ 7.2 Route Optimization  
+  
+    The SCTP intrinsically provides the route optimization for data 
+    transport between CN and MN. No additional route optimization 
+    procedures are required, differently from MIPv4. No binding update 
+    between MN and CN is needed, differently from MIPv6. As a result, the 
+    tunneling of data packets between HA and MN is not required too. 
+
+  
+  
+  Koh and Xie                                                 [Page 9] 
+ INTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+  
+     
+     
+     
+ 7.3 Other Issues 
+  
+    In the proposed scheme for use of SCTP over MIP, the home address 
+    (HoA) of MN is not involved in the data transport between CN and MN. 
+    The reason for this is to exploit the intrinsic route optimization 
+    feature of mobile SCTP. Note that the additional tunneling or binding 
+    update procedures are required in case that the HoA is used in the 
+    SCTP association. 
+     
+    The HoA may be used as a backup IP address in the event of path 
+    failure of the primary address, CCoA or CoA. This is for further 
+    study. 
+  
+     
+ 8. Security Considerations  
+  
+    This document discusses architecture of SCTP mobility support. The 
+    associated security issues will be identified as further works go on. 
+  
+     
+ 9. Acknowledgement 
+     
+    The Authors would like to give special thanks to the following people 
+    for their valuable contributions and discussion:  
+     
+       Hee Young Jung, ETRI 
+       Mee Jeong Lee, Ewha Women University 
+       Moon Jung Chang, Ewha Women University 
+       Randall Stewart, Cisco Systems 
+       Maximilian Riegel, Siemens AG 
+       Michael Tuexen, University of Applied Science in Muenster 
+        
+     
+     
+ 10. References 
+    
+   [1] S. Bradner, "The Internet Standards Process -- Revision 3", BCP, 
+      RFC 2026, October 1996.  
+    
+   [2] S. Bradner, "Key words for use in RFCs to Indicate Requirement 
+      Levels", BCP, RFC 2119, March 1997.  
+    
+   [3] Stewart, R., et al., "Stream Control Transmission Protocol", RFC 
+      2960, October 2000 
+    
+
+
+  
+  
+  Koh and Xie                                                [Page 10] 
+NTERNET DRAFT           mSCTP with Mobile IP              August 2003 
+
+   [4] Stewart, R., "Stream Control Transmission Protocol (SCTP) Dynamic 
+      Address Reconfiguration", draft-ietf-tsvwg-addip-sctp-07, February 
+      2003 
+    
+   [5] Riegel, M. and Tuexen M., "Mobile SCTP", draft-riegel-tuexen-
+      mobile-sctp-02, February 2003 
+    
+   [6] Koh, S. J., et al., "Architecture of Mobile SCTP for IP Mobility 
+      Support", draft-sjkoh-sctp-mobility-02, June 2003 
+    
+   [7] Perkins, C. (ed.), "IP mobility Support for IPv4", RFC 3344, 
+      August 2002 
+    
+   [8] Johnson, D., et al., "Mobility Support in IPv6", draft-ietf-
+      mobileip-ipv6-21, February 2003 
+    
+   [9] Malki, K. L., et al., "Low Latency Handoffs in Mobile IPv4", 
+      draft-ietf-mobileip-lowlatency-handoffs-v4-04, June 2002 
+    
+   [10] Koodli, R., et al., "Fast Handovers for Mobile IPv6", draft-
+      ietf-mobileip-fast-mipv6-06, March 2003 
+    
+    
+ Author's Addresses 
+       
+       
+      Seok Joo Koh 
+      sjkoh@etri.re.kr 
+      ETRI, Korea 
+       
+      Qiaobing Xie 
+      Qiaobing.Xie@motorola.com 
+      Motorola, Inc., USA 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Koh and Xie                                                [Page 11] 
+

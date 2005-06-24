@@ -1,0 +1,105 @@
+#!enscript -G -r -f Courier7 -o states.ps -
+Version 0.11.  Best viewed on a 176 column terminal or printed with the above command.
+
+This table shows actions in response to all possible messages in all
+possible states for SCTP.  It is based on RFC2960.
+
+Arguments to the state functions:
+(asoc, {(skb, verificationTag, singleton) || (primitive_args) || nil} )
+- asoc is the association in question, NULL for CLOSED
+- The second arg is a coproduct depending on the event
+-- for a chunk we have:
+--- skb is the inbound chunk
+--- verificationTag is from the SCTP header
+--- singleton is true if the chunk is alone in its packet
+-- for a primitive we have
+--- primitive_args is a union which captures the args to all primitives
+-- for other events the second argument is undefined.
+
+Return values of the state functions:
+(asoc, NewState, timers, responsePacket, ULPNotice, error, unique)
+- asoc is the association in question, NB: might be a CLOSED asoc
+- NewState is the next state the machine should move to
+- timers is new timer values, NULL if not needed
+- responsePacket is an outbound packet to send, NULL if not needed
+- ULPNotice is any response or notification we need to send to the ULP
+- error is an error code, NULL if there was no error
+- unique is a boolean that tells us if the chunk has to be alone in its packet.  undef if the event was not a chunk.
+
+Most of the state functions should be self-explainatory.  Here are some which might not be clear:
+violation - Can not happen -- the other guy is violating the protocol.
+other_stupid - The other implementation is doing a legal thing which
+	is a BAD IDEA.
+lucky - We did something legal but stupid and got away with it :-).
+bug - We did something impossible.
+
+* in the left column means that this is "normal sender" flow.
++ in the left column means that this is "normal receiver" flow.
+% marks chunks which may NOT be bundled. See 3.0 and 6.10.
+! marks special security considerations
+Count the >'s to calculate state transitions.
+0 - Fixed in Version 11.
+1 - If we see more INIT ACK's than we sent INIT's, we may be under hijack attack
+2 - 3.3.10.10 is a special case of 5.2.4 for SHUTDOWN-ACK-SENT.
+3 - 6.0 says that OUTBOUND data should only be generated in ESTABLISHED, SHUTDOWN-PENDING, and SHUTDOWN-RECEIVED.
+4 - Contradiction fixed in v11.
+5 - implementation specific (safe to leave unspecified)
+6 - 
+7 - This is not explicit but is a logical consequence of other requirements.
+8 - If his HEARTBEAT beats his cookie you'll send an ABORT.
+9 - There is a finite probability that this orderly shutdown will turn into an ABORT.
+
+
+                       | CLOSED        |  COOKIE-WAIT    | COOKIE-ECHOED   | ESTABLISHED      | SHUTDOWN-PENDING   | SHUTDOWN-SENT   | SHUTDOWN-RECEIVED  | SHUTDOWN-ACK-SENT 
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+Chunks                 |               |                 |                 |                  |                    |                 |                    |                   
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+ABORT                  | pdiscard(8.4.2)| do_9_1_abort  <|do_9_1_abort   <<| do_9_1_abort  <<<| do_9_1_abort   >>>>| do_9_1_abort >>>| do_9_1_abort     >>| do_9_1_abort     >
+INIT                  %|*do_5_1B_init  | do_5_2_1_siminit| do_5_2_1_siminit| do_5_2_2_dupinit | do_5_2_2_dupinit   | do_5_2_2_dupinit| do_5_2_2_dupinit   | do_9_2_reshut     
+INIT ACK              %| discard(5.2.3)|*do_5_1C_ack    >| discard(5.2.3) 1| discard(5.2.3)  1| discard(5.2.3)    1| discard(5.2.3) 1| discard(5.2.3)    1| discard(5.2.3)   1
+COOKIE ECHO            |*do_5_1D_ce >>>| do_5_2_4_dupcook| do_5_2_4_dupcook| do_5_2_4_dupcook | do_5_2_4_dupcook   | do_5_2_4_dupcook| do_5_2_4_dupcook   | do_5_2_4_dupcook 2
+COOKIE ACK             | discard      4| discard(5.2.5)  |*do_5_1E_ca     >| discard(5.2.5)   | discard(5.2.5)     | discard(5.2.5)  | discard(5.2.5)     | discard(5.2.5)    
+SHUTDOWN               | tabort_8_4_8  | discard(9.2)   0| discard(9.2)   0|+do_9_2_shut   >>>| discard(0.2)      0| do_9_2_shutack>>| discard(0.2)      0| discard(0.2)     0
+SHUTDOWN ACK           | do_8_4_5_shut | do_8_4_5_shut   | discard        0| violation       7| violation         7|*do_9_2_final >>>| violation         7| do_9_2_final     >
+SHUTDOWN COMPLETE     %| discard(8.4.6)| discard(8.5.1c) | discard(8.5.1c) | discard(8.5.1c)  | discard(8.5.1c)    | discard(8.5.1c) | discard(8.5.1c)    |+4(C)             >
+DATA                   | tabort_8_4_8  | discard(6.0)    | discard(6.0)    |*eat_data_6_2     | eat_data_6_2       | eat_data_fast4-4| discard(6.0)       | discard(6.0)     
+SACK                   | tabort_8_4_8  | discard(6.0)    | eat_sack_6_2_1  |*eat_sack_6_2_1   | eat_sack_6_2_1     | discard(6.0)    | eat_sack_6_2_1     | discard(6.0)     
+HEARTBEAT              | tabort_8_4_8  | violation      7| other_stupid   8|*beat_8_3         | beat_8_3           | beat_8_3        | beat_8_3           | other_stupid     9
+HEARTBEAT ACK          | tabort_8_4_8  | violation      7| lucky          7|*backbeat_8_3     | backbeat_8_3       | backbeat_8_3    | backbeat_8_3       | backbeat_8_3
+ERROR_stale            | discard      4| discard(5.2.6)  | do_5_2_6_stale  | discard(5.2.6)   | discard(5.2.6)     | discard(5.2.6)  | discard(5.2.6)     | discard(5.2.6)    
+ERROR                  | tabort_8_4_8  | ?               | ?               | ?                | ?                  | ?               | ?                  | ?                 
+ECNE                   | bug?          | bug?            | do_ecne         | do_ecne          | do_ecne            | do_ecne         | do_ecne            | violation
+CWR                    | discard       | discard         | discard         | do_ecn_cwr       | do_ecn_cwr         | do_ecn_cwr      | discard            | bug?
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+Timeouts               |               |                 |                 |                  |                    |                 |                    |                   
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+T1-COOKIE TO           | bug           | bug             | do_4_3_reecho   | bug              | bug                | bug             | bug                | bug               
+T1-INIT TO             | bug           | do_4_2_reinit   | bug             | bug              | bug                | bug             | bug                | bug               
+T2-SHUTDOWN TO         | bug           | bug             | bug             | bug              | bug                | do_9_2_reshut   | bug                | do_9_2_reshutack  
+T3-RTX TO              | bug           | bug             | do_6_3_3_retx   | do_6_3_3_retx    | do_6_3_3_retx      | bug	     | do_6_3_3_retx      | bug
+HEARTBEAT TO           | bug           | bug		 | bug		   | do_8_3_hb_err    | do_8_3_hb_err      | heartoff	    5| do_8_3_hb_err      | heartoff         5
+SACK TO		       | bug	       | bug		 | bug		   | do_6_2_sack      | do_6_2_sack	   | do_6_2_sack     | bug		  | bug
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+Other Events           |               |                 |                 |                  |                    |                 |                    |                   
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+NO PENDING TSN         | ignore        | ignore          | ignore          | ignore           |*do_9_2_start_shut >| ignore          |+do_9_2_shutack 4-6>| ignore            
+ICMP UNREACHFRAG       | adjust_mtu    | adjust_mtu      | adjust_mtu      | adjust_mtu       | adjust_mtu         | adjust_mtu      | adjust_mtu         | adjust_mtu        
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+Primitives             |               |                 |                 |                  |                    |                 |                    |                   
+-----------------------|---------------|-----------------|-----------------|------------------|--------------------|-----------------|--------------------|-------------------
+PRM_INITIALIZE         |               | error           | error           | error            | error              | error           | error              | error             
+PRM_ASSOCIATE          | do_PRM_ASOC  >| error           | error           | error            | error              | error           | error              | error             
+PRM_SHUTDOWN           | error         | mark_shutdown  5| mark_shutdown  5|*do_9_2_PRM_SHUT >| discard           5| discard        5| discard(9.2)       | discard         5
+PRM_ABORT              | error         | do_PRM_ABORT   <| do_PRM_ABORT  <<| do_PRM_ABORT  <<<| do_PRM_ABORT   >>>>| do_PRM_ABORT >>>| do_PRM_ABORT     >>| do_PRM_ABORT    >
+PRM_SEND               | error         | do_PRM_SENDQ6.0 | do_PRM_SENDQ6.0 | do_PRM_SEND      | error(9.2)         | error(9.2)      | error(9.2, 4-5)    | error(9.2, 4-7)
+PRM_SETPRIMARY         | error         | error           | do_PRM_SETPRI   | do_PRM_SETPRI    | do_PRM_SETPRI      | do_PRM_SETPRI   | do_PRM_SETPRI      | do_PRM_SETPRI     
+PRM_RECEIVE            | error         | error           |                 | do_PRM_RCV       | do_PRM_RCV         | do_PRM_RCV      | do_PRM_RCV?        | do_PRM_RCV?       
+PRM_STATUS             | error         | get_PRM_STATUS  | get_PRM_STATUS  | get_PRM_STATUS   | get_PRM_STATUS     | get_PRM_STATUS  | get_PRM_STATUS     | get_PRM_STATUS    
+PRM_CHANGEHEARTBEAT    | error         | do_PRM_CH_HB    | do_PRM_CH_HB    | do_PRM_CH_HB     | do_PRM_CH_HB       | do_PRM_CH_HB    | do_PRM_CH_HB       | do_PRM_CH_HB      
+PRM_REQUESTHEARTBEAT   | error         | do_PRM_HB       | do_PRM_HB       | do_PRM_HB        | do_PRM_HB          | do_PRM_HB       | do_PRM_HB          | do_PRM_HB         
+PRM_GETSRTTREPORT      | error         | get_PRM_SRTT    | get_PRM_SRTT    | get_PRM_SRTT     | get_PRM_SRTT       | get_PRM_SRTT    | get_PRM_SRTT       | get_PRM_SRTT      
+PRM_SETFAILURETHRESHOLD| error         | error           | do_PRM_FTHRESH  | do_PRM_FTHRESH   | do_PRM_FTHRESH     | do_PRM_FTHRESH  | do_PRM_FTHRESH     | do_PRM_FTHRESH    
+PRM_SETPROTOPARAMETERS | error         | do_PRM_SETPARM  | do_PRM_SETPARM  | do_PRM_SETPARM   | do_PRM_SETPARM     | do_PRM_SETPARM  | do_PRM_SETPARM     | do_PRM_SETPARM    
+PRM_RECEIVE_UNSENT     | error         | ?               | ?               | ?                | ?                  | ?               | ?                  | ?                 
+PRM_RECEIVE_UNACKED    | error         | ?               | ?               | ?                | ?                  | ?               | ?                  | ?                 
+PRM_DESTROY            | error         | do_PRM_DIEDIE   | do_PRM_DIEDIE   | do_PRM_DIEDIE    | do_PRM_DIEDIE      | do_PRM_DIEDIE   | do_PRM_DIEDIE      | do_PRM_DIEDIE     

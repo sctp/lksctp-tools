@@ -1,0 +1,52 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_OPT_INFO 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_optinfo \- Get options on a SCTP socket. 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_opt_info(int " sd ", sctp_assoc_t " id ", int " opt ,
+.BI "                  void * " arg ", socklen_t * " size);
+.fi
+.SH DESCRIPTION
+.BR sctp_opt_info
+is a wrapper library function that can be used to get SCTP level options on
+a socket.
+.I sd
+is the socket descriptor for which the option is requested. For one-to-many
+style sockets,
+.I id
+specifies the association to query. For one-to-one style sockets,
+.I id
+is ignored.
+.I opt
+specifes the SCTP socket option to get.
+.I arg
+is an option-specific structure buffer provided by the caller. 
+.I size
+is a value-result parameter, initially containing the size of the buffer
+pointed to by
+.I arg
+and modifed on return to indicate the actual size of the value returned.
+.SH "RETURN VALUE"
+On success,
+.BR sctp_opt_info
+returns 0 and on failure -1 is returned with errno set to the appropriate
+error code.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_sendmsg (3),
+.BR sctp_recvmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),

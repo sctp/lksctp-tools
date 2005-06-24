@@ -1,0 +1,720 @@
+% TEMPLATE for Usenix papers, specifically to meet requirements of
+%  TCL97 committee.
+% originally a template for producing IEEE-format articles using LaTeX.
+%   written by Matthew Ward, CS Department, Worcester Polytechnic Institute.
+% adapted by David Beazley for his excellent SWIG paper in Proceedings,
+%   Tcl 96
+% turned into a smartass generic template by De Clarke, with thanks to
+%   both the above pioneers
+% use at your own risk.  Complaints to /dev/null.
+% make it two column with no page numbering, default is 10 point
+
+% Munged by Fred Douglis <douglis@research.att.com> 10/97 to separate
+% the .sty file from the LaTeX source template, so that people can
+% more easily include the .sty file into an existing document.  Also
+% changed to more closely follow the style guidelines as represented
+% by the Word sample file. 
+% This version uses the latex2e styles, not the very ancient 2.09 stuff.
+
+% adapted for Ottawa Linux Symposium
+
+\documentclass[twocolumn]{article}
+\usepackage{ols,epsfig}
+\begin{document}
+
+%Remove this next line if your system defaults correctly.
+\special{papersize=8.5in,11in}
+
+%don't want date printed
+\date{}
+
+%make title bold and 14 pt font (Latex default is non-bold, 16 pt)
+\title{\Large \bf Linux Kernel SCTP : The Third Transport}
+
+%for single author (just remove % characters)
+\author{
+La~Monte H.P.\ Yarroll \\
+%{\em Your Department} \\
+{\em Motorola GTSS}\\
+%{\em Your City, State, ZIP}\\
+% is there a standard format for email/URLs??
+% remember that ~ doesn't do what you expect, use \~{}.
+{\normalsize piggy@acm.org} \\
+%
+% copy the following lines to add more authors
+\and
+Karl Knutson \\
+{\em Motorola GTSS}\\
+%% is there a standard format for email/URLs??
+{\normalsize karl@athena.chicago.il.us}
+%
+} % end author
+
+\maketitle
+
+% You have to do this to suppress page numbers.  Don't ask.
+\thispagestyle{empty}
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+\subsection*{Abstract}
+% nuked italics -- FD
+
+The Stream Control Transmission Protocol (SCTP) is a reliable
+message-oriented protocol with transparent support for multihoming.
+It allows multiple independent complex exchanges which all share a
+single connection and congestion context.
+
+We provide an overview of the protocol, the UDP-style API and the
+details of the Linux kernel reference implementation.  The brief API
+discussion is intended for developers wishing to use SCTP.  The
+detailed implementation discussion is for developers interested in
+contributing to the kernel development effort.
+
+\section{Introduction}
+
+The developers at the Linux 2.5 Kernel Summit in San Jose achieved a
+rough consensus that 2.5 should probably support SCTP, a new transport 
+protocol from the IETF.  This paper introduces the ongoing work on
+such an implementation, providing some details for both the
+application developer and the kernel developer.
+
+The Stream Control Transmission Protocol (SCTP) is a reliable
+message-oriented protocol with transparent support for multihoming.
+It allows multiple independent complex exchanges which all share a
+single connection and congestion context.
+
+\subsection{History of SCTP}
+The SIGTRAN (Signalling Transport) Working Group of the IETF is
+concerned with the transport of telephony signalling data over IP.
+Upon reviewing the available standard transport protocols, they
+concluded that none of them met the transport requirements of
+signalling data.
+
+SIGTRAN concluded that they needed a new transport protocol which
+could provide reliable message delivery, tolerate network failures,
+and avoid the head-of-line-blocking problem.  We will discuss this
+problem later.
+
+The WG selected a proposal from Randall Stewart and Qiaobing Xie of
+Motorola as a starting point.  Stewart and Xie had developed a
+Distributed Processing Environment, Quantix, aimed at telephony
+applications.  This DPE had been successfully demonstrated at Geneva
+Telecom in 1999.
+
+The Working Group took great care in constructing the new protocol,
+SCTP, incorporating many lessons learned from TCP, such as congestion
+control, selective ACK, message fragmentation and bundling.
+
+The core transport protocol from Quantix brought support for
+multihoming, message framing, and streams.  We discuss all of these
+features at length later.
+
+The IESG decided that the resulting protocol was robust enough to be
+elevated from a specialised transport for telephony signalling to a new
+general purpose transport to stand beside UDP and TCP.  To this end,
+they moved the work from SIGTRAN to TSVWG, the general transport
+group.
+
+As of this writing, the core specification, \cite{rfc2960}, is at Proposed
+Standard.  There have been three successful bakeoffs covering over 25
+separate implementations.  Lessons learned from the most recent
+bakeoff are being written up in an ``Implementor's Guide'', \cite{impl}.
+
+\subsection{SCTP in the Linux kernel}
+
+Shortly before the first bakeoff, the IESG asked SIGTRAN to move SCTP
+from riding on UDP to riding directly on top of IP.  The long term
+goal was clearly was to move SCTP from user space into the kernel.
+
+Aside from the obvious performance gains, this has the effect of
+reducing the number of implementations to roughly one per operating
+system.  This makes it easier to verify the stability of most of the
+implementations which appear on the Internet.
+
+Randall Stewart saw the importance of this and started one of the
+authors of this paper working on a port of the user space
+implementation to the Linux kernel.  This port was intended as a
+reference for developers of implementations for other kernels to
+examine.  The Linux kernel implementation has since diverged
+significantly from the user space reference, but maintains the
+standards of a reference implementation (see Coding Standards, below).
+
+\subsection{SCTP examples}
+
+SCTP is a reliable message-oriented protocol with transparent support
+for multihoming.  It allows multiple independent complex exchanges
+which all share a single connection and congestion context.
+
+Many network applications operate by exchanging simultaneously, short,
+similar sequences of data continuously.  The traffic produced by these
+operations can be characterised as MICE (Multiple Independent Complex
+Exchanges).  It is also true that many applications which use MICE
+also have high network reliability requirements.
+
+\subsubsection{A database app}
+One example is a client/server database application.  Each request and
+each response is a message.  Each transaction is a sequence of
+dependent request/response pairs.
+
+Implemented over TCP, this application would have to provide its own
+message boundaries, since TCP sends bytes, not messages.  How do we
+implement MICE with TCP?  We have two ways of doing this:  multiple
+connections, or a single multiplexed and reused connection.
+
+With each transaction over a separate TCP connection, we gain the
+independence of transactions, but at a cost in performance. Since TCP
+(as a general purpose transport protocol) uses congestion control,
+each of the connections would have to go through slow-start and if
+most transactions were short, they would never get out of slow-start.
+
+With all transactions over a single TCP connection, we make efficient
+use of the network bandwidth, but open ourselves up to the
+head-of-line blocking problem.  This means that if one segment in one
+transaction is lost, this blocks all transactions, not just the one
+with the lost segment.
+
+If we use SCTP for the same application we gain the benefits of using
+TCP, as well as advantages peculiar to SCTP.  SCTP directly supports
+messages and guarantees TCP-like levels of bandwidth efficiency via
+bundling and fragmentation.  Each database transaction can be
+represented as an ordered stream of messages, which are independent in
+SCTP for retransmission purposes.  This means that while SCTP has the
+same congestion control mechanisms as TCP, it does not have to resort
+to multiple connections nor is it vulnerable to the head-of-line
+blocking problem.
+
+\subsubsection{A free clinic}
+
+Another example of SCTP use is for a free\footnote{Free as in ``free
+beer''.} clinic which needs a reliable way to use its IP-networked
+patient monitoring software.
+
+This has many similarities to the example above in that different
+monitoring devices would need to send simultaneous
+information---multiple independent complex exchanges.  The main
+difference is in the higher network reliability requirements.  
+
+A reasonable way to improve the network reliability is to set up a
+parallel network and use multihoming for the client and server
+applications. However, if the application is TCP-based, the
+multihoming needs to be added to the application.  With SCTP, the
+multihoming ability is built into the protocol.  All that is necessary
+is to make the appropriate socket calls and SCTP will take advantage
+of the addresses available in the existing network.  This also applies
+if one side of the connection has more addresses than the other.
+
+\section{The UDP-style API}
+
+Any new protocol needs an API.  In particular for an Internet
+protocol, it's important to have the API match the API normally used
+for IP networks.  This is the Berkeley sockets model---the SCTP
+version is defined in the Internet Draft ``Sockets API Extensions for
+SCTP''\cite{api}.  The API draft defines two complementary interfaces
+to SCTP--one for compatibility with older TCP-based applications, and
+another for new applications designed expressly to use SCTP.  The
+Linux Kernel SCTP stack does not yet implement the former, so we
+discuss only the UDP-style interface.
+
+The conceptual model of the UDP-style API is (naturally) that of plain
+UDP.  To send a message in UDP, you create a socket, bind an address
+to it and send your message using \texttt{sendmsg()}. To receive a
+message in UDP, you create a socket, bind an address to it and use
+\texttt{recvmsg()}.  It's much the same with the UDP-style API for
+SCTP.  To send a message, you create a socket, bind \textit{addresses}
+to it and use \texttt{sendmsg()}.  The SCTP stack underlying the API
+handles association startup and shutdown automatically.  The same goes
+for message reception.  To receive a message in UDP-style, you create
+a socket, bind \textit{addresses} to it and use \texttt{recvmsg()}.
+
+The important API differences between UDP and UDP-style SCTP are:
+multihoming; ancillary data; and the option of notifications from the
+SCTP stack.
+
+\subsection{Multihoming and \texttt{bindx()}}
+
+There are three ways to work with multihoming with SCTP.  One is to
+ignore multihoming and use one address.  Another way is to bind all
+your addresses through the use of \texttt{INADDR\_ANY} or
+\texttt{IN6ADDR\_ANY}.  This will ``associate the endpoint with the
+optimal subset of available local interfaces.''(Section 3.1.2,
+\cite{api})  The most flexible way is through the use of
+\texttt{sctp\_bindx()}, which allows additional addresses to be
+added to a socket after the first one is bound with \texttt{bind()},
+but before the socket is used to transfer or receive data.  The
+function \texttt{sctp\_bindx()} is further described in section 8.1 of
+\cite{api}.
+
+\subsection{Ancillary data}
+
+To use streams with the UDP-style API, you use ancillary data in the
+\texttt{struct~cmsghdr} part of the \texttt{struct~msghdr} argument to
+both \texttt{sendmsg()} and \texttt{recvmsg()}.  Ancillary data is
+used for initialisation data (\texttt{struct~sctp\_initmsg} and for
+header data (\texttt{struct~sctp\_sndrcvinfo}).
+
+Ancillary data are manipulated with the macros \texttt{CMSG\_FIRSTHDR,
+CMSG\_NEXTHDR, CMSG\_DATA, CMSG\_SPACE, \textnormal{and} CMSG\_LEN}.
+These are all defined in \cite{rfc2292}.  \cite{api} provides a nice
+example in section 5.4.2.
+
+{\tt \small
+\begin{verbatim}
+    struct sctp_initmsg {
+       uint16_t sinit_num_ostreams;
+       uint16_t sinit_max_instreams;
+       uint16_t sinit_max_attempts;
+       uint16_t sinit_max_init_timeo;
+    };
+\end{verbatim}
+}
+
+The initialisation ancillary data sets information for starting 
+new associations.
+
+{\tt \small
+\begin{verbatim}
+    struct sctp_sndrcvinfo {
+       uint16_t sinfo_stream;
+       uint16_t sinfo_ssn;
+       uint16_t sinfo_flags;
+       uint32_t sinfo_ppid;
+       uint32_t sinfo_context;
+       uint8_t sinfo_dscp;
+       sctp_assoc_t sinfo_assoc_id;
+    };
+\end{verbatim}
+}
+
+The header ancillary data reports information gleaned from the SCTP
+headers.  If requested with the \texttt{SCTP\_RECVDATAIOEVNT} socket
+option, this ancillary data is provided with every inbound data
+message.  There is a handy key (\texttt{sinfo\_assoc\_id}) which
+identifies the association for this particular message.  It also
+provides the flags needed to implement partial delivery of very large
+messages.
+
+Outbound messages should include an \texttt{sctp\_sndrcvinfo} ancillary 
+data structure to tell SCTP which SCTP stream to put this datagram
+into.  It is also possible to set a default stream so that this
+ancillary data may be omitted.
+
+\subsection{Notifications}
+
+SCTP provides for the concept of optional notifications.  These are
+messages delivered in-band about events inside the SCTP stack, such as
+a destination transport address failure or a new association coming
+up.  The notifications are marked with the \texttt{MSG\_NOTIFICATION}
+flag in the \texttt{msg\_flags} field of the \texttt{sctp\_sendrcvinfo}
+ancillary data.  The notification is delivered as the body of the
+message returned by \texttt{recvmsg()}.
+
+In \ref{notifications} we find a table of notifications.  Each
+notification delivers its own data structure which shares the same
+name (lower case, naturally) as the notification type itself.  The first
+field of every notification is a \texttt{uint16\_t} which caries the
+notification type.
+
+\begin{figure*}[t]
+\begin{center}
+{\tt
+\begin{tabular}{ l  l  l }
+   \hline
+   \textnormal{Type} & \textnormal{Socket Option} & \textnormal{Description} \\
+   \hline
+   SCTP\_ASSOC\_CHANGE 		& SCTP\_RECVASSOCEVNT	&  \textnormal{Change of association} \\
+   SCTP\_PEER\_ADDR\_CHANGE	& SCTP\_RECVADDREVNT	& \textnormal{Change in status of a given address} \\
+   SCTP\_REMOTE\_ERROR		& SCTP\_RECVPEERERR	& \textnormal{An error received from a peer} \\
+   SCTP\_SEND\_FAILED		& SCTP\_RECVSENDFAILEVNT & \textnormal{A failure to send} \\
+   SCTP\_SHUTDOWN\_EVENT	& SCTP\_RECVDOWNEVNT	& \textnormal{The reception of a \texttt{SHUTDOWN} chunk} \\
+\end{tabular}
+}
+\end{center}
+\caption{\label{notification}Useful notifications for an SCTP socket}
+\end{figure*}
+
+\section{The lksctp Project}
+
+A critical factor in the success of any new IETF protocol is of course
+a Linux implementation.  Fortunately, key personnel at Motorola
+recognised this and encouraged us to tackle such a project.  Months
+later, we have a core implementation with an ever-expanding feature
+set.  We now have significant participation from developers at IBM and
+Intel and the pace is picking up.
+
+\subsection{Coding standards}
+
+In addition to the usual requirements of kernel code, our code seeks
+to be a useful reference for people making their own kernel
+implementations of SCTP.  If a reader has some question about how to
+implement a particular section of the RFC, they need only grep for the
+relevant text in our code and they can find an example.  As much as
+practical, we draw names directly from the RFC.  We made the state
+machine into an explicit table (see \ref{states} for an
+excerpt) with names that refer directly back to the relevant section
+numbers.  Clarity is a compelling requirement for our code.
+
+\subsection{Extreme Programming}
+
+As the project grew and we added developers, we clearly needed some
+way of coordinating our work.  We decided to experiment with Extreme
+Programming, \cite{xp}.
+
+XP is a collection of practices aimed at controlling risk in a small
+to medium-sized software development project.  One important principle
+is that you should do the simplest thing that could possibly work.  A
+second important principle is to take advantage of the fact that
+programmers like to code.
+
+We use a range of XP practices, but the practices which are most
+visible to anybody who reads or works on lksctp are the tests and the
+metaphors.
+
+\section{The Tests}
+
+One of the XP practices we use is code-to-the-test.  XP asks, ``If
+testing is good, why don't we do it all the time?'' Instead of writing
+tests for working code, write tests first, and then write code to pass
+the tests.  This practice leads to a large automated test suite which
+runs several times per day.
+
+We use three kinds of test, unit tests, test frame functional tests,
+and live kernel functional tests.
+
+The most basic form of test is the unit test.  Unit tests exercise all
+the interfaces of a particular object and confirm that it behaves
+correctly.  They also encode regression checks for fixed bugs.  These
+tests all have names beginning with \texttt{test\_}.
+
+The second form of test is the test frame functional tests.  These are
+the tests with names beginning with \texttt{ft\_frame\_}.  These tests
+check for external behaviours of the system, but with a simulated
+kernel.  The simulated kernel is very light weight and gives us very
+fine control over things like timing and network properties.
+
+Ideally, functional tests should be written by the customer for a
+system---they encode the behaviours that the customer expects.  In our
+case, we play the role of customer on behalf of the RFC.  We also use
+test frame functional tests to define work items for off-site
+development groups.  The off-site group writes tests which describe the 
+feature they intend to implement and submits those tests as a
+proposal.  This has proven an excellent medium for describing work.
+
+The final form of test we use is the live kernel functional test.  We
+have many fewer of these than we would like---they are difficult to run 
+since we must install and boot a kernel to test.  This is much more
+work than simply running \texttt{make unit\_test}. We are exploring UML as 
+a possible way to automate our kernel functional tests.  These tests
+have names beginning with \texttt{ft\_kern\_}.
+
+Code-to-the-test is a practice which you can introduce at any point in 
+a project.  When you first start, it seems that you are spending more
+time writing tests than writing code, but once you begin to have a
+critical mass of interacting tests you begin to see significant
+payoffs in both code quality and development velocity.
+
+We have had several incidents where interactions between unit tests
+and functional tests have uncovered complimentary masking bugs.
+
+Tests are not a substitute for understanding code---they are a
+mechanism for encoding that understanding to share with other
+developers, including future versions of yourself.  You can learn
+nearly as much about our code by reading our tests as by reading the
+code itself.
+
+Lately, we have begun using functional tests to encode major bugs.
+These are among the best of all possible bug reports---they describe
+the failure precisely and tell exactly when the problem is gone.
+After the bugs are fixed the tests serve as part of the regression
+suite.
+
+\section{The Metaphors}
+
+XP projects are built around a unifying metaphor rather than an
+elaborate architecture.  In our case, we chose two metaphors which
+could serve quite well for nearly any protocol development project.
+
+Our metaphors are the state machine and the smart pipe.  Most readers
+are probably familiar with the state machine, but the smart pipe is a
+twist on a familiar concept.  The idea behind a smart pipe\footnote{An
+alternate term may be ``oven''.} is that raw stuff goes in one end and
+cooked stuff comes out the other end.
+
+\subsection{The State Machine}
+
+The state machine in our implementation is quite literal.  We have an
+explicit state table which keys to specific state functions which are
+tied directly back to parts of the RFC.  The core of the state machine
+(found in \texttt{sctp\_do\_sm()}) is almost purely functional---only header
+conversions are permitted.  Each state function produces a description
+of the side effects (in the form of a \texttt{struct~sctp\_sm\_retval})
+needed to handle the particular event.  A separate side effect
+processor, \texttt{sctp\_side\_effects()}, converts this structure into
+actions.
+
+Events fall into four categories.  The RFC is very explicit about
+state transitions associated with arriving chunks.  The RFC discusses
+transitions due to primitive requests from upper layers, but many of
+these are implementation dependent.  The third category of events is
+timeouts.  The final category is a catch-all for odd events like
+queues emptying.
+
+\begin{figure*}[t]
+\begin{center}
+{\tt
+\begin{tabular}{ l  l  l  l  l }
+   \hline
+   \textnormal{State:}	& CLOSED	& COOKIE-WAIT	& COOKIE-ECHOED	& ESTABLISHED \\
+   \hline
+   \hline
+   \textnormal{Chunks}	&		&		&		& \\
+   \hline
+
+   INIT         & do\_5\_1B\_init & do\_5\_2\_1\_siminit & do\_5\_2\_1\_siminit & do\_5\_2\_2\_dupinit \\
+   INIT ACK     & discard(5.2.3) & do\_5\_1C\_ack	& discard(5.2.3) & discard(5.2.3)	\\
+   COOKIE ECHO	& do\_5\_1D\_ce	& do\_5\_2\_4\_dupcook& do\_5\_2\_4\_dupcook& do\_5\_2\_4\_dupcook \\
+   COOKIE ACK	& discard	& discard(5.2.5) & do\_5\_1E\_ca & discard(5.2.5)    		\\
+   DATA		& tabort\_8\_4\_8 & discard(6.0) & discard(6.0) & eat\_data\_6\_2		\\
+   SACK		& tabort\_8\_4\_8 & discard(6.0) & eat\_sack\_6\_2\_1 & eat\_sack\_6\_2\_1      \\
+
+   \hline
+   \textnormal{Timeouts} &	&		&		& \\
+   \hline
+
+   T1-INIT TO	& bug           & do\_4\_2\_reinit & bug	& bug \\
+   T3-RTX TO	& bug           & bug		& do\_6\_3\_3\_retx & do\_6\_3\_3\_retx \\
+
+   \hline
+   \textnormal{Primitives} &	&		&		& \\
+   \hline
+
+   PRM\_ASSOCIATE & do\_PRM\_ASOC & error	& error		& error \\
+   PRM\_SEND	& error		& do\_PRM\_SENDQ6.0 & do\_PRM\_SENDQ6.0 & do\_PRM\_SEND \\
+
+\end{tabular}
+}
+\end{center}
+\caption{\label{states}Portion of SCTP state table showing association initialisation}
+\end{figure*}
+
+In order to create an explicit state machine, it was necessary to
+first create an explicit state table.  The process of creating this
+table uncovered a few minor contradictions in one of the drafts of the 
+RFC.  These mostly involved conflicting catch-all cases.  In Figure 1
+we have an excerpt which shows the state functions involved in
+initialising a new association.
+
+\subsection{The Smart Pipes}
+
+Each smart pipe has one or more structures which define its internal
+data, and a set of functions which define its external interactions.
+In this respect these smart pipes can be considered a type of object,
+in the OO sense.  All of these definitions can be found in the include 
+file \texttt{<net/sctp/sctpStructs.h>}.
+
+Most of our smart pipes have push inputs---external objects explictly
+put things in by calling methods directly.  A pull input is
+possible---the smart pipe would need to have a way to register a
+callback function which can fetch more input in response to some other 
+stimulus.
+
+Some of our pipes use pull outputs.  E.g. \texttt{SCTP\_ULPqueue} passes
+data and notifications up the protocol stack through explicit calls to
+the socket functions, usually \texttt{readmsg(2)}.  Some of our smart
+pipes use push outputs.  E.g. \texttt{SCTP\_outqueue} has a set of
+callback functions which it invokes when it needs to send chunks out
+toward the wire.
+
+There are four smart pipes in lksctp.  They are
+\texttt{SCTP\_inqueue}, \texttt{SCTP\_ULPqueue},
+\texttt{SCTP\_outqueue}, and \texttt{SCTP\_packet}.  The first two
+carry information up the stack from the wire to the user; the second
+two carry information back down the stack. 
+
+\subsubsection{\texttt{SCTP\_inqueue}}
+
+\texttt{SCTP\_inqueue} accepts packets and provides chunks.  It is
+responsible for reassembling fragments, unbundling, tracking received
+TSN's for acknowledgement, and managing rwnd for congestion control.
+There is an \texttt{SCTP\_inqueue} for each endpoint (to handle chunks
+not related to a specific association) and one for each association.
+
+The function \texttt{sctp\_v4\_rcv()} (which is the receiving function
+for SCTP registered with IPv4) calls \texttt{sctp\_push\_inqueue()} to
+push packets into the input queue for the appropriate association or
+endpoint.  The function \texttt{sctp\_push\_inqueue()} schedules
+either \texttt{sctp\_bh\_rcv\_asoc()} or \texttt{sctp\_bh\_rcv\_ep()}
+on the immediate queue to complete delivery.  These functions call
+\texttt{sctp\_pop\_inqueue()} to pull data out of the
+\texttt{SCTP\_inqueue}.  This function does most of the work for this
+smart pipe.
+
+The functions \texttt{sctp\_bh\_rcv\_ep()} and
+\texttt{sctp\_bh\_rcv\_asoc()} run the state machine on incoming
+chunks.  Among many other side effects, the state machine can generate
+events for an upper-layer-protocol (ULP), and/or chunks to go back out
+on the wire.
+
+\subsubsection{\texttt{SCTP\_ULPqueue}}
+
+\texttt{SCTP\_ULPqueue} is the smart pipe which accepts events (either
+user data messages or notifications) from the state machine and
+delivers them to the ULP through the sockets layer.  It is responsible
+for delivering streams of messages in order.  There is one
+\texttt{SCTP\_ULPqueue} for every endpoint, but this is likely to
+change at some point to one \texttt{SCTP\_ULPqueue} for each socket.
+This smart pipe uses a data structure distributed between the
+\texttt{struct~SCTP\_endpoint} and the
+\texttt{struct~SCTP\_association}.
+
+The state machine, \texttt{sctp\_do\_sm()}, pushes data into an
+\texttt{SCTP\_ULPqueue} by calling
+\texttt{sctp\_push\_chunk\_ULPqueue()}.  It pushes notifications with
+\texttt{sctp\_push\_event\_ULPqueue()}.  The sockets layer extracts
+events from an \texttt{SCTP\_ULPqueue} with
+\texttt{sctp\_pop\_ULPqueue()}. 
+
+\subsubsection{\texttt{SCTP\_outqueue}}
+
+\texttt{SCTP\_outqueue} is responsible for bundling logic, transport
+selection, outbound congestion control, fragmentation, and any
+necessary data queueing.  It knows whether or not data can go out onto
+the wire yet.  With one exception noted below, every outbound chunk
+goes through an \texttt{SCTP\_outqueue} attached to an association.
+The state machine injects chunks into an \texttt{SCTP\_outqueue} with
+\texttt{sctp\_push\_outqueue()}.  They automatically push out the other
+end through a small set of callbacks which are normally attached to an
+\texttt{SCTP\_packet}.
+
+The state machine is capable of putting a fully-formed packet directly
+on the wire.  At this point only \texttt{ABORT} uses this feature.  It is
+likely that we will refactor \texttt{INIT ACK} generation again to use
+this feature.
+
+\subsubsection{\texttt{SCTP\_packet}}
+
+An \texttt{SCTP\_packet} is a lazy packet transmitter associated with a
+specific transport.  The upper layer pushes data into the packet,
+usually with \texttt{sctp\_transmit\_chunk()}.  The packet blindly
+bundles the chunks.  If the it fills (hits the PMTU for its transport),
+it transmits the packet to make room for the new chunk.
+\texttt{SCTP\_packet} rejects packets which need fragmenting.  It is
+possible to force a packet to transmit immediately with
+\texttt{sctp\_transmit\_packet()}.  \texttt{SCTP\_packet} tracks the
+congestion counters, but handles none of the congestion logic.
+
+\section{More Data Structures}
+
+Not everything is a state table or a smart pipe---after all, this is
+the kernel and we ARE programming in C.  Here again, we have followed
+the RFC very closely.  Most of the key concepts in the RFC manifest
+themselves as explicit data structures.  For convenience, we refer to
+these data structures as ``nouns''.
+
+Nearly all of the ``noun'' structures are designed for use with the
+\texttt{sk\_buff} macros for list manipulation.  These macros provide a
+doubly-linked list with locking.
+
+\subsection{\texttt{struct~SCTP\_proto}}
+
+The entire lksctp universe is grounded in an instance of \texttt{
+struct~SCTP\_proto} accessible through \texttt{sctp\_get\_protocol()}.
+This structure holds system-wide defaults for things like the maximum
+number of permitted retransmissions.  It contains a list of all
+endpoints on the system.
+
+\subsection{\texttt{struct~SCTP\_endpoint}}
+
+Each UDP-style SCTP socket has an endpoint, represented as a
+\texttt{struct~SCTP\_endpoint}.  Once we implement high-bandwidth sockets and
+TCP-style sockets, it will be possible for multiple sockets to share a
+single endpoint structure.  The endpoint structure contains a local
+SCTP socket number and a list of local IP addresses.  These two items
+define the endpoint uniquely.  In addition to endpoint-wide default
+values and statistics, the endpoint maintains a list of associations.
+
+\subsection{\texttt{struct~SCTP\_association}}
+
+Each association structure, \texttt{struct~SCTP\_association}) is defined
+by a local endpoint (a pointer to a \texttt{struct~SCTP\_endpoint}), and
+a remote endpoint (an SCTP port number and a list of transport
+addresses).  This is one of the most complicated structures in the
+implementation as it includes a great deal of information mandated by
+the RFC.  Among many other things, this structure holds the state of
+the state machine.  The list of transport addresses for the remote
+endpoint is more elaborate than the simple list of IP addresses in the
+local endpoint data structure since SCTP needs to maintain congestion
+information about each of the remote transport addresses.
+
+\subsection{\texttt{struct~SCTP\_transport}}
+
+A \texttt{struct~SCTP\_transport} is defined by a remote SCTP port number
+and an IP address.  The structure holds congestion and reachability
+information for the given address.  This is also where we get the list 
+of functions to call to manipulate the specific address family.  For
+TCP you would find this information way up in the socket, but this is
+not possible for SCTP.
+
+\subsection{\texttt{struct~SCTP\_chunk}}
+
+Possibly the most fundamental data structure in lksctp is
+\texttt{struct~SCTP\_chunk}.  This holds SCTP chunks both inbound and
+outbound.  It is essentially an extension to \texttt{struct~sk\_buff}.
+It adds pointers to the various possible SCTP subheaders and a few
+flags needed specifically for SCTP.  One strict convention is that
+\texttt{chunk->skb->data} is the demarcation line between headers in
+network byte order and headers in host byte order.  All outbound
+chunks are ALWAYS in network byte order.  The first function which
+needs a field from an inbound chunk converts that full header to host
+byte order {\it in situ}.
+
+\section{Acknowledgements}
+
+The authors are members of a team at Motorola dedicated to producing
+open source implementations in support of IETF standardisation.  We
+would like to thank the people who make these efforts possible,
+specifically Maureen~Govern, Stephen~Spear, Qiaobing~Xie, and
+Irfan~Ali.  We are of course deeply indebted to Randall Stewart and
+Qiaobing Xie for having created SCTP and for starting the Linux Kernel
+SCTP Implementation Project.  We wish to recognizee the ongoing and
+significant contributions from developers outside Motorola, especially
+Jon Grimm and Daisy Chang of IBM, and Xingang Guo of Intel.
+
+\section{Availability}
+
+All the code discussed in this paper is available from the lksctp
+project on Source Forge:
+
+\begin{center}
+\texttt{http://sourceforge.net/projects/lksctp/}
+\end{center}
+
+\begin{thebibliography}{2001}
+
+\bibitem[RFC2960]{rfc2960} R.~Stewart, Q.~Xie, K.~Morneault, C.~Sharp,
+H.~J.~Schwarzbauer, T.~Taylor, I.~Rytina, M.~Kalla, L.~Zhang, and,
+V.~Paxson, {\em Stream Control Transmission Protocol}, RFC~2960 (Oct~2000).
+
+\bibitem[SCTPAPI]{api} R.~Stewart, Q.~Xie, L.~H.~P.~Yarroll, J.~Wood,
+K.~Poon, K.~Fujita., {\em Sockets API Extensions for SCTP}, Work In
+Progress, \texttt{draft-ietf-tsvwg-sctpsocket-00.txt} (Jun~2001).
+
+\bibitem[SCTPIMPL]{impl} R.~Stewart. {\it et al}, 
+{\em SCTP Implementor's Guide}, Work In Progress,
+\texttt{draft-ietf-tsvwg-sctpimpguide-00.txt} (Jun~2001).
+
+\bibitem[SCTPMIB]{mib} J.~Pastor, M.~Belinchon. {\em Stream Control
+Transmission Protocol Management Information Base using SMIv2}, Work
+In Progress, \texttt{draft-ietf-sigtran-sctp-mib-03.txt} (Feb~2001).
+
+\bibitem[XP]{xp} K.~Beck. {\em Extreme Programming Explained: Embrace
+Change}, Addison-Wesley Publishers (2000).
+
+\bibitem[SCTPORG]{sctporg}{\em Randall Stewart's SCTP site},\\
+\texttt{http://www.sctp.org}, (2001).
+
+\bibitem[SCTPDE]{sctpde}{\em T\"uxen/Jungmeier SCTP site},\\
+\texttt{http://www.sctp.de}, (2001).
+
+\end{thebibliography}
+
+\end{document}

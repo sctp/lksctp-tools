@@ -1,0 +1,1512 @@
+
+
+Network Working Group                                            M. West
+Internet-Draft                                                A. Surtees
+Expires: December 26, 2003                            Siemens/Roke Manor
+                                                           June 27, 2003
+
+
+                         SCTP Profile for EPIC
+                      draft-west-sctp-epic-01.txt
+
+Status of this Memo
+
+   This document is an Internet-Draft and is in full conformance with
+   all provisions of Section 10 of RFC2026.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF), its areas, and its working groups.  Note that
+   other groups may also distribute working documents as Internet-
+   Drafts.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   The list of current Internet-Drafts can be accessed at http://
+   www.ietf.org/ietf/1id-abstracts.txt.
+
+   The list of Internet-Draft Shadow Directories can be accessed at
+   http://www.ietf.org/shadow.html.
+
+Copyright Notice
+
+   Copyright (C) The Internet Society (2003).  All Rights Reserved.
+
+Abstract
+
+   This draft describes a profile for compressing SCTP/IP using the
+   Robust Header Compression Formal Notation.
+
+   The RObust Header Compression [1] scheme is designed to compress
+   packet headers over error prone channels.  It is built around an
+   extensible core framework that can be tailored to compress new
+   protocol stacks by adding additional ROHC profiles.
+
+   This profile describes a new profile for ROHC which will allow SCTP/
+   IP headers to be compressed.
+
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 1]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+Note
+
+   This is a preliminary profile.  It is documented in this draft for
+   two main reasons.
+
+   1.  To encourage discussion regarding the compression of SCTP
+
+   2.  To explore the range of protocols that the Formal Notation can be
+       used to compress
+
+
+Table of Contents
+
+   1.        Introduction . . . . . . . . . . . . . . . . . . . . . .  3
+   2.        Terminology  . . . . . . . . . . . . . . . . . . . . . .  3
+   3.        Framework  . . . . . . . . . . . . . . . . . . . . . . .  4
+   4.        Basic SCTP/IPv4 Header . . . . . . . . . . . . . . . . .  4
+   5.        SCTP/IPv4 Profile  . . . . . . . . . . . . . . . . . . .  6
+   5.1       Overview . . . . . . . . . . . . . . . . . . . . . . . .  6
+   5.1.1     High-level Structure . . . . . . . . . . . . . . . . . .  7
+   5.1.1.1   IPv4 header compression  . . . . . . . . . . . . . . . .  7
+   5.1.1.2   SCTP header  . . . . . . . . . . . . . . . . . . . . . .  8
+   5.1.1.2.1 Common Header  . . . . . . . . . . . . . . . . . . . . .  8
+   5.1.1.2.2 Chunks . . . . . . . . . . . . . . . . . . . . . . . . .  8
+   5.1.2     Limitations and restrictions . . . . . . . . . . . . . .  9
+   5.2       Additional Encoding Methods  . . . . . . . . . . . . . . 10
+   5.2.1     padding  . . . . . . . . . . . . . . . . . . . . . . . . 11
+   5.3       The Profile  . . . . . . . . . . . . . . . . . . . . . . 11
+   6.        Security Considerations  . . . . . . . . . . . . . . . . 25
+   7.        Acknowledgements . . . . . . . . . . . . . . . . . . . . 25
+             References . . . . . . . . . . . . . . . . . . . . . . . 25
+             Authors' Addresses . . . . . . . . . . . . . . . . . . . 26
+             Full Copyright Statement . . . . . . . . . . . . . . . . 27
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 2]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+1. Introduction
+
+   This document describes a profile for compressing SCTP/IP.  The
+   Stream Control Transmission Protocol [6] may have application in the
+   same areas that Robust Header Compression was designed to target.
+   Requirements for the compression of SCTP are discussed in [3].  This
+   profile assumes the use of the ROHC [1] framework but using the
+   Formal Notation [2] to derive the new set of header formats.
+
+   The aim of this profile is to produce header formats which can be
+   used along with the framework of ROHC to compress SCTP.  The
+   compression of the protocol is defined in the formal notation input
+   language.
+
+   The framework takes a profile as its input.  A profile describes the
+   fields of a particular protocol header using the formal notation.
+   This formal notation also describes how to compress each field using
+   one or more of the fundamental methods defined in the formal
+   notation.  Consequently to describe how to compress a new protocol,
+   all that is needed is a profile.  This draft gives the profile for
+   SCTP.  For more details about the formal notation and the process of
+   generating packets, refer to [2].  It is assumed in this profile that
+   Huffman encoding will be used to generate the indicator bits that
+   enable packets to be decompressed correctly.
+
+2. Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED",  "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in RFC-2119.
+
+   Profile
+
+      A ROHC [1] profile is a description of how to compress a certain
+      protocol stack over a certain type of link.  Each profile includes
+      one or more sets of compressed header formats and a state machine
+      to control the compressor and the decompressor.
+
+   Chunk
+
+      A unit of information within an SCTP packet, consisting of a chunk
+      header and chunk-specific content.
+
+   SCTP packet
+
+      The unit of data delivery across the interface between SCTP and
+      the connectionless packet network (e.g., IP).  An SCTP packet
+      includes the common SCTP header, possible SCTP control chunks, and
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 3]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      user data encapsulated within SCTP DATA chunks.
+
+   Stream
+
+      A uni-directional logical channel established from one to another
+      associated SCTP endpoint, within which all user messages are
+      delivered in sequence except for those submitted to the unordered
+      delivery service.
+
+   For more definitions of SCTP terms, see [6].
+
+3. Framework
+
+   The overall framework in which to run this profile, that is the
+   context identifier (CID), basic packet identifiers, e.g.  IR, IR-DYN,
+   are as defined in ROHC [1].
+
+   For the sake of simplicity, the profile is initially described for
+   uni-directional operation.  No feedback packets are defined.
+
+4. Basic SCTP/IPv4 Header
+
+   The base fields of each header are as shown below (note these
+   diagrams are compatible with those in ROHC [1]):
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 4]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   IPv4 Header
+
+      +----+----+----+----+----+----+----+----+
+      |    Version = 4    | Header length = 5 |
+      +----+----+----+----+----+----+----+----+
+      |            Type of Service            |
+      +----+----+----+----+----+----+----+----+
+      /                Length                 /    2 octets
+      +----+----+----+----+----+----+----+----+
+      /            Identification             /    2 octets
+      +----+----+----+----+----+----+----+----+
+      | RF | DF | MF |  Fragment Offset = 0   |
+      +----+----+----+----+----+----+----+----+
+      |             Time to Live              |
+      +----+----+----+----+----+----+----+----+
+      |             Protocol = 17             |
+      +----+----+----+----+----+----+----+----+
+      |               Checksum                |
+      +----+----+----+----+----+----+----+----+
+      /            Source Address             /    4 octets
+      +----+----+----+----+----+----+----+----+
+      /          Destination Address          /    4 octets
+      +----+----+----+----+----+----+----+----+
+
+   o  Header length = 5 assuming no IP options.
+
+   o  RF (Reserved Flag) and MF (More Fragments flag) assumed to be zero
+      by [1].
+
+   SCTP Common Header
+
+      +----+----+----+----+----+----+----+----+
+      /              Source Port              /    2 octets
+      +----+----+----+----+----+----+----+----+
+      /           Destination Port            /    2 octets
+      +----+----+----+----+----+----+----+----+
+      /           Verification Tag            /    4 octets
+      +----+----+----+----+----+----+----+----+
+      /               Checksum                /    4 octets
+      +----+----+----+----+----+----+----+----+
+
+   o  The compression profile does not care whether or not the checksum
+      is an Adler-32 checksum as described in [6] or a 32-bit CRC since
+      the checksum is carried transparently by the compression scheme.
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 5]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   SCTP packet structure
+
+      +----+----+----+----+----+----+----+----+
+      /               IP Header               /   20  octets
+      +----+----+----+----+----+----+----+----+
+      /             Common Header             /   12  octets
+      +----+----+----+----+----+----+----+----+
+      /              SCTP Chunk               /    4+ octets
+      +----+----+----+----+----+----+----+----+
+      :                                       :
+      :             Further Chunks            :
+      :                                       :
+      +----+----+----+----+----+----+----+----+
+
+   Generic SCTP Chunk
+
+      +----+----+----+----+----+----+----+----+
+      |                 Type                  |
+      +----+----+----+----+----+----+----+----+
+      |              Chunk Flags              |
+      +----+----+----+----+----+----+----+----+
+      /                Length                 /    2 octets
+      +----+----+----+----+----+----+----+----+
+      :                                       :
+      :                Payload                :    x octets
+      :                                       :
+      +----+----+----+----+----+----+----+----+
+      /                Padding                /   0-3 octets
+      +----+----+----+----+----+----+----+----+
+
+   o  Length defines the length of the chunk including the type, flags,
+      length and payload fields.
+
+   o  0 to 3 octets of padding are added to ensure that the total size
+      of the chunk is an integer multiple of 4 octets
+
+   The input language describes each of these fields so the compressor
+   need have no prior knowledge of what the header looks like.
+
+5. SCTP/IPv4 Profile
+
+5.1 Overview
+
+   This section gives an overview of how the profile for SCTP
+   compression is structured.  That is, it briefly discusses the
+   components of an SCTP packet at a high level and explains how the
+   packet is processed.
+
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 6]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   Note: More detailed descriptions of the behaviour of SCTP protocol
+   fields could be added as an appendix.
+
+5.1.1 High-level Structure
+
+   SCTP is quite different from transport protocols such as UDP and TCP.
+   This is primarily because a packet can contain multiple 'chunks'.
+   Each chunk is associated with a sub-flow and follows a standard
+   'type/length/value' encoding.  This means that the entire packet is
+   processed by the profile, with the contents of certain chunks
+   (particularly data chunks) being transmitted as 'uncompressible'
+   data.
+
+   The process of compression is exactly the same as for any profile
+   written in the formal notation.  The profile contains a description
+   of the SCTP packet that is sufficient to allow it to be compressed.
+
+   The following explanation refers to the profile in Section 5.3.
+
+   The overall profile is broken down into top-level elements for the
+   IR, IR-DYN and CO (compressed) packet formats.  The generation and
+   usage of these different types of packets within header compression
+   is described in ROHC [1].
+
+   These top-level elements compress (for this simple example profile)
+   the IPv4 header, the SCTP common header and a list of SCTP chunks.
+
+5.1.1.1 IPv4 header compression
+
+   The IP header is not particularly complex with regard to compression.
+   Many of the fields are static, or rarely change.  A detailed
+   description of IP header fields is given in [1].
+
+   The major differences for the handling of the IP header in the SCTP
+   case are as follows:
+
+   o  The TOS field is split to include the ECN bits.  Although the ECN
+      chunk types are reserved in [6], they are not defined.  However,
+      their presence indicates an intent to deal with ECN, so the IP TOS
+      bits are split accordingly.
+
+   o  The IP length field is not dealt with within the IP header, but
+      preserved in a label.  This is because there is no length
+      indication in the SCTP header, but the use of 'list' compression
+      requires the length of the list (in this case the packet) to be
+      known.
+
+   o  The IP ID field cannot obviously be tied to another field, as in
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 7]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      the case with the RTP sequence number in [1].  Therefore, it is
+      encoded in-situ.
+
+
+5.1.1.2 SCTP header
+
+   The SCTP header can itself be sub-divided into the common header and
+   one or more chunks (of various types) that may be present.  These are
+   considered in the following sections.
+
+5.1.1.2.1 Common Header
+
+   The SCTP common header, as outlined previously, is quite simple.  The
+   port numbers are handled as for other transport protocols, such as
+   UDP and TCP.  That is, they are expected to remain static within a
+   flow.  The verification tag is also expected to remain unchanged,
+   once established.  The checksum is carried transparently in every
+   compressed packet.
+
+5.1.1.2.2 Chunks
+
+   An SCTP packet can contain one or more chunks and these chunks may
+   belong to one or more streams.
+
+   The core part of the profile for compressing the SCTP chunk headers
+   is a large 'list' encoding.  This encoding allows for the compression
+   of a list of items which may be optionally present in a header and/or
+   occur in an arbitrary order.  This is, therefore, the logical
+   encoding to use as a basis for the chunks.
+
+   As discussed earlier, chunks have a standard 'type/length/value'
+   layout.  For some chunks, for example Shutdown, the value part can be
+   explicitly encoded, since is has well-defined, fixed contents.  In
+   many cases, however, the format of the value part is not known.  (The
+   most obvious example of this would be the payload of a data chunk).
+   Here the 'uncompressed' method is used to simply convey this
+   information to the decompressor without any compression being
+   applied.  However, the data needs to be accounted for in the profile
+   in order for the start of the next chunk to be located.
+
+   The remainder of this section contains notes relating to the encoding
+   of specific chunk types.
+
+   o  Each data chunk contains a header and payload.  The header fields
+      (transaction sequence number, stream ID, stream sequence number,
+      PPI) are encoded as a 'sub-header' in their own right.  It is up
+      to the compressor to choose how to manage the available data-chunk
+      encodings in the list to achieve best efficiency.  For example,
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 8]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      each instance of a data-chunk in the list might be associated with
+      a different stream.
+
+   o  The Init chunk contains a fixed set of fields (including the
+      initiate tag, advertised receive window, numbers of streams in and
+      out, and intial transaction sequence number) as well as some
+      opaque data that is treated as 'uncompressed'.  The fixed header
+      fields are individually encoded.  Only one Init chunk is supported
+      per SCTP packet.
+
+   o  The Init ACK chunk is encoded in essentially the same way as the
+      Init chunk.
+
+   o  The SACK chunk is currently a place-holder encoding, which will be
+      replaced with a more efficienct encoding.  The current profile
+      identifies the list of SACK blocks and duplicate TSNs and uses
+      'list' encoding to process them in a simple, but structured, way.
+
+   o  The Heartbeat, Heartbeat-ACK, Abort and Cookie-Echo chunks follow
+      the standard chunk layout but, other than the fields mandated by
+      this structure, contain only opaque data that is carried as
+      'uncompressed'.
+
+   o  The Shutdown, Shutdowm-ACK, Cookie-ACK and Shutdown-Complete
+      chunks contain only well-defined fields, so the entire contents of
+      these chunks are encoded.
+
+   o  The SCTP Error chunk contains a list of error causes and this
+      structure is repeated in the profile, which encodes the list of
+      causes.
+
+   o  The ECNE and CWR chunks are reserved in the [6] but not defined.
+      Thus, currently, they are treated as 'generic'.
+
+   o  Since SCTP may introduce new chunk types, a 'generic' chunk coding
+      is included which takes advantage of the 'type/length/value'
+      structure of chunks to provide a simple encoding for any chunk.
+
+
+5.1.2 Limitations and restrictions
+
+   This is, as noted at the start, a preliminary SCTP profile.  Thus it
+   should not be seen as definitive, although the profile is sufficient
+   to achieve relatively efficient compression of SCTP.  This section
+   identifies some of the key areas of the profile that need further
+   consideration.
+
+   o  Up to 4 data chunks can be handled.  The 'list' encoding requires
+
+
+
+West & Surtees          Expires December 26, 2003               [Page 9]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      an upper bound on the number of entries.  (Each encoding in a
+      'list' can only be used once per packet).  This means that an
+      arbitrary limit on the number of data chunks needs to be set.
+      Currently this is four, although any value could be used.
+
+      Note that if the 'list' encoding fails (due to there being too
+      many data chunks, for example), then the packet will have to be
+      sent as uncompressed.  Careful selection of the repeat count is
+      one way of mitigating this.  Another would be to introduce a more
+      flexible encoding that would only compress the first part of the
+      packet.
+
+   o  No chunk other than a data chunk can appear more than once.  This
+      is a compression restriction rather than an SCTP protocol
+      restriction.  It is essentially the same as the previous point:
+      there must be a limit on the number of encodings.
+
+      Note that the use of 'generic' encodings for chunks allow this
+      restriction to be relaxed somewhat.  The 'generic' encoding will
+      never be as efficient as an encoding that makes use of the known
+      characteristics of a chunk.  However, it prevents the profile from
+      failing when applied to a packet.
+
+   o  The current use of 'list' encoding does not permit the complex
+      rules regarding which chunks can appear in a header to be
+      codified.  The profile allows (within the constraints of the
+      'list' encoding) for any of the chunks to occur in any order.  The
+      effects on efficiency of this need to be assessed and, if
+      necessary, the profile will be updated to remedy any inefficiency.
+
+   All of the above issues are for further study.
+
+5.2 Additional Encoding Methods
+
+   It is useful to define an additional encoding method for SCTP
+   compression.  This can be defined in the formal notation and its
+   definition serves only to simplify the profile.  The expansion into
+   fundamental encoding methods could be put in every position in which
+   it is used.
+
+
+
+
+
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 10]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+5.2.1 padding
+
+      padding (data_len,d,m,l,p)   ::= field (n)
+                                       map (Field_Value, p, Null)
+
+      where b = floor (data_len, d) * m
+            n = mod (l - mod (b, l), l)
+
+   d = divider to get length in bits
+   m = multiplier to get length in bits
+   l = overall size must be a multiple of l bits
+   p = value of padding bits
+
+   The padding method allows for redundant padding data to be elided
+   from the compressed packet.  It is for use in cases such as SCTP,
+   where blocks of data are 'rounded up' in size to the nearest multiple
+   of a convenient number of bits.
+
+   In operation, at the compressor the encoding takes the known length
+   of the block of data.  It then computes how many blocks of padding
+   should be present and their value.  If this matches the data on the
+   uncompressed data in the correct position in the header, then the
+   padding is simply ignored.
+
+   At the decompressor, the same calculation is performed on the length
+   field.  The padding is then put back in place in the header.
+
+   The padding operation does not require any context to be used.  It is
+   also assumed to be applied 100% of the time, so there is no
+   probability present.
+
+   For example, an SCTP data chunk is a multiple of 4 bytes (32 bits)
+   long and is padded with octets of '0'.  The SCTP chunk length is in
+   label data_len.  This translates to the following encoding:
+
+       padding(data_len,1,8,32,0)
+
+
+5.3 The Profile
+
+
+   ;
+   ; These 3 encodings are the base methods that define the
+   ; encoding of the IPv4/SCTP header
+   ;
+
+      sctp_ip_formats_ir   ::=   ordinary_huffman(sctp_ip_header_ir)
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 11]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      sctp_ip_formats_dyn  ::=   ordinary_huffman(sctp_ip_header_dyn)
+
+      sctp_ip_formats_co   ::=   ordinary_huffman(sctp_ip_header_co)
+
+
+      sctp_ip_header_ir    ::=   ip_header_ir
+                                 sctp_header_ir
+                                 header_crc
+
+      sctp_ip_header_dyn   ::=   ip_header_dyn
+                                 sctp_header_dyn
+                                 header_crc
+
+      sctp_ip_header_co    ::=   ip_header_co
+                                 sctp_header_co
+                                 header_crc
+
+   ;
+   ; The breakdown of field encodings for an IPv4 header
+   ;
+      ip_header_ir         ::=   inferred_ip_checksum
+                                 ip_version
+                                 ip_header_length
+                                 ip_tos_dyn
+                                 ip_ecn
+                                 ip_length
+                                 ip_id_dyn
+                                 ip_reserved
+                                 ip_dont_fragment_dyn
+                                 ip_more_fragments
+                                 ip_offset
+                                 ip_time_to_live_dyn
+                                 ip_protocol
+                                 ip_checksum
+                                 ip_source_address_ir
+                                 ip_dest_address_ir
+
+
+      ip_header_dyn        ::=   inferred_ip_checksum
+                                 ip_version
+                                 ip_header_length
+                                 ip_tos_dyn
+                                 ip_ecn
+                                 ip_length
+                                 ip_id_dyn
+                                 ip_reserved
+                                 ip_dont_fragment_dyn
+                                 ip_more_fragments
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 12]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+                                 ip_offset
+                                 ip_time_to_live_dyn
+                                 ip_protocol
+                                 ip_checksum
+                                 ip_source_address_co
+                                 ip_dest_address_co
+
+      ip_header_co         ::=   inferred_ip_checksum
+                                 ip_version
+                                 ip_header_length
+                                 ip_tos_co
+                                 ip_ecn
+                                 ip_length
+                                 ip_id_co
+                                 ip_reserved
+                                 ip_dont_fragment_co
+                                 ip_more_fragments
+                                 ip_offset
+                                 ip_time_to_live_co
+                                 ip_protocol
+                                 ip_checksum
+                                 ip_source_address_co
+                                 ip_dest_address_co
+
+   ; IP version (fixed as 4)
+   ;
+      ip_version           ::=   value(4,4)
+
+   ; IP header length (fixed as 5)
+   ;
+      ip_header_length     ::=   value(4,5)
+
+   ; IP TOS is a rarely changing field
+   ;
+      ip_tos_dyn           ::=   irregular (6)
+
+      ip_tos_co            ::=   static
+
+   ; ECN currently carried transparently.
+   ;
+      ip_ecn               ::=   irregular (2)
+
+   ; save length for later
+   ;
+      ip_length            ::=   label (16,ip_len)
+
+   ; Check that the IP ID is in network_byte order
+   ;
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 13]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   ; IP ID is currently assumed to be essentially monotonically
+   ; increasing.  A format construct could be used to support
+   ; random IP IDs as well.
+   ;
+      ip_id_dyn            ::=   nbo (16)
+                                 next_field (NBO_Flag)
+                                 irregular (1)
+                                 next_field (NBO_Field)
+                                 irregular(16)
+
+      ip_id_co             ::=   nbo (16)
+                                 next_field (NBO_Flag)
+                                 static
+                                 next_field (NBO_Field)
+                                 lsb (4,0) 90% / lsb(8,0) 9% /
+                                 irregular(16) 1%
+
+   ; Reserved flag assumed to be false (0)
+   ;
+      ip_reserved          ::=   value(1,0)
+
+   ; DF can only change in IR/IR_DYN packets
+   ;
+      ip_dont_fragment_co  ::=   static
+
+      ip_dont_fragment_dyn ::=   irregular(1)
+
+   ; MF is assumed to be false (0)
+   ;
+      ip_more_fragments    ::=   value(1,0)
+
+   ; Offset is assumed to be (0)
+   ;
+      ip_offset            ::=   value(13,0)
+
+   ; TTL is a rarely changing field
+   ;
+      ip_time_to_live_co   ::=   static 99% / irregular(8) 1%
+
+      ip_time_to_live_dyn  ::=   irregular(8)
+
+   ; Fixed value for the SCTP protocol
+   ;
+      ip_protocol          ::=   value(8,132)
+
+   ; IP checksum is handled by inferred_ip_checksum
+   ;
+      ip_checksum          ::=   skip(16)
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 14]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   ; Source and destination addresses are set in an IR packet and
+   ; do not change thereafter
+   ;
+      ip_source_address_ir ::=   irregular(32)
+
+      ip_source_address_co ::=   static
+
+      ip_dest_address_ir   ::=   irregular(32)
+
+      ip_dest_address_co   ::=   static
+
+   ;
+   ; These encodings specify the SCTP common header and the
+   ; chunk list
+   ;
+
+      sctp_header_ir       ::=   sport_ir
+                                 dport_ir
+                                 verif_tag_dyn
+                                 sctp_chksum
+                                 chunk_list_ir
+
+      sctp_header_dyn      ::=   sport_co
+                                 dport_co
+                                 verif_tag_dyn
+                                 ctp_chksum
+                                 chunk_list_ir
+
+      sctp_header_co       ::=   sport_co
+                                 dport_co
+                                 verif_tag_co
+                                 sctp_chksum
+                                 chunk_list_co
+
+   ; Source and destination ports don't change after they are initially
+   ;  set in an IR packet
+   ;
+      sctp_source_port_ir  ::=   irregular(16)
+
+      sctp_source_port_co  ::=   static
+
+      sctp_source_port_ir  ::=   irregular(16)
+
+      sctp_source_port_co  ::=   static
+
+
+   ; Verification tag is a relatively rarely changing field
+   ;
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 15]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      verif_tag_dyn        ::=   irregular(32)
+
+      verif_tag_co         ::=   static 90% / irregular(32) 10%
+
+   ; Checksum is just treated as an unpredictable 32_bit value
+   ;
+      sctp_chksum          ::=   irregular(32)
+
+   ; The list of allowable chunk types.  Each encoding in the list
+   ; construct can be used only once per packet
+   ;
+      chunk_list_ir        ::=   list(ip_len, 1, 8, -256,
+                                    [optional(sctp_data_ir),
+                                     optional(sctp_data_ir),
+                                     optional(sctp_data_ir),
+                                     optional(sctp_data_ir),
+                                     optional(sctp_init_ir),
+                                     optional(sctp_init_ack_ir),
+                                     optional(sctp_sack_ir),
+                                     optional(sctp_heartbeat),
+                                     optional(sctp_heartbeat_ack),
+                                     optional(sctp_abort),
+                                     optional(sctp_shutdown),
+                                     optional(sctp_shutdown_ack),
+                                     optional(sctp_error),
+                                     optional(sctp_cookie_echo),
+                                     optional(sctp_cookie_ack),
+                                     optional(sctp_ecne),
+                                     optional(sctp_cwr),
+                                     optional(sctp_sd_complete),
+                                     optional(sctp_generic)])
+                                 sctp_chunks_order_co
+                                 sctp_chunks_presence_co
+
+      chunks_order_ir      ::=   irregular(95)
+
+      chunks_presence_ir   ::=   irregular(19)
+
+      chunk_list_co        ::=   list(ip_len, 1, 8, -256
+                                    [optional(sctp_data_co),
+                                     optional(sctp_data_co),
+                                     optional(sctp_data_co),
+                                     optional(sctp_data_co),
+                                     optional(sctp_init_co),
+                                     optional(sctp_init_ack_co),
+                                     optional(sctp_sack_co),
+                                     optional(sctp_heartbeat),
+                                     optional(sctp_heartbeat_ack),
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 16]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+                                     optional(sctp_abort),
+                                     optional(sctp_shutdown),
+                                     optional(sctp_shutdown_ack),
+                                     optional(sctp_error),
+                                     optional(sctp_cookie_echo),
+                                     optional(sctp_cookie_ack),
+                                     optional(sctp_ecne),
+                                     optional(sctp_cwr),
+                                     optional(sctp_sd_complete),
+                                     optional(sctp_generic)])
+                                 sctp_chunks_order_co
+                                 sctp_chunks_presence_co
+
+      chunks_order_co      ::=   static 90% / irregular(95) 10%
+
+      chunks_presence_co   ::=   static 70% / irregular(19) 30%
+
+   ;
+   ; DATA chunk
+   ;
+
+      sctp_data_ir         ::=   value(8,0)                ; type
+                                 data_flags
+                                 label (16, data_len)      ; length
+                                 sctp_tsn_ir
+                                 sctp_sid_ir
+                                 sctp_ssn_ir
+                                 sctp_ppi_ir
+                                 data_payload
+                                 data_chunk_length_ir
+
+      sctp_data_co         ::=   value(8,0)                ; type
+                                 data_flags
+                                 label (16, data_len)      ; length
+                                 sctp_tsn_co
+                                 sctp_sid_co
+                                 sctp_ssn_co
+                                 sctp_ppi_co
+                                 data_payload
+                                 data_chunk_length_co
+
+      data_flags           ::=   value(5,0)
+                                 irregular(3)              ; u, b, e
+
+      sctp_tsn_ir          ::=   irregular(32)
+
+      sctp_sid_ir          ::=   irregular(16)
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 17]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      sctp_ssn_ir          ::=   irregular(16)
+
+      sctp_ppi_ir          ::=   irregular(32)
+
+      sctp_tsn_co          ::=   lsb(4,4) 60% / lsb(8,16) 25% /
+                                 lsb(16,1024) 10% / irregular(32) 5%
+
+      sctp_sid_co          ::=   static 90% / irregular(16) 10%
+
+      sctp_ssn_co          ::=   lsb(7,4) 60% / irregular(32) 40%
+
+      sctp_ppi_co          ::=   static 90% / irregular(32) 10%
+
+      data_payload         ::=   uncompressible(data_len,1,8,-128)
+                                 padding(data_len,1,8,32,0)
+
+      data_chunk_length_ir ::=   next_field (data_len)
+                                 irregular(16)
+
+      data_chunk_length_co ::=   next_field (data_len)
+                                 irregular_padded(16,12) 80% /
+                                 irregular(16) 20%
+
+   ;
+   ; INIT chunk
+   ;
+
+      sctp_init_ir         ::=   value(8,1)                ; type
+                                 chunk_flags_ir
+                                 label (16, data_len)      ; length
+                                 initiate_tag
+                                 adv_rwnd
+                                 stream_out
+                                 stream_in
+                                 initial_tsn
+                                 init_params
+                                 init_chunk_length_ir
+
+      sctp_init_co         ::=   value(8,1)                ; type
+                                 chunk_flags_co
+                                 label (16, data_len)      ; length
+                                 initiate_tag
+                                 adv_rwnd
+                                 stream_out
+                                 stream_in
+                                 initial_tsn
+                                 init_params
+                                 init_chunk_length_co
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 18]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      chunk_flags_ir       ::=   irregular(8)
+
+      chunk_flags_co       ::=   static 90% / irregular(8) 10%
+
+      intitiate_tag        ::=   irregular(32)
+
+      adv_rwnd             ::=   irregular(32)
+
+      stream_out           ::=   irregular(16)
+
+      stream_in            ::=   irregular(16)
+
+      initial_tsn          ::=   irregular(32)
+
+      init_params          ::=   uncompressible (data_len,1,8,-160)        ; d, m, p
+                                 padding(data_len,1,8,32,0)
+
+      init_chunk_length_ir ::=   next_field (data_len)
+                                 irregular(16)
+
+      init_chunk_length_co ::=   next_field (data_len)
+                                 irregular_padded(16,10) 90% /
+                                 irregular(16) 10%
+
+   ;
+   ; INIT ACK Chunk
+   ;
+
+      sctp_init_ack_ir     ::=   value(8,2)                ; type
+                                 chunk_flags_ir
+                                 label (16, data_len)      ; length
+                                 initiate_tag
+                                 adv_rwnd
+                                 stream_out
+                                 stream_in
+                                 initial_tsn
+                                 init_params
+                                 init_chunk_length_ir
+
+      sctp_init_ack_co     ::=   value(8,2)                ; type
+                                 chunk_flags_co
+                                 label(16, data_len)      ; length
+                                 initiate_tag
+                                 adv_rwnd
+                                 stream_out
+                                 stream_in
+                                 initial_tsn
+                                 init_params
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 19]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+                                 init_chunk_length_co
+
+   ;
+   ; SACK chunk
+   ;
+
+      sctp_sack_ir         ::=   value(8,3)                ; type
+                                 chunk_flags_ir
+                                 irregular(16)             ; length
+                                 adv_rwnd
+                                 label(16,gap_count)       ; gap count
+                                 label(16,dup_count)       ; tsn count
+                                 gap_list_ir
+                                 dup_tsn_list_ir
+
+      sctp_sack_co         ::=   value(8,3)                ; type
+                                 chunk_flags_co
+                                 irregular(16)             ; length
+                                 adv_rwnd
+                                 label(16,gap_count)       ; gap count
+                                 label(16,dup_count)       ; tsn count
+                                 gap_list_co
+                                 dup_tsn_list_co
+
+      gap_list_ir          ::=   list(gap_count, 1, 32, 0,
+                                    [optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir),
+                                     optional(gap_entry_ir)])
+                                 gap_order_ir
+                                 gap_presence_ir
+
+      gap_list_co          ::=   list(gap_count, 1, 32, 0,
+                                    [optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co),
+                                     optional(gap_entry_co)])
+                                 gap_order_co
+                                 gap_presence_co
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 20]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      gap_order_ir         ::=   irregular(24)
+
+      gap_order_co         ::=   static 80% / irregular(24) 20%
+
+      gap_presence_ir      ::=   irregular (8)
+
+      gap_presence_co      ::=   static 50% / irregular (8) 50%
+
+      gap_entry_ir         ::=   irregular(16)
+                                 irregular(16)
+
+      gap_entry_co         ::=   static 50% / irregular(16) 50%
+                                 static 50% / irregular(16) 50%
+
+      dup_tsn_list_ir      ::=   list(dup_count,1,32,0,
+                                    [optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir),
+                                     optional(tsn_entry_ir)])
+                                 dup_order_ir
+                                 dup_presence_ir
+
+      dup_tsn_list_co      ::=   list(dup_count,1,32,0,
+                                    [optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co),
+                                     optional(tsn_entry_co)])
+                                 dup_order_co
+                                 dup_presence_co
+
+      dup_order_ir         ::=   irregular(24)
+
+      dup_order_co         ::=   static 80% / irregular(24) 20%
+
+      dup_presence_ir      ::=   irregular (8)
+
+      dup_presence_co      ::=   static 50% / irregular (8) 50%
+
+      tsn_entry_ir         ::=   irregular(32)
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 21]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+      tsn_entry_co         ::=   static 50% / irregular(32) 50%
+
+   ;
+   ; HEARTBEAT chunk
+   ;
+
+      sctp_heartbeat       ::=   value(8,4)               ; type
+                                 chunk_flags_ir
+                                 label(16,data_len)
+                                 uncompressible(data_len,1,8,-32)
+                                 padding(data_len,1,8,32,0)
+                                 next_field(data_len)
+                                 irregular(16)
+
+   ;
+   ; HEARTBEAT ACK chunk
+   ;
+
+      sctp_heartbeat_ack   ::=   value(8,5) ; type
+                                 chunk_flags_ir
+                                 label(16,data_len)
+                                 uncompressible(data_len,1,8,-32)
+                                 padding(data_len,1,8,32,0)
+                                 next_field(data_len)
+                                 irregular(16)
+
+   ;
+   ; ABORT chunk
+   ;
+
+      sctp_abort           ::=   value(8,6) ; type
+                                 abort_flags
+                                 label(16,data_len)
+                                 uncompressible(data_len,1,8,-32)
+                                 padding(data_len,1,8,32,0)
+                                 next_field(data_len)
+                                 irregular(16)
+
+      abort_flags          ::=   value(7,0)
+                                 irregular(1)
+
+   ;
+   ; SHUTDOWN chunk
+   ;
+
+      sctp_shutdown        ::=   value(8,7)                ; type
+                                 chunk_flags_ir
+                                 value(16,8)               ; length
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 22]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+                                 irregular(32)
+
+   ;
+   ; shutdown ack chunk
+   ;
+
+      sctp_shutdown_ack    ::=   value(8,8)                ; type
+                                 chunk_flags_ir
+                                 value(16,4)               ; length
+
+   ;
+   ; ERROR chunk
+   ;
+
+      sctp_error_ir        ::=   value(8,9)                ; type
+                                 chunk_flags_ir
+                                 label(16,data_len)
+                                 cause_list
+
+      cause_list_ir        ::=   list(data_len,1,8,-32,
+                                    [optional(error_cause_ir),
+                                     optional(error_cause_ir),
+                                     optional(error_cause_ir),
+                                     optional(error_cause_ir)])
+                                 cause_list_order_ir
+                                 cause_list_presence_ir
+
+      cause_list_co        ::=   list(data_len,1,8,-32,
+                                    [optional(error_cause_co),
+                                     optional(error_cause_co),
+                                     optional(error_cause_co),
+                                     optional(error_cause_co)])
+                                 cause_order_co
+                                 cause_presence_co
+
+      cause_order_ir       ::=   irregular(8)
+
+      cause_order_co       ::=   static 99% / irregular(8) 1%
+
+      cause_presence_ir    ::=   irregular(4)
+
+      cause_presence_co    ::=   static 50% / irregular(4) 50%
+
+      error_cause_ir       ::=   cause_code_ir
+                                 label(cause_len,16)
+                                 uncompressible(cause_len,1,8,-32)
+                                 padding(cause_len,1,8,32,0)
+                                 next_field(cause_len)
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 23]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+                                 irregular(16)
+
+      error_cause_co       ::=   cause_code_co
+                                 label(cause_len,16)
+                                 uncompressible(cause_len,1,8,-32)
+                                 padding(cause_len,1,8,32,0)
+                                 next_field(cause_len)
+                                 irregular(16)
+
+
+      cause_code_ir        ::=   irregular(16)
+
+      cause_code_co        ::=   irregular_padded(16,4) 99% /
+                                 irregular(16) 1%
+
+
+   ;
+   ; COOKIE ECHO chunk
+   ;
+
+      sctp_cookie_echo     ::=   value(8,10) ; type
+                                 chunk_flags_ir
+                                 label(16,data_len)
+                                 uncompressible(data_len,1,8,-32)
+                                 padding(data_len,1,8,32,0)
+                                 next_field(data_len)
+                                 irregular(16)
+
+   ;
+   ; COOKIE ACK chunk
+   ;
+
+      sctp_cookie_ack      ::=   value(8,11) ; type
+                                 chunk_flags
+                                 value(16,4) ; length
+
+
+   ;
+   ; these are reserved values, but not yet used.
+   ; thus they are currently treated as generic chunk
+   ; headers
+   ;
+
+      sctp_ecne            ::=   sctp_generic
+
+      sctp_cwr             ::=   sctp_generic
+
+   ;
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 24]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+   ; SHUTDOWN COMPLETE chunk
+   ;
+
+      sctp_sd_complete     ::=   value(8,14) ; type
+                                 sd_complete_flags
+                                 value(16,4) ; length
+
+      sd_complete_flags    ::=   value(7,0)
+                                 irregular(1)
+
+   ;
+   ; Generic handler for any Type/Length/Value SCTP chunk
+   ; header...
+   ;
+
+      sctp_generic         ::=   irregular(8) ; type
+                                 chunk_flags_ir
+                                 label(16,data_len)
+                                 uncompressible(data_len,1,8,-32)
+                                 padding(data_len,1,8,32,0)
+                                 next_field(data_len)
+                                 irregular(16)
+
+
+
+6. Security Considerations
+
+   This draft describes a profile for the compression and decompression
+   of SCTP/IPv4 headers.
+
+   See [1] for the security issues raised by robust header compression.
+
+   See [2] for the security issues raised by the use of the Formal
+   Notation.
+
+7. Acknowledgements
+
+   The authors would like to acknowledge the many people who have helped
+   with issues relating to SCTP, ROHC and the formal notation.  These
+   stalwarts include Carsten Bormann, Max Riegel, Christian Schmidt,
+   Michael Tuexen, Richard Price, Rob Hancock, and Stephen McCann.
+
+References
+
+   [1]  Bormann, C., Burmeister, C., Degermark, M., Fukushima, H.,
+        Hannu, H., Jonsson, L-E., Hakenberg, R., Koren, T., Le, K., Liu,
+        Z., Martensson, A., Miyazaki, A., Svanbro, K., Wiebke, T.,
+        Yoshimura, T. and H. Zheng, "RObust Header Compression (ROHC):
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 25]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+        Framework and four profiles: RTP, UDP, ESP, and uncompressed",
+        RFC 3095, July 2001.
+
+   [2]  Price, R., Surtees, A. and M. West, "Formal Notation for Robust
+        Header Compression ROHC-FN", draft-ietf-rohc-formal-notation-
+        01.txt (work in progress), March 2003.
+
+   [3]  Schmidt, C. and M. Tuexen, "Requirements for SCTP Compression",
+        draft-ietf-rohc-sctp-reqs-02.txt (work in progress), February
+        2003.
+
+   [4]  Bradner, S., "The Internet Standards Process -- Revision 3", BCP
+        9, RFC 2026, October 1996.
+
+   [5]  Bradner, S., "Key words for use in RFCs to Indicate Requirement
+        Levels", BCP 14, RFC 2119, March 1997.
+
+   [6]  Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
+        H., Taylor, T., Rytina, I., Kalla, M., Zhang, L. and V. Paxson,
+        "Stream Control Transmission Protocol", RFC 2960, October 2000.
+
+
+Authors' Addresses
+
+   Mark A. West
+   Siemens/Roke Manor
+   Roke Manor Research Ltd.
+   Romsey, Hants  SO51 0ZN
+   UK
+
+   Phone: +44 (0)1794 833311
+   EMail: mark.a.west@roke.co.uk
+   URI:   http://www.roke.co.uk
+
+
+   Abigail Surtees
+   Siemens/Roke Manor
+   Roke Manor Research Ltd.
+   Romsey, Hants  SO51 0ZN
+   UK
+
+   Phone: +44 (0)1794 833131
+   EMail: abigail.surtees@roke.co.uk
+   URI:   http://www.roke.co.uk
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 26]
+
+Internet-Draft            SCTP Profile for EPIC                June 2003
+
+
+Full Copyright Statement
+
+   Copyright (C) The Internet Society (2003).  All Rights Reserved.
+
+   This document and translations of it may be copied and furnished to
+   others, and derivative works that comment on or otherwise explain it
+   or assist in its implementation may be prepared, copied, published
+   and distributed, in whole or in part, without restriction of any
+   kind, provided that the above copyright notice and this paragraph are
+   included on all such copies and derivative works.  However, this
+   document itself may not be modified in any way, such as by removing
+   the copyright notice or references to the Internet Society or other
+   Internet organizations, except as needed for the purpose of
+   developing Internet standards in which case the procedures for
+   copyrights defined in the Internet Standards process must be
+   followed, or as required to translate it into languages other than
+   English.
+
+   The limited permissions granted above are perpetual and will not be
+   revoked by the Internet Society or its successors or assigns.
+
+   This document and the information contained herein is provided on an
+   "AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
+   TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
+   BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
+   HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
+   MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+Acknowledgement
+
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
+
+This Internet-Draft will expire on December 26, 2003.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+West & Surtees          Expires December 26, 2003              [Page 27]
+

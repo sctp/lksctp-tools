@@ -1,0 +1,82 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_SENDMSG 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_sendmsg \- Send a message from a SCTP socket. 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_sendmsg(int " sd ", const void * " msg ", size_t " len ,
+.BI "                 struct sockaddr *" to ", socklen_t " tolen , 
+.BI "                 uint32_t " ppid ", uint32_t " flags ,
+.BI "                 uint16_t " stream_no ", uint32_t " timetolive ,
+.BI "                 uint32_t " context );
+.fi
+.SH DESCRIPTION
+.BR sctp_sendmsg
+is a wrapper library function that can be used to send a message from a socket
+while using the advanced features of SCTP. 
+.I sd
+is the socket descriptor from which the message pointed to by
+.I msg
+of length
+.I len
+is sent.
+.I to
+is the destination address of the message and
+.I tolen
+is the length of the destination address.
+.I stream_no
+identifies the stream number that the application wishes to send this message to.
+.I flags
+parameter is composed of a bitwise OR of the following values.
+.TP
+.B MSG_UNORDERED
+This flags requests the un-ordered delivery of the message.
+.TP
+.B MSG_ADDR_OVER
+This flag, in the one-to-many style, requests the SCTP stack to override the
+primary destination address with address specified in
+.I to.
+.TP
+.B MSG_ABORT
+Setting this flag causes the specified association to abort by sending an ABORT
+message to the peer(one-to-many style only). The ABORT chunk will contain an
+error cause 'User Initiated Abort' with cause code 12. The cause specific
+information of this error cause is provided in
+.I msg.
+.TP
+.B MSG_EOF
+Setting this flag invokes the SCTP graceful shutdown procedure on the specific
+association(one-to-many style only).
+.PP
+.I timetolive
+specifies the time duration in milliseconds. The sending side will expire the
+message if the message has not been sent to the peer within this time period.
+A value of 0 indicates that no timeout should occur on this message. 
+.I ppid
+is an opaque unsigned value that is passed to the remote end along with the
+message.
+.I context
+is a 32 bit opaque value that is passed back to the upper layer along with the
+undelivered message if an error occurs on the send of the message.
+.SH "RETURN VALUE"
+On success,
+.BR sctp_sendmsg
+returns the number of bytes sent or -1 if an error occurred.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_recvmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),
+.BR sctp_opt_info (3),

@@ -1,0 +1,531 @@
+
+    Internet Engineering Task Force                            J. R. Iyengar,
+    Category: Internet Draft                                      P. D. Amer
+    Expires: In six months                            University of Delaware
+    
+                                                                  R. Stewart
+                                                               Cisco Systems 
+     
+                                                          I. Arias-Rodriguez
+                                                                       Nokia
+
+                                                               June 30, 2002 
+     
+         Preventing SCTP Congestion Window Overgrowth During Changeover
+                     draft-iyengar-sctp-cacc-01.txt
+
+     
+    Status of this Memo 
+     
+    This document is an internet-draft and is in full conformance with all 
+    provisions of Section 10 of RFC2026. 
+     
+    Internet-Drafts are working documents of the Internet Engineering Task 
+    Force (IETF), its areas, and its working groups.  Note that other groups 
+    may also distribute working documents as Internet-Drafts.  Internet-
+    Drafts are draft documents valid for a maximum of six months and may be 
+    updated, replaced, or obsoleted by other documents at any time.  It is 
+    inappropriate to use Internet- Drafts as reference material or to cite 
+    them other than as "work in progress." 
+    The list of current Internet-Drafts can be accessed at 
+    http://www.ietf.org/ietf/1id-abstracts.txt  
+    The list of Internet-Draft Shadow Directories can be accessed at 
+    http://www.ietf.org/shadow.html. 
+     
+    Abstract 
+    
+    SCTP [RFC2960] supports IP multihoming at the transport layer. SCTP
+    allows an association to span multiple local and peer IP addresses,
+    and allows the application to dynamically change the primary
+    destination during an active association. We present a problem in the
+    current SCTP specification that results in unnecessary retransmissions
+    and "TCP-unfriendly" growth of the sender's congestion window during
+    certain changeover conditions. We present the problem and propose an
+    algorithm called the Split Fast Retransmit Changeover Aware Congestion
+    Control algorithm (SFR-CACC) as a solution. We recommend the addition
+    of SFR-CACC to the SCTP specification [RFC2960].
+     
+    Table of Contents 
+     
+    1 Introduction ................................................ 2
+    2 Congestion Window Overgrowth: Problem Description ........... 2
+    3 A Solution to the Problem: The SFR-CACC Algorithm ........... 4
+    4 Conclusion .................................................. 7
+    5 Security Considerations ..................................... 7
+    6 Acknowledgments ............................................. 7
+    7 Authors' Addresses .......................................... 7
+
+Iyengar et al.                                                  [Page 1]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+    8 References ..................................................
+     
+     
+    1 Introduction 
+     
+    In an SCTP [RFC2960] association, the sender transmits data to its
+    peer's primary destination address. SCTP provides for
+    application-initiated changeovers so that the sending application can
+    move the outgoing traffic to another path by changing the sender's
+    primary destination address. We uncovered a problem in the
+    current SCTP specification that results in unnecessary retransmissions
+    and "TCP-unfriendly" growth of the sender's congestion window under
+    certain changeover conditions. We present the problem and propose an
+    algorithm called the Split Fast Retransmit Changeover Aware Congestion
+    Control (SFR-CACC) algorithm as a solution. We recommend the addition
+    of the SFR-CACC algorithm to the SCTP specification [RFC2960].
+     
+    1.1 Conventions 
+     
+    The keywords MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD,SHOULD 
+    NOT, RECOMMENDED, NOT RECOMMENDED, MAY, and OPTIONAL, when they appear in 
+    this document, are to be interpreted as described in [RFC2119]. 
+     
+    
+    2 Congestion Window Overgrowth: Problem Description
+
+    We present a specific example which illustrates the congestion window
+    overgrowth problem.
+
+    2.1 Example Description:
+
+    Consider the architecture shown below:
+
+       ______                  _________                 ______
+      |      |	              /         \               |      |
+      |      |A1 <============== Path 1 ============> B1|      |
+      |      |<------------->|           |<------------>|      |
+      | Host |               |  Network  |              | Host |
+      |  A   |               |           |              |  B   |
+      |      |<------------->|           |<------------>|      |
+      |      |A2 <============== Path 2 ============> B2|      |
+      |      |                \_________/               |      |
+       ------                                            ------
+
+                      Fig 1: Example Architecture
+
+     SCTP endpoints A and B have an association between them. Both
+     endpoints are multihomed, A with network interfaces A1 and A2, and B
+     with interfaces B1 and B2. More precisely, A1, A2, B1 and B2 are IP
+     addresses associated with link layer interfaces.  Here we assume only
+     one address per interface, so address and interface are used
+     interchangeably.
+
+     All four addresses are bound to the SCTP association.  For one of
+
+Iyengar et al.                                                  [Page 2]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+     several possible reasons (e.g., path diversity, policy based routing,
+     load balancing), we assume in this example that the data traffic from
+     A to B1 is routed through A1, and from A to B2 is routed through A2.
+
+     Let C1 be the cwnd at A for destination B1, and C2 be the cwnd at A
+     for destination B2. C1 and C2 are denoted in terms of MTUs, not
+     bytes.
+
+     Consider the following sequence of events:
+     
+     1) The sender (host A) initially sends data to the receiver (host B)
+        using primary destination address B1. This setting causes packets
+        to leave through A1. Assume these packets leave the
+        transport/network layers, and get buffered at A's link layer A1,
+        whereupon they get transmitted according to the channel's
+        availability. We refer to these TSNs (that is, packets) the first
+        group of TSNs.
+	
+     2) Assume as the first group of TSNs is being transmitted through A1,
+        that the sender's application changes the primary destination to
+        B2, thereby causing any new data from the sender to be sent to
+        B2. In the example, we assume C2 = 2 at the moment of changeover
+        and new TSNs (second group of TSNs) are now transmitted to the new
+        primary, B2.  This new primary destination causes new TSNs to
+        leave the sender through A2. Concurrently, the packets buffered
+        earlier at A1 are still being transmitted.  Previous packets sent
+        through A1, and the packets sent through A2, can arrive at the
+        receiver B in an interleaved fashion on interfaces B1 and B2,
+        respectively. This reordering is introduced as a result of
+        changeover.
+	
+     3) The receiver starts reporting gaps as soon as it notices
+        reordering. If the receiver communicates four missing reports to
+        the sender before all original transmissions of the first group
+        have been acked, the sender will start retransmitting the unacked
+        TSNs on path 2.
+
+     4) The SACKs for the original transmission of the first group of TSNs
+        reach A on A1. Since the sender cannot distinguish between SACKs
+        generated by transmissions from SACKs generated by
+        retransmissions, the SACKs now received by A on A1 end up acking
+        the retransmissions of the first group of TSNs, incorrectly
+        crediting C2 instead of C1. This behaviour whereby SACKs for
+        original transmissions incorrectly ack retransmissions continues
+        until all original transmissions of the first group are
+        retransmitted to B2. Thus, the SACKs from the original
+        transmissions cause C2 to grow (possibly drastically) from wrong
+        interpretation of the feedback.
+
+
+     2.2 Discussion
+
+     Our preliminary investigation shows that the problem occurs for a
+     range of {end-to-end delay, end-to-end available bandwidth, MTU}
+
+Iyengar et al.                                                  [Page 3]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+     settings. [SCTP_IYENGAR_2002a, SCTP_IYENGAR_2002b] give a more
+     detailed description and analysis of the problem. From the general
+     model developed in [SCTP_IYENGAR_2002b], we have found that whenever
+     a changeover is made to a higher quality path (i.e., lower end-to-end
+     delay, higher end-to-end available bandwidth path), there is a
+     likelihood of TCP-unfriendly cwnd growth and unnecessary
+     retransmissions. We also note that the bigger the quality improvement
+     that the new path provides, the larger the TCP-unfriendly growth and
+     number of false retransmissions will be.
+
+     The congestion window overgrowth (i.e., TCP-unfriendly congestion
+     window growth) problem exists even if buffering of the first group
+     occurs not at the sender's link layer, but in a router along the path
+     (in the example architecture, path 1). In essence, the transport
+     layers at the endpoints can be thought of as the sending and
+     receiving entities, and the buffering could potentially be
+     distributed anywhere along the end-to-end path.
+
+
+    3 Solution to the Problem: The SFR-CACC Algorithm
+    
+    The problem of TCP-unfriendly cwnd growth occurs due to incorrect fast
+    retransmissions. These incorrect retransmissions occur because the
+    congestion control algorithm at the sender is unaware of the
+    occurrence of a changeover, and is hence unable to identify reordering
+    introduced due to changeover. In [SCTP_IYENGAR_2002b], we propose the
+    Changeover Aware Congestion Control algorithms (CACC) - the
+    Conservative CACC algorithm (C-CACC), and the Split Fast Retransmit
+    CACC algorithm (SFR-CACC), which curb the TCP-unfriendly cwnd growth
+    by avoiding these unnecessary fast retransmissions. Of the three
+    algorithms, C-CACC has the disadvantage that in the face of loss, a
+    lot of TSNs could potentially have to wait for an RTO when they could
+    have been fast retransmitted. SFR-CACC alleviates this disadvantage.
+
+    The key idea in SFR-CACC is to maintain state at the sender on a
+    per-destination basis when a changeover happens. On the receipt of a
+    SACK, the sender uses this state to selectively increase the missing
+    report count for TSNs in the retransmission list. In SFR-CACC, we
+    further make the following observation: the reordering observed during
+    changeover happens because TSNs which are supposed to reach the
+    receiver in-sequence end up reaching the receiver in concurrent
+    groups, in-sequence within each group. With this observation, we
+    reason that the Fast Retransmit algorithm can be applied independently
+    within each group. That is, on the receipt of a SACK, if we can
+    estimate the TSN(s) that causes this SACK to be sent from the
+    receiver, we can use the SACK to increment missing report counts
+    within the causative TSN(s)'s group. Our estimate is conservative, if
+    a SACK could have been caused by TSNs in multiple groups, this SACK
+    will be used to increment missing report counts only for TSNs sent to
+    the current primary destination, if any.  In the case where multiple
+    changeovers cycle back to a destination while the CHANGEOVER_ACTIVE is
+    still set, CYCLING_CHANGEOVER is set to indicate a double switch to
+    the destination. The CYCLING_CHANGEOVER flag is used to mark TSNs in
+    only the latest group sent to the current primary destination, thus
+
+Iyengar et al.                                                  [Page 4]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+    preventing incorrect marking of TSNs in any other changeover
+    range. SFR-CACC also enables Fast Retransmit for TSNs which could have
+    timed out on some destination, but were retransmitted on the current
+    primary destination after the latest changeover to the current primary
+    destination.
+
+    3.1 Variables Introduced
+
+    In SFR-CACC, four per-destination variables are introduced:
+
+    1) CHANGEOVER_ACTIVE - a flag which indicates the occurrence of
+       a changeover.
+    2) CYCLING_CHANGEOVER - a flag which indicates whether the
+       change of primary is the first switch to this destination address
+       during an active switch. We refer to the time during which the
+       CHANGEOVER_ACTIVE is 1 as an active switch. This flag is
+       used to determine primary switches cycling through destination
+       address space.
+    3) next_tsn_at_change -  an unsigned integer, which stores the next
+       TSN to be used by the sender, at the moment of changeover.
+    4) cacc_saw_newack - a temporary flag, which is used during the
+       processing of a SACK to estimate the causative TSN(s)'s group.
+
+
+    3.2 The SFR-CACC Algorithm
+
+    Upon the receipt of a request to change the primary destination 
+    address, on the data structure for the new primary destination,
+    the sender MUST do the following:
+
+    1) If CHANGEOVER_ACTIVE is set, then there was a switch to this
+       destination address earlier. The sender MUST set
+       CYCLING_CHANGEOVER to indicate that this switch is a double
+       switch to the same destination address.
+
+    2) The sender MUST set CHANGEOVER_ACTIVE to indicate that a
+       changeover has occurred.
+
+    3) The sender MUST store the next TSN to be sent in
+       next_tsn_at_change.
+
+
+    On receipt of a SACK the sender SHOULD execute the following statements:
+
+    1) If the cumulative ack in the SACK passes next_tsn_at_change on the
+       current primary, the CHANGEOVER_ACTIVE flag SHOULD be
+       cleared. The CYCLING_CHANGEOVER flag SHOULD also be cleared
+       for all destinations.
+
+    2) If the SACK contains gap acks and the flag CHANGEOVER_ACTIVE
+       is set the receiver of the SACK MUST take the following actions:
+
+       A) Initialize the cacc_saw_newack to 0 for all destination
+          addresses.
+
+Iyengar et al.                                                  [Page 5]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+
+       B) For each TSN t being acked that has not been acked in any
+          SACK so far, set cacc_saw_newack to 1 for the destination that
+          the TSN was sent to.
+
+    3) If the missing report count for TSN t is to be incremented
+       according to [RFC2960] and [SCTP_STEWART_2002], and
+       CHANGEOVER_ACTIVE is set, then the sender MUST further
+       execute steps 3.1 and 3.2 to determine if the missing report count
+       for TSN t SHOULD NOT be incremented.
+
+       3.1) If CYCLING_CHANGEOVER is 0, the sender SHOULD execute
+            steps C, D, F.
+
+            C) Let count_of_newacks be the number of destinations for
+               which cacc_saw_newack is set.
+
+            D) If count_of_newacks is greater than or equal to 2, and t
+               was not sent to the current primary then the sender MUST
+               NOT increment missing report count for t.
+
+            F) If count_of_newacks is less than 2, let d be the
+               destination to which t was sent.  If cacc_saw_newack is 0
+               for destination d, then the sender MUST NOT increment
+               missing report count for t.
+
+       3.2) Else if CYCLING_CHANGEOVER is 1, and t is less than
+            next_tsn_at_change of the current primary, then the sender
+            MUST NOT increment missing report count for t.
+
+       3.3) If 3.1 and 3.2 do not dictate that the missing report count
+            for t should not be incremented, then the sender SHOULD
+            increment missing report count for t (according to [RFC2960]
+            and [SCTP_STEWART_2002]).
+
+
+    3.3 Discussion
+
+    The SFR-CACC algorithm maintains state information during a
+    changeover, and uses this information to avoid incorrect fast
+    retransmissions.  Consequently, this algorithm prevents the
+    TCP-unfriendly cwnd growth. This algorithm has the added advantage
+    that no extra bits are added to any packets, and thus the load on the
+    wire and the network is not increased. SFR-CACC is also capable of
+    handling multiple changeovers. One disadvantage of SFR-CACC is that
+    there is added complexity at the sender to maintain and use the added
+    state variables. Some of the TSNs on the old primary may also not be
+    eligible for Fast Retransmit. To quantify the number of TSNs which
+    will be ineligible for Fast Retransmit in the face of loss, let us
+    assume that only one changeover is performed, and that SACKs are not
+    lost. Under these assumptions, potentially only the last four packets
+    sent to the old primary destination will be forced to be retransmitted
+    with an RTO instead of a Fast Retransmit. In other words, under the
+    stated assumptions, if a TSN that is lost has at least four packets
+
+Iyengar et al.                                                  [Page 6]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+    successfully transmitted after it to the same destination, then the
+    TSN will be retransmitted via Fast Retransmit.
+
+
+    4 Conclusion
+    
+    The general consensus at the IETF has been to dissuade the usage of
+    SCTP's multihoming feature for simultaneous data transfer to the
+    multiple destination addresses, largely due to insufficient research
+    in the area. Though there is some amount of simultaneous data transfer
+    in the described scenario, this phenomenon is an effect of changing
+    the primary destination; not necessarily a result of an application
+    intending to simultaneously transfer data over the multiple paths.
+    Among other reasons, this changeover could be initiated by an
+    application searching for a better path to the peer host for a long
+    session, or attempting to perform a smoother failover.
+
+    We recommend the addition of SFR-CACC to SCTP [RFC2960] to alleviate
+    the problem of TCP-unfriendly cwnd growth and unnecessary fast
+    retransmissions during a changeover. We have implemented the SFR-CACC
+    algorithm in the NetBSD/FreeBSD release for the KAME stack
+    [SCTP_WEB_KAME, SCTP_WEB_SCTPHOME]. The implementation uses three
+    additional flags and one TSN marker per-destination, as described in
+    section 3.2. Approximately twenty lines of C code were needed to
+    facilitate SFR-CACC, most of which will be executed only when a
+    changeover is performed in an association.
+
+
+    5 Security Considerations 
+
+    This document discusses a congestion control issue during changeover
+    in SCTP. This does not raise any new security issues with SCTP.
+
+ 
+    6 Acknowledgments 
+     
+    The authors would like to thank Vern Paxson, Mark Allman, Phillip
+    Conrad, Armando Caro and Jerry Heinz for providing comments and input.
+
+     
+    7 Authors' Addresses 
+     
+    Janardhan R. Iyengar
+    Department of Computer & Information Sciences
+    University of Delaware
+    103 Smith Hall
+    Newark, DE 19716, USA
+    email: iyengar@cis.udel.edu
+
+    Paul D. Amer
+    Department of Computer & Information Sciences
+    University of Delaware
+    103 Smith Hall
+    Newark, DE 19716, USA
+
+Iyengar et al.                                                  [Page 7]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+    email: amer@cis.udel.edu
+
+    Randall R. Stewart 
+    24 Burning Bush Trail
+    Crystal Lake, IL 60012, USA 
+    email: rrs@cisco.com 
+
+    Ivan Arias-Rodriguez
+    Nokia Research Center
+    PO Box 407
+    FIN-00045 Nokia Group
+    Finland
+    email: ivan.arias-rodriguez@nokia.com
+
+
+     
+    8 References 
+
+    [RFC2960] R. Stewart, Q. Xie, K. Morneault, C. Sharp, H. Schwarzbauer,
+    T. Taylor, I. Rytina, M. Kalla, L. Zhang, V. Paxson. "Stream Control
+    Transmission Protocol". Proposed Standard (RFC2960), IETF, October
+    2000.
+    
+    [SCTP_STEWART_2002] Randall Stewart, Lyndon Ong, Ivan Arias-Rodriguez,
+    Kacheong Poon, Armando L. Caro, Jr. "SCTP Implementor's Guide". 
+    Internet Draft: draft-ietf-tsvwg-sctpimpguide-05.txt, IETF, May
+    2002. (work in progress)
+
+    [SCTP_IYENGAR_2002a] J. R. Iyengar, Armando L. Caro Jr., Paul D. Amer,
+    Gerard J. Heinz, Randall Stewart. "SCTP Congestion Window Overgrowth
+    During Changeover". Proc. SCI 2002, July 2002, Orlando. (to appear)
+
+    [SCTP_IYENGAR_2002b] J. R. Iyengar, Armando L. Caro Jr., Paul D. Amer,
+    Gerard J. Heinz, Randall Stewart. "Preventing SCTP Congestion Window
+    Overgrowth During Changeover". Technical Report XX-XX, Department of
+    Computer and Information Sciences, University of Delaware.
+
+    [SCTP_WEB_KAME] Webpage of the KAME Project, http://www.kame.org
+
+    [SCTP_WEB_SCTPHOME] The SCTP Homepage, http://www.sctp.org    
+
+ 
+    Full Copyright Statement 
+     
+    Copyright (C) The Internet Society (2001).  All Rights Reserved. 
+     
+    This document and translations of it may be copied and furnished to 
+    others, and derivative works that comment on or otherwise explain it or 
+    assist in its implementation may be prepared, copied, published and 
+    distributed, in whole or in part, without restriction of any kind, 
+    provided that the above copyright notice and this paragraph are included 
+    on all such copies and derivative works.  However, this document itself 
+    may not be modified in any way, such as by removing the copyright notice 
+    or references to the Internet Society or other Internet organizations, 
+
+Iyengar et al.                                                  [Page 8]
+
+draft-ietf-iyengar-sctp-cacc-01.txt                            June 2002
+
+    except as needed for the purpose of developing Internet standards in 
+    which case the procedures for copyrights defined in the Internet 
+    Standards process must be followed, or as required to translate it into 
+    languages other than English. 
+     
+    The limited permissions granted above are perpetual and will not be 
+    revoked by the Internet Society or its successors or assigns. 
+     
+    This document and the information contained herein is provided on an "AS 
+    IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING TASK 
+    FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT 
+    LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT 
+    INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR 
+    FITNESS FOR A PARTICULAR PURPOSE. 
+     
+    Funding for the RFC Editor function is currently provided by the 
+    Internet Society. 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Iyengar et al.                                                  [Page 9]
+
