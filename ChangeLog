@@ -3,6 +3,7 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA           Make init & delayed sack timeouts configurable by user.
 K:NA           Fix incorrect setting of sk_bound_dev_if when binding/sending
                to a ipv6 link local address.
 K:NA           Support IP_FREEBIND socket option and ip_nonlocal_bind sysctl.  

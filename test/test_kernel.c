@@ -1735,6 +1735,13 @@ struct tvec_t_base_s {
 };
 static struct tvec_t_base_s timer_base;
 
+void fastcall init_timer(struct timer_list *timer)
+{
+	timer->entry.next = NULL;
+	timer->base = NULL;
+	timer->magic = TIMER_MAGIC;
+}
+
 int __mod_timer(struct timer_list *timer, unsigned long expires)
 {
 	struct list_head *lh;
@@ -2695,7 +2702,7 @@ change_chunk_sequence(int net)
 	struct sk_buff *nskb[2];
 	int i;
 
-	for(i=1;i<=2;i++) {
+	for(i=0;i<=1;i++) {
 		skb = skb_dequeue(&Internet[net]);
 		if (!skb || !network_up[net]) {
 			return;
@@ -2733,8 +2740,8 @@ change_chunk_sequence(int net)
 	}/*for...*/
 
 	/* Feed the packet to SCTP.  */
-	(void) sctp_rcv(nskb[2]);
 	(void) sctp_rcv(nskb[1]);
+	(void) sctp_rcv(nskb[0]);
 
 } /* change_chunk_sequence() */
 

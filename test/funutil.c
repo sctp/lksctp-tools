@@ -2141,7 +2141,7 @@ struct sctp_chunk *sctp_copy_chunk(struct sctp_chunk *chunk, const int priority)
 	if (retval->subh.v)
 		retval->subh.v += offset;
 	if (retval->chunk_end)
-		((__u8 *) retval->chunk_end) += offset;
+		retval->chunk_end = (__u8 *)retval->chunk_end + offset;
 	if (retval->chunk_hdr)
 		retval->chunk_hdr = (struct sctp_chunkhdr *)((__u8 *)(retval->chunk_hdr) + offset);
 	if (retval->sctp_hdr)
