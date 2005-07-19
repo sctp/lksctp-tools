@@ -981,7 +981,9 @@ start_over:
 		/* The testframe has no locking so the timer may have
 		 * been deleted under us.  Grrr...
 		 */
-		if (tmp->next == LIST_POISON1) 
+		if (!tmp)
+			break;
+		if (!tmp->next || tmp->next == LIST_POISON1) 
 			goto start_over;
 	}
 
@@ -991,8 +993,6 @@ start_over:
 	return 0;
 
 } /* test_run_timeout() */
-
-
 
 
 /**
@@ -2104,55 +2104,6 @@ test_frame_send_failed_check(struct sock *sk, uint16_t etype,
 	}
 
 } /* test_frame_send_failed_check() */
-
-/* Do a deep copy of a chunk.  */
-struct sctp_chunk *sctp_copy_chunk(struct sctp_chunk *chunk, const int priority)
-{
-	struct sctp_chunk *retval;
-	long offset;
-
-	retval = t_new(struct sctp_chunk, priority);
-	if (!retval)
-		goto nodata;
-
-	/* Do the shallow copy.  */
-	*retval = *chunk;
-
-	/* Make sure that the copy does NOT think it is on any lists.  */
-	retval->next = NULL;
-	retval->prev = NULL;
-	retval->list = NULL;
-	INIT_LIST_HEAD(&retval->transmitted_list);
-	INIT_LIST_HEAD(&retval->frag_list);
-
-	/* Now we copy the deep structure.  */
-	retval->skb = skb_copy(chunk->skb, priority);
-	if (!retval->skb) {
-		kfree(retval);
-		goto nodata;
-	}
-
-	/* Move the copy headers to point into the new skb.  */
-	offset = ((__u8 *)retval->skb->head)
-		- ((__u8 *)chunk->skb->head);
-
-	if (retval->param_hdr.v)
-		retval->param_hdr.v += offset;
-	if (retval->subh.v)
-		retval->subh.v += offset;
-	if (retval->chunk_end)
-		retval->chunk_end = (__u8 *)retval->chunk_end + offset;
-	if (retval->chunk_hdr)
-		retval->chunk_hdr = (struct sctp_chunkhdr *)((__u8 *)(retval->chunk_hdr) + offset);
-	if (retval->sctp_hdr)
-		retval->sctp_hdr = (struct sctphdr *)((__u8 *)(retval->sctp_hdr) + offset);
-	SCTP_DBG_OBJCNT_INC(chunk);
-	return retval;
-
-nodata:
-	return NULL;
-}
-
 
 void print_address(const char *label, union sctp_addr *addr)
 {

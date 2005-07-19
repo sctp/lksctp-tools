@@ -67,8 +67,17 @@ struct sctp_af test_specific;
 int empty_aether(void);
 int packet_went_through(struct sctp_chunk **chunk, uint32_t *, int);
 
-#define VERIFY(p, n) ((n) == skb_queue_len(&(p)->chunks))
+static int 
+verify_packet(struct sctp_packet *p, int n) 
+{
+	struct list_head *tmp;
 
+	int i = 0;
+	list_for_each(tmp, &p->chunk_list)
+		i++;
+
+	return (i == n);
+}
 
 int
 main(void)
@@ -191,21 +200,21 @@ main(void)
         payload_type1 = (uint8_t) rand();
 	memset(&sinfo, 0x00, sizeof(sinfo));
 	sinfo.sinfo_ppid = payload_type1;
-        data_chunks[0] = sctp_make_data(asoc, &sinfo, msg1_len, message1);
+        data_chunks[0] = sctp_make_data(asoc, &sinfo, msg1_len, (u8 *)message1);
 	datamsg = sctp_datamsg_new(GFP_KERNEL);
 	data_chunks[0]->msg = datamsg;
 
         msg2_len = strlen(message2) + 1;
         payload_type2 = (uint8_t) rand();
 	sinfo.sinfo_ppid = payload_type2;
-        data_chunks[1] = sctp_make_data(asoc, &sinfo, msg2_len, message2);
+        data_chunks[1] = sctp_make_data(asoc, &sinfo, msg2_len, (u8 *)message2);
 	datamsg = sctp_datamsg_new(GFP_KERNEL);
 	data_chunks[1]->msg = datamsg;
 
         big_len = strlen(big_message) + 1;
         payload_type_big = (uint8_t) rand();
 	sinfo.sinfo_ppid = payload_type_big;
-        big_chunk = sctp_make_data(asoc, &sinfo, msg2_len, message2);
+        big_chunk = sctp_make_data(asoc, &sinfo, msg2_len, (u8 *)message2);
 	datamsg = sctp_datamsg_new(GFP_KERNEL);
 	big_chunk->msg = datamsg;
 
@@ -228,7 +237,7 @@ main(void)
 
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
         /* Verify that it only contains one chunk. */
-        if (!VERIFY(&packet, 1)) { DUMP_CORE; }
+        if (!verify_packet(&packet, 1)) { DUMP_CORE; }
 
         /* Commit the second chunk to the network? */
         transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[1]);
@@ -237,7 +246,7 @@ main(void)
 /*** Check that an appropriate packet was created but not sent. */
 
         /* Verify that it contains both chunks. */
-        if (!VERIFY(&packet, 2)) { DUMP_CORE; }
+        if (!verify_packet(&packet, 2)) { DUMP_CORE; }
         
         /* Transmit the resultant packet, */
         transmitted = sctp_packet_transmit(&packet);
@@ -266,7 +275,7 @@ main(void)
 
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
         /* Verify that it only contains one chunk. */
-        if (!VERIFY(&packet, 1)) { 
+        if (!verify_packet(&packet, 1)) { 
                 DUMP_CORE; 
         }
 
@@ -281,7 +290,7 @@ main(void)
         if (!packet_went_through(&data_chunks[0], &TSNs[0], 1)) {
                 DUMP_CORE;
         }
-        if (!VERIFY(&packet, 1)){
+        if (!verify_packet(&packet, 1)){
                 DUMP_CORE;
         }
 
@@ -298,7 +307,7 @@ main(void)
 		if (!packet.ipfragok) 
 			DUMP_CORE;
 	
-	} else if (!VERIFY(&packet, 0)) { DUMP_CORE; }
+	} else if (!verify_packet(&packet, 0)) { DUMP_CORE; }
 
         /* Check that the chunk sitting in packet went through.  */
         if (!packet_went_through(&data_chunks[1], &TSNs[1], 1)) {

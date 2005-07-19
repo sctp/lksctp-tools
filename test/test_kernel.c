@@ -411,7 +411,7 @@ void do_gettimeofday(struct timeval *retval)
 } /* void get_time(struct timeval *retval) */
 
 /* Create an new skb.  */
-struct sk_buff *alloc_skb(unsigned int size, int ignore)
+struct sk_buff *alloc_skb(unsigned int size, unsigned int ignore)
 {
 	struct sk_buff *skb;
 	int sctp_ip_overhead;
@@ -469,41 +469,6 @@ nodata:
 nohead:
 	return NULL;
 } /* alloc_skb() */
-
-/*
- *      Slab constructor for a skb head.
- */
-static inline void skb_headerinit(void *p, kmem_cache_t *cache,
-                                  unsigned long flags)
-{
-	struct sk_buff *skb = p;
-
-	skb->next = NULL;
-	skb->prev = NULL;
-	skb->list = NULL;
-	skb->sk = NULL;
-	skb->stamp.tv_sec=0;    /* No idea about time */
-	skb->dev = NULL;
-	skb->dst = NULL;
-	memset(skb->cb, 0, sizeof(skb->cb));
-	skb->pkt_type = PACKET_HOST;    /* Default type */
-	skb->ip_summed = 0;
-	skb->priority = 0;
-	skb->security = 0;      /* By default packets are insecure */
-	skb->destructor = NULL;
-
-#ifdef CONFIG_NETFILTER
-	skb->nfmark = skb->nfcache = 0;
-	skb->nfct = NULL;
-#ifdef CONFIG_NETFILTER_DEBUG
-	skb->nf_debug = 0;
-#endif
-#endif
-#ifdef CONFIG_NET_SCHED
-	skb->tc_index = 0;
-#endif
-
-}
 
 static void skb_drop_fraglist(struct sk_buff *skb)
 {
@@ -619,7 +584,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->pkt_type=old->pkt_type;
 	new->stamp=old->stamp;
 	new->destructor = NULL;
-	new->security=old->security;
 #ifdef CONFIG_NETFILTER
 	new->nfmark=old->nfmark;
 	new->nfcache=old->nfcache;
@@ -636,7 +600,7 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 
 /* Copy an skb.  */
 struct sk_buff *
-skb_copy(const struct sk_buff *skb, int priority)
+skb_copy(const struct sk_buff *skb, unsigned int priority)
 {
         struct sk_buff *nskb;
         int datalen;
@@ -686,7 +650,7 @@ skb_copy(const struct sk_buff *skb, int priority)
  *	%GFP_ATOMIC.
  */
 
-struct sk_buff *skb_clone(struct sk_buff *skb, int gfp_mask)
+struct sk_buff *skb_clone(struct sk_buff *skb, unsigned int gfp_mask)
 {
 	struct sk_buff *n;
 
@@ -734,7 +698,7 @@ struct sk_buff *skb_clone(struct sk_buff *skb, int gfp_mask)
 struct sk_buff *skb_copy_expand(const struct sk_buff *skb,
 				int newheadroom,
 				int newtailroom,
-				int gfp_mask)
+				unsigned int gfp_mask)
 {
 	struct sk_buff *n;
 
@@ -771,20 +735,6 @@ skb_under_panic(struct sk_buff *skb, int len, void *here)
 {
         debug_halt();
 } /* skb_over_panic() */
-
-#if 0
-void
-spin_lock(spinlock_t *lock)
-{
-        /* DO NOTHING.  */
-} /* spin_lock() */
-
-void
-spin_unlock(spinlock_t *lock)
-{
-        /* DO NOTHING.  */
-} /* spin_lock() */
-#endif /* 0 */
 
 void
 read_lock_bh(rwlock_t *rw)
@@ -2470,7 +2420,8 @@ sock_release(struct socket *socket)
 	kfree(socket);
 } /* sock_release */
 
-struct sock *sk_alloc(int family, int priority, struct proto *prot, int zero_it)
+struct sock *sk_alloc(int family, unsigned int priority, struct proto *prot,
+			 int zero_it)
 {
 	struct sock *sk;
 
