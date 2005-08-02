@@ -65,7 +65,7 @@ main(int argc, char *argv[])
 	int clnt_sk[MAX_CLIENTS], acpt_sk[MAX_CLIENTS],sk;
 	int lstn_sk;
 	struct sockaddr_in lstn_addr, acpt_addr;
-	int addrlen;
+	socklen_t addrlen;
 	int error, i;
         char *message = "hello, world!\n";
 	char msgbuf[100];

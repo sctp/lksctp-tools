@@ -63,7 +63,8 @@ int TST_CNT = 0;
 int
 main(int argc, char *argv[])
 {
-        int ret,len,msg_count;
+        int ret, msg_count;
+	socklen_t len;
 	int sk,pf_class,lstn_sk,acpt_sk, flag;
         char *message = "hello, world!\n";
 	char *message_rcv;

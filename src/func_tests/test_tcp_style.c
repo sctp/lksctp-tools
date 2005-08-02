@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 	int listen_sk, clt2_sk, accept2_sk;
 	sockaddr_storage_t clt_loop[MAX_CLIENTS];
 	sockaddr_storage_t svr_loop, accept_loop, clt2_loop;
-	int addrlen;
+	socklen_t addrlen;
 	int error, i;
         char *message = "hello, world!\n";
 	char msgbuf[100];

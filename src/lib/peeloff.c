@@ -31,7 +31,7 @@ int
 sctp_peeloff(int fd, sctp_assoc_t associd)
 {
 	sctp_peeloff_arg_t peeloff;
-	int peeloff_size = sizeof(peeloff);
+	socklen_t peeloff_size = sizeof(peeloff);
 	int err;
 
 	peeloff.associd = associd;

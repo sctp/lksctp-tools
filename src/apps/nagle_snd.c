@@ -92,7 +92,7 @@ main(int argc, char *argv[])
 	struct cmsghdr *cmsg;
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
-        u_int8_t *message;
+        char *message;
         int error, bytes_sent;
 	int pf_class, af_family;
         sctp_assoc_t associd;
@@ -278,7 +278,7 @@ main(int argc, char *argv[])
 	sinfo->sinfo_ppid = ppid;
 	sinfo->sinfo_stream = stream;
 	
-	message = (u_int8_t *)test_malloc((size + 1) * sizeof(u_int8_t));
+	message = test_malloc((size + 1) * sizeof(u_int8_t));
 
 	for(i=0; i + 10 < size; i+= 10)
 		strncpy(message+i, "1234567890", 10);

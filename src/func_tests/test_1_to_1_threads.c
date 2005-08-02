@@ -61,7 +61,7 @@ int client_sk;
 int server_sk;
 int acpt_sk;
 struct sockaddr_in  conn_addr;
-u_int8_t *message = "hello, world!\n";
+char *message = "hello, world!\n";
 
 void 
 t_recv (int id) {
@@ -145,7 +145,7 @@ main(void)
 	void *      result;
 	pthread_attr_t attr;
 	struct sockaddr_in lstn_addr;
-	int len = sizeof(struct sockaddr_in);
+	socklen_t len = sizeof(struct sockaddr_in);
 	struct sockaddr_in svr_addr;
 
 	pthread_attr_init(&attr);

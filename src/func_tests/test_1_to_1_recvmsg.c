@@ -64,11 +64,12 @@ int TST_CNT = 0;
 int
 main(int argc, char *argv[])
 {
-        int ret,len;
+        socklen_t len;
+	int ret;
 	int sk,pf_class,lstn_sk,acpt_sk;
 	int flag = 0;
 	struct msghdr inmessage;
-        u_int8_t *message = "hello, world!\n";
+        char *message = "hello, world!\n";
 	struct iovec iov_rcv;
         int count;
 	char * buffer_rcv;

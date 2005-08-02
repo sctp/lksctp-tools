@@ -84,12 +84,12 @@
 /* IEEE Transactions on Communications, Vol.41, No.6, June 1993  */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-static char buffer1[4100];
-static char buffer2[4100];
-static char buffer3[4100];
-static char buffer4[4100];
+static unsigned char buffer1[4100];
+static unsigned char buffer2[4100];
+static unsigned char buffer3[4100];
+static unsigned char buffer4[4100];
 static struct sockaddr_in bindto,got;
-static int len;
+static socklen_t len;
 
 unsigned long  sctp_crc_c[256] = {
 	0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,

@@ -321,7 +321,7 @@ int main(int argc, char *argv[])
 							strlen(ttlmsg) + 1,
 				    SCTP_SEND_FAILED, 0);
 	ssf = (struct sctp_send_failed *)iov.iov_base;
-	if (0 != strncmp(ttlmsg, ssf->ssf_data, strlen(ttlmsg) + 1))
+	if (0 != strncmp(ttlmsg, (char *)ssf->ssf_data, strlen(ttlmsg) + 1))
 		tst_brkm(TBROK, tst_exit, "SEND_FAILED data mismatch");
 
 	tst_resm(TPASS, "Receive SEND_FAILED for message with timeout");
@@ -338,7 +338,8 @@ int main(int argc, char *argv[])
 								  SMALL_MAXSEG,
 					    SCTP_SEND_FAILED, 0);
 		ssf = (struct sctp_send_failed *)iov.iov_base;
-		if (0 != strncmp(&ttlfrag[offset], ssf->ssf_data, SMALL_MAXSEG))
+		if (0 != strncmp(&ttlfrag[offset], (char *)ssf->ssf_data,
+				 SMALL_MAXSEG))
 			tst_brkm(TBROK, tst_exit, "SEND_FAILED data mismatch");
 		offset += SMALL_MAXSEG;
 	} while (!(ssf->ssf_info.sinfo_flags & 0x01)); /* LAST_FRAG */

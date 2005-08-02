@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
 	uint32_t stream;
 	struct sctp_event_subscribe subscribe;
 	char *big_buffer;
-	int offset, msg_flags, msgname_len;
+	int offset, msg_flags;
+	socklen_t msgname_len;
 	size_t buflen;
 	struct sctp_send_failed *ssf;
 	struct sctp_sndrcvinfo sinfo;
@@ -263,7 +264,7 @@ int main(int argc, char *argv[])
 							strlen(ttlmsg) + 1,
 				    SCTP_SEND_FAILED, 0);
 	ssf = (struct sctp_send_failed *)big_buffer;
-	if (0 != strncmp(ttlmsg, ssf->ssf_data, strlen(ttlmsg) + 1))
+	if (0 != strncmp(ttlmsg, (char *)ssf->ssf_data, strlen(ttlmsg) + 1))
 		tst_brkm(TBROK, tst_exit, "SEND_FAILED data mismatch");
 
 	tst_resm(TPASS, "sctp_recvmsg SEND_FAILED for message with ttl");
@@ -284,7 +285,8 @@ int main(int argc, char *argv[])
 							          SMALL_MAXSEG,
 					    SCTP_SEND_FAILED, 0);
 		ssf = (struct sctp_send_failed *)big_buffer;
-		if (0 != strncmp(&ttlfrag[offset], ssf->ssf_data, SMALL_MAXSEG))
+		if (0 != strncmp(&ttlfrag[offset], (char *)ssf->ssf_data,
+				 SMALL_MAXSEG))
 			tst_brkm(TBROK, tst_exit, "SEND_FAILED data mismatch");
 		offset += SMALL_MAXSEG;
 	} while (!(ssf->ssf_info.sinfo_flags & 0x01)); /* LAST FRAG */

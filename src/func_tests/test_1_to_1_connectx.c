@@ -68,7 +68,8 @@ int TST_CNT = 0;
 int
 main(int argc, char *argv[])
 {
-	int error,len,i;
+	int error,i;
+	socklen_t len;
 	int sk,lstn_sk,clnt_sk[SK_MAX],acpt_sk[SK_MAX],pf_class;
 	int sk1,clnt2_sk;
 

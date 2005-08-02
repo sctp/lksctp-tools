@@ -71,10 +71,11 @@ int TST_CNT = 0;
 int
 main(int argc, char *argv[])
 {
-        int len, msg_count;
+        socklen_t len;
+	int msg_count;
 	int sk,sk1,pf_class,lstn_sk,acpt_sk,acpt1_sk, flag;
 	struct msghdr outmessage;
-        u_int8_t *message = "hello, world!\n";
+        char *message = "hello, world!\n";
         struct iovec iov;
 	struct sctp_sndrcvinfo *sinfo;
         int count;

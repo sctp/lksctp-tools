@@ -58,12 +58,13 @@ main(int argc, char *argv[])
 	struct msghdr inmessage, outmessage;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 	char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
-	int error, len;
+	int error;
+	socklen_t len;
 	char *big_buffer;
 	struct sctp_event_subscribe event;
 	struct cmsghdr *cmsg;
 	struct sctp_sndrcvinfo *sinfo;
-	u_int8_t *message = "hello, world!\n";
+	char *message = "hello, world!\n";
 	uint32_t ppid;
 	uint32_t stream;
 

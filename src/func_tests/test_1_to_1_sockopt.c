@@ -80,7 +80,8 @@ int TST_CNT = 0;
 int
 main(void)
 {
-	int error,len;
+	int error;
+	socklen_t len;
 	int sk, sk1, sk2, acpt_sk, pf_class;
 	struct sctp_rtoinfo grtinfo;
 	struct sockaddr_in lstn_addr, conn_addr;

@@ -29,6 +29,7 @@
  * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include "sctp_socket.h"
 
 int (*real_bind)(int  sockfd, const struct sockaddr *my_addr, socklen_t addrlen);

@@ -79,7 +79,7 @@ main(int argc, char *argv[])
 	struct sctp_assoc_change *sac;
 	char *big_buffer;
 	int i;
-        u_int8_t *message = "hello, world!\n";
+        char *message = "hello, world!\n";
 	struct sctp_status status;
 	socklen_t status_len;
 

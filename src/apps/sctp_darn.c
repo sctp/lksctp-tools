@@ -689,7 +689,7 @@ command_listen(char *argv0, int sk)
 		}
 
 		if (socket_type == SOCK_STREAM) {
-			int len = 0;
+			socklen_t len = 0;
 
 			if (!recvsk) {
 				if ((recvsk = accept(sk, NULL, &len)) < 0) {
@@ -1685,7 +1685,7 @@ static void
 sndbuf_func(char *argv0, int sk, int len, int set)
 {
 	int error;
-	int optlen;
+	socklen_t optlen;
 
 	if (set) {
 		error = setsockopt(sk, SOL_SOCKET, SO_SNDBUF,
@@ -1711,7 +1711,7 @@ static void
 rcvbuf_func(char *argv0, int sk, int len, int set)
 {
 	int error;
-	int optlen;
+	socklen_t optlen;
 
 	if (set) {
 		error = setsockopt(sk, SOL_SOCKET, SO_RCVBUF,
@@ -1878,7 +1878,8 @@ primary_func(char *argv0, int sk, char *cp, int set)
 	struct sockaddr_in *in_addr;
 	struct sockaddr_in6 *in6_addr;
 	struct sockaddr *saddr;
-	int prim_len, ret;
+	socklen_t prim_len;
+	int ret;
 	char *p = cp;
 	char addr_buf[INET6_ADDRSTRLEN];
 	const char *ap = NULL;
@@ -1996,7 +1997,7 @@ err:
 static int
 nodelay_func(char *argv0, int sk, int val, int set)
 {
-	int optlen;
+	socklen_t optlen;
 	int error;
 
 	if (set) {
@@ -2023,7 +2024,7 @@ nodelay_func(char *argv0, int sk, int val, int set)
 static int
 maxseg_func(char *argv0, int sk, int val, int set)
 {
-	int optlen;
+	socklen_t optlen;
 	int error;
 
 	if (set) {
@@ -2181,7 +2182,7 @@ test_sk_for_assoc(int sk, sctp_assoc_t assoc_id)
 {
 	int error = 0;
 	struct sctp_status status;
-	int status_len;
+	socklen_t status_len;
 
 	memset(&status, 0, sizeof(status));
 	if (assoc_id)

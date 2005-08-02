@@ -75,9 +75,9 @@ int main(void)
 	struct cmsghdr *cmsg;
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
-        u_int8_t *message = "hello, world!\n";
-        u_int8_t *telephone = "Watson, come here!  I need you!\n";
-        u_int8_t *telephone_resp = "I already brought your coffee...\n";
+        char *message = "hello, world!\n";
+        char *telephone = "Watson, come here!  I need you!\n";
+        char *telephone_resp = "I already brought your coffee...\n";
         int error, bytes_sent;
 	int pf_class;
 	uint32_t ppid;

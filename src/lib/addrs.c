@@ -32,7 +32,7 @@
 int
 sctp_getpaddrs(int sd, sctp_assoc_t id, struct sockaddr **addrs)
 {
-	int len = sizeof(sctp_assoc_t);
+	socklen_t len = sizeof(sctp_assoc_t);
 	int cnt, err;
 	struct sctp_getaddrs getaddrs;
 
@@ -82,7 +82,7 @@ sctp_freepaddrs(struct sockaddr *addrs)
 int
 sctp_getladdrs(int sd, sctp_assoc_t id, struct sockaddr **addrs)
 {
-	int len = sizeof(sctp_assoc_t);
+	socklen_t len = sizeof(sctp_assoc_t);
 	int cnt, err;
 	struct sctp_getaddrs getaddrs;
 

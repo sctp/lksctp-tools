@@ -76,7 +76,7 @@ main(void)
 	struct cmsghdr *cmsg;
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
-        u_int8_t *message = "hello, world!\n";
+        char *message = "hello, world!\n";
         int error;
 	int pf_class, af_family;
 	uint32_t ppid;
@@ -97,7 +97,7 @@ main(void)
 	struct sctp_sndrcvinfo get_accept_assoc_dflt_param; 
 	struct sctp_paddrinfo pinfo;
 	int dflt_pathmaxrxt;
-	int optlen, addrlen;
+	socklen_t optlen, addrlen;
 	struct sctp_status status;
 
         /* Rather than fflush() throughout the code, set stdout to
