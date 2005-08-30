@@ -375,6 +375,9 @@ main(int argc, char *argv[])
 	if ( test_run_network() ) {
 		DUMP_CORE;
 	}
+
+	test_frame_get_message(sk2, messages[4]) ;
+
 	sctp_close(sk2, 0);
 
 	/* Force out SACK.  */

@@ -181,6 +181,7 @@ main(int argc, char *argv[])
 	
 	test_frame_get_event(sk1, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 	test_frame_get_event(peel_sk, SCTP_ASSOC_CHANGE, SCTP_RESTART);
+	test_frame_get_message(peel_sk, peel_msg);
 
 	sctp_close(peel_sk, 0);
 
