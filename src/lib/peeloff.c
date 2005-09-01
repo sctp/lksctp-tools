@@ -11,7 +11,7 @@
  * application to interface with the SCTP in kernel.
  *
  * This implementation is based on the Socket API Extensions for SCTP
- * defined in <draft-ietf-tsvwg-sctpsocket-07.txt.
+ * defined in <draft-ietf-tsvwg-sctpsocket-10.txt.
  *
  * (C) Copyright IBM Corp. 2001, 2003
  * 

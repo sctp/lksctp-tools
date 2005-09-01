@@ -1,5 +1,5 @@
 ifndef LKSCTP_LINUX
-LKSCTP_LINUX=../../lksctp-2.5
+LKSCTP_LINUX=../../lksctp-2.6
 endif
 ROOT=${LKSCTP_LINUX}/net/sctp
 INCLUDE=./linux/include

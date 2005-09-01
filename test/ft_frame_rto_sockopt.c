@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 
 	printf("t->rto: %d,  rtoinfo1.srto_max: %d asoc->rto_max: %d\n", t->rto,  
 	       rtoinfo1.srto_max, asoc->rto_max);
-	if (t->rto != (rtoinfo1.srto_max * HZ / 1000))
+	if (t->rto != msecs_to_jiffies(rtoinfo1.srto_max))
 		DUMP_CORE;
 
 	printf("\n\n\trto_max Test Passed\n\n\n");
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	t = asoc->peer.primary_path;
 
-	if (t->rto != (rtoinfo2.srto_min * HZ / 1000))
+	if (t->rto != msecs_to_jiffies(rtoinfo2.srto_min))
 		DUMP_CORE;
 
 	printf("\n\n\trto_min Test Passed\n\n\n");

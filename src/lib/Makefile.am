@@ -9,4 +9,4 @@ INCLUDES = -I$(top_srcdir)/src/include
 
 lib_LTLIBRARIES = libsctp.la
 libsctp_la_SOURCES = bindx.c connectx.c peeloff.c opt_info.c addrs.c sendmsg.c recvmsg.c
-libsctp_la_LDFLAGS = -version-info 1:2:0
+libsctp_la_LDFLAGS = -version-info 1:3:0

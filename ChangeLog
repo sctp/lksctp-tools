@@ -1,8 +1,12 @@
-Version 2.6.10-1.0.2 of the Developers' Release of the SCTP
+Version 2.6.13-1.0.3 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+lksctp-2.6.13-1.0.3: Thu Sep  1 10:54:22 PDT 2005
+T:NA           Update to 2.6.13
+K:NA           Fix potential NULL pointer dereference while handling an ICMP
+               error.
 K:NA           Make init & delayed sack timeouts configurable by user.
 K:NA           Fix incorrect setting of sk_bound_dev_if when binding/sending
                to a ipv6 link local address.

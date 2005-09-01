@@ -1683,7 +1683,7 @@ out:
 struct tvec_t_base_s {
 	int jnk;
 };
-static struct tvec_t_base_s timer_base;
+struct tvec_t_base_s timer_base;
 
 void fastcall init_timer(struct timer_list *timer)
 {
