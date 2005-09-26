@@ -94,6 +94,7 @@ main(int argc, char *argv[])
 
 	event.sctp_data_io_event = 1;
 	event.sctp_association_event = 1;
+	event.sctp_shutdown_event = 1;
 	len = sizeof(struct sctp_event_subscribe);
 	test_setsockopt(svr_sk, SCTP_EVENTS, &event, len);
 	test_setsockopt(clt_sk, SCTP_EVENTS, &event, len);
@@ -173,8 +174,16 @@ main(int argc, char *argv[])
 
 	tst_resm(TPASS, "Data message on server socket - SUCCESS");
 
-	close(svr_sk);
 	close(clt_sk);
+	error = test_recvmsg(acpt_sk, &inmessage, MSG_WAITALL);
+	test_check_msg_notification(&inmessage,
+                                    error,
+                                    sizeof(struct sctp_shutdown_event),
+                                    SCTP_SHUTDOWN_EVENT,
+                                    0);
+
+	tst_resm(TPASS, "SHUTDOWN notification on accepted socket - SUCCESS");
+	close(svr_sk);
 	close(acpt_sk);
 
 	return 0;
