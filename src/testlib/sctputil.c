@@ -248,7 +248,7 @@ test_check_buf_data(void *buf, int datalen, int msg_flags,
 			 "length:%d, expected length:%d", datalen,
 			 expected_datalen);
 
-	if (msg_flags != expected_msg_flags)
+	if ((msg_flags & ~0x80000000) != expected_msg_flags)
 		tst_brkm(TBROK, tst_exit, "Unexpected msg_flags:0x%x "
 			 "expecting:0x%x", msg_flags, expected_msg_flags);
 
