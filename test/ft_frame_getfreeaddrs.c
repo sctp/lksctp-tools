@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 #endif
 	struct sctp_association *asoc1, *asoc2;
 	int num, optlen;
-	struct sctp_getaddrs param;
+	struct sctp_getaddrs_old param;
 	int pf_class;
 	int addr_len;
 
@@ -122,18 +122,18 @@ int main(int argc, char *argv[])
 	/* TEST #1: SCTP_GET_LOCAL_ADDRS_NUM	SCTP_GET_LOCAL_ADDRS */
 	num = 0;
 	optlen = sizeof(int);
-	error = sctp_getsockopt(sk1, IPPROTO_SCTP, SCTP_GET_LOCAL_ADDRS_NUM,
+	error = sctp_getsockopt(sk1, IPPROTO_SCTP, SCTP_GET_LOCAL_ADDRS_NUM_OLD,
 				(void *)&num, &optlen);
 	if (error != 2)
 		DUMP_CORE;
 
-	optlen = sizeof(struct sctp_getaddrs);
+	optlen = sizeof(struct sctp_getaddrs_old);
 	param.addr_num = 2;
 	param.assoc_id = 0;
 	param.addrs = (struct sockaddr *)malloc(2 * 
 						sizeof(struct sockaddr_in6));
 	memset(param.addrs, 0, 2 * sizeof(struct sockaddr_in6));
-	error = sctp_getsockopt(sk1, IPPROTO_SCTP, SCTP_GET_LOCAL_ADDRS,
+	error = sctp_getsockopt(sk1, IPPROTO_SCTP, SCTP_GET_LOCAL_ADDRS_OLD,
 				(void *)&param, &optlen);
 	if (error)
 		DUMP_CORE;
@@ -197,16 +197,16 @@ int main(int argc, char *argv[])
         /* TEST #2: SCTP_GET_PEER_ADDRS_NUM	SCTP_GET_PEER_ADDRS */
 	num = (int)sctp_assoc2id(asoc2);
 	optlen = sizeof(int);
-	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_GET_PEER_ADDRS_NUM,
+	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_GET_PEER_ADDRS_NUM_OLD,
 				(void *)&num, &optlen);
 	if (error != 2)
 		DUMP_CORE;
 
-	optlen = sizeof(struct sctp_getaddrs);
+	optlen = sizeof(struct sctp_getaddrs_old);
 	param.addr_num = 2;
 	param.assoc_id = sctp_assoc2id(asoc2);
 	memset(param.addrs, 0, 2 * sizeof(struct sockaddr_in6));
-	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_GET_PEER_ADDRS,
+	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_GET_PEER_ADDRS_OLD,
 				(void *)&param, &optlen);
 	if (error)
 		DUMP_CORE;
