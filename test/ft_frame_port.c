@@ -413,7 +413,7 @@ is_a_sctp_local_addr(union sctp_addr *addr)
         case AF_INET:
                 for (dev = dev_base; dev; dev = dev->next) {
                         
-			if ( (in_dev = __in_dev_get(dev)) ) {
+			if ( (in_dev = __in_dev_get_rcu(dev)) ) {
                                 
                                 for (ifa = in_dev->ifa_list;
                                      ifa;
@@ -458,7 +458,7 @@ total_sctp_local_addr(void)
 
 
 	for (dev = dev_base; dev; dev = dev->next) {
-		in_dev = __in_dev_get(dev);
+		in_dev = __in_dev_get_rcu(dev);
 		for (ifa = in_dev->ifa_list; ifa; ifa = ifa->ifa_next) {
 			if (!(LOOPBACK(ifa->ifa_local))) {
 				total++;

@@ -1750,7 +1750,7 @@ test_get_source_from_route(uint32_t daddr)
 
 
 	for (dev = dev_base; dev; dev = dev->next) {
-		if ((in_dev = __in_dev_get(dev)) == NULL) {
+		if ((in_dev = __in_dev_get_rcu(dev)) == NULL) {
 			continue;
 		}
 

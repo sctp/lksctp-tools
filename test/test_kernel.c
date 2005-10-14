@@ -40,8 +40,6 @@
  * Any bugs reported given to us we will try to fix... any fixes shared will
  * be incorperated into the next SCTP release.
  */
-#define ARCH_HAS_PREFETCH
-extern void prefetch(const void *x);
 
 #include <linux/ip.h>
 #include <linux/skbuff.h>
@@ -286,13 +284,13 @@ struct inet6_dev lo_ip6_ptr = {
 
 /* These are net_device definitions for the test frame. */
 struct net_device eth2_dev =
-	{"eth2", 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, 4};
+	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, NULL, 4};
 struct net_device eth1_dev =
-	{"eth1", 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, 3};
+	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, NULL, 3};
 struct net_device eth0_dev =
-	{"eth0", 0, 0, 0, 0, 0, 0, 0, &eth1_dev, NULL, NULL, 2};
+	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, &eth1_dev, NULL, 0, NULL, 2};
 struct net_device loopback_dev =
-	{"lo", 0, 0, 0, 0, 0, 0, 0, &eth0_dev, NULL, NULL, 1};
+	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, &eth0_dev, NULL, 0, NULL, 1};
 struct net_device *dev_base = &loopback_dev;
 rwlock_t inetdev_lock = RW_LOCK_UNLOCKED;
 rwlock_t dev_base_lock = RW_LOCK_UNLOCKED;
@@ -411,7 +409,7 @@ void do_gettimeofday(struct timeval *retval)
 } /* void get_time(struct timeval *retval) */
 
 /* Create an new skb.  */
-struct sk_buff *alloc_skb(unsigned int size, unsigned int ignore)
+struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask, int fclone)
 {
 	struct sk_buff *skb;
 	int sctp_ip_overhead;
@@ -483,7 +481,7 @@ static void skb_drop_fraglist(struct sk_buff *skb)
 	} while (list);
 }
 
-static void skb_release_data(struct sk_buff *skb)
+void skb_release_data(struct sk_buff *skb)
 {
 	if (!skb->cloned ||
 	    atomic_dec_and_test(&(skb_shinfo(skb)->dataref))) {
@@ -509,7 +507,6 @@ __kfree_skb(struct sk_buff *skb)
 {
         /* The test kernel just plain leaks.  */
         /* TNABTAF */
-	BUG_ON(skb->list != NULL);
 
        /* Continue leaking but at least call the destructor cause I got
 	* stuff to do - JAG
@@ -548,7 +545,6 @@ make_skb(const void *raw, int datalen)
         /* Make sure we are NOT on a list.  */
         nskb->next = NULL;
         nskb->prev = NULL;
-        nskb->list = NULL;
 
         nskb->sk = NULL;
         nskb->h.raw = NULL;
@@ -570,7 +566,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	 */
 	unsigned long offset = new->data - old->data;
 
-	new->list=NULL;
 	new->sk=NULL;
 	new->dev=old->dev;
 	new->priority=old->priority;
@@ -582,7 +577,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	memcpy(new->cb, old->cb, sizeof(old->cb));
 	atomic_set(&new->users, 1);
 	new->pkt_type=old->pkt_type;
-	new->stamp=old->stamp;
 	new->destructor = NULL;
 #ifdef CONFIG_NETFILTER
 	new->nfmark=old->nfmark;
@@ -627,7 +621,6 @@ skb_copy(const struct sk_buff *skb, unsigned int priority)
         /* Make sure we are NOT on a list.  */
         nskb->next = NULL;
         nskb->prev = NULL;
-        nskb->list = NULL;
 
         nskb->sk = NULL;
         nskb->h.raw = NULL;
@@ -665,7 +658,6 @@ struct sk_buff *skb_clone(struct sk_buff *skb, unsigned int gfp_mask)
 
 	n->cloned = 1;
 	n->next = n->prev = NULL;
-	n->list = NULL;
 	n->sk = NULL;
 	atomic_set(&n->users, 1);
 	n->destructor = NULL;
@@ -1341,9 +1333,6 @@ simulate_network_once(int net)
 	/* Mark the "device" we received on.  */
 	nskb->dev = devices[net];
 
-	/* Remember when... */
-	do_gettimeofday(&nskb->stamp);
-
 	/* Do we need to blow this away?  */
 	if (do_slaughter(nskb)) {
 		return;  /* drop packet */
@@ -1878,11 +1867,6 @@ inet_register_protosw(struct inet_protosw *p)
 
 void
 inet_unregister_protosw(struct inet_protosw *p)
-{
-}
-
-void
-prefetch(const void *x)
 {
 }
 
@@ -2679,9 +2663,6 @@ change_chunk_sequence(int net)
 		/* Mark the "device" we received on.  */
 		nskb[i]->dev = devices[net];
 
-		/* Remember when... */
-		do_gettimeofday(&nskb[i]->stamp);
-
 		/* Do we need to blow this away?  */
 		if (do_slaughter(nskb[i])) {
 			return;  /* drop packet */
@@ -2995,18 +2976,13 @@ void skb_queue_purge(struct sk_buff_head *list)
 		kfree_skb(skb);
 }
 
-void skb_unlink(struct sk_buff *skb)
+void skb_unlink(struct sk_buff *skb, struct sk_buff_head *list)
 {
-	struct sk_buff_head *list = skb->list;
+	unsigned long flags;
 
-	if (list) {
-		unsigned long flags;
-
-		spin_lock_irqsave(&list->lock, flags);
-		if (skb->list == list)
-			__skb_unlink(skb, skb->list);
-		spin_unlock_irqrestore(&list->lock, flags);
-	}
+	spin_lock_irqsave(&list->lock, flags);
+	__skb_unlink(skb, list);
+	spin_unlock_irqrestore(&list->lock, flags);
 }
 
 int sock_create_kern(int family, int type, int protocol, struct socket **res)
@@ -3181,3 +3157,13 @@ struct net_device *dev_get_by_index(int ifindex)
 
 	return dev; 
 }
+
+void __net_timestamp(struct sk_buff *skb)
+{
+	struct timeval tv;
+
+	do_gettimeofday(&tv);
+	skb_set_timestamp(skb, &tv);
+}
+
+cpumask_t cpu_possible_map = CPU_MASK_ALL;
