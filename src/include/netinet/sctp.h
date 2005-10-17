@@ -54,6 +54,9 @@ typedef __s32 sctp_assoc_t;
 #define HAVE_KERNEL_SCTP
 #define HAVE_SCTP_MULTIBUF
 #define HAVE_SCTP_NOCONNECT
+#define HAVE_SCTP_PRSCTP
+#define HAVE_SCTP_ADDIP
+#define HAVE_SCTP_CANSET_PRIMARY
 
 /* The following symbols come from the Sockets API Extensions for
  * SCTP <draft-ietf-tsvwg-sctpsocket-07.txt>.
