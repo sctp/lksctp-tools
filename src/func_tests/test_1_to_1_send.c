@@ -58,7 +58,7 @@
 #include <sctputil.h>
 
 char *TCID = __FILE__;
-int TST_TOTAL = 8;
+int TST_TOTAL = 9;
 int TST_CNT = 0;
 
 int
@@ -215,6 +215,11 @@ main(int argc, char *argv[])
 	test_recv(acpt_sk, message_rcv, 5, flag);
 	
 	tst_resm(TPASS, "send() partial data from a buffer - SUCCESS");
+
+	/* TEST9: sctp_send with no sinfo */
+	test_sctp_send(sk, message, strlen(message) + 1 , NULL, flag);
+	test_recv(acpt_sk, message_rcv, strlen(message) + 1, flag);
+	tst_resm(TPASS, "sctp_send() with no sinfo - SUCCESS");
 
 	close(sk1);
 	close(lstn_sk);

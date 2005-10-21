@@ -654,6 +654,12 @@ int sctp_sendmsg(int s, const void *msg, size_t len, struct sockaddr *to,
 		 socklen_t tolen, uint32_t ppid, uint32_t flags,
 		 uint16_t stream_no, uint32_t timetolive, uint32_t context);
 
+/* This library function assist the user with sending a message without
+ * dealing directly with the CMSG header.
+ */
+int sctp_send(int s, const void *msg, size_t len,
+              const struct sctp_sndrcvinfo *sinfo, int flags);
+
 /* This library function assists the user with the advanced features
  * of SCTP.  This is a new SCTP API described in the section 8.8 of the
  * Sockets API Extensions for SCTP. This is implemented using the

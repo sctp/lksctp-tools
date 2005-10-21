@@ -56,7 +56,7 @@
 #include <sctputil.h>
 
 char *TCID = __FILE__;
-int TST_TOTAL = 9;
+int TST_TOTAL = 10;
 int TST_CNT = 0;
 
 #define SMALL_RCVBUF 800
@@ -84,6 +84,8 @@ int main(int argc, char *argv[])
 	size_t buflen;
 	struct sctp_send_failed *ssf;
 	struct sctp_sndrcvinfo sinfo;
+	struct sctp_sndrcvinfo snd_sinfo;
+	sctp_assoc_t associd1, associd2;
 
 	/* Rather than fflush() throughout the code, set stdout to
 	 * be unbuffered.
@@ -166,6 +168,7 @@ int main(int argc, char *argv[])
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags); 
+	associd2 = ((struct sctp_assoc_change *)big_buffer)->sac_assoc_id;
 	test_check_buf_notification(big_buffer, error, msg_flags,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
@@ -176,6 +179,7 @@ int main(int argc, char *argv[])
 	error = test_sctp_recvmsg(sk1, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags); 
+	associd1 = ((struct sctp_assoc_change *)big_buffer)->sac_assoc_id;
 	test_check_buf_notification(big_buffer, error, msg_flags,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
@@ -293,6 +297,25 @@ int main(int argc, char *argv[])
 
 	tst_resm(TPASS, "sctp_recvmsg SEND_FAILED for fragmented message with "
 		 "ttl");
+
+	snd_sinfo.sinfo_ppid = rand();
+	snd_sinfo.sinfo_flags = 0; 
+	snd_sinfo.sinfo_stream = 2; 
+	snd_sinfo.sinfo_timetolive = 0; 
+	snd_sinfo.sinfo_assoc_id = associd1; 
+	test_sctp_send(sk1, message, strlen(message) + 1, &snd_sinfo,
+		       MSG_NOSIGNAL);
+
+	buflen = REALLY_BIG;
+	msgname_len = sizeof(msgname);
+	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
+				  (struct sockaddr *)&msgname, &msgname_len,
+				  &sinfo, &msg_flags); 
+	test_check_buf_data(big_buffer, error, msg_flags, &sinfo,
+			    strlen(message) + 1, MSG_EOR, snd_sinfo.sinfo_stream,
+			    snd_sinfo.sinfo_ppid); 
+
+	tst_resm(TPASS, "sctp_send");
 
 	/* Shut down the link.  */
 	close(sk1);

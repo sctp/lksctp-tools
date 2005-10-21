@@ -281,6 +281,17 @@ static inline int test_sctp_sendmsg(int s, const void *msg, size_t len,
 	return error;			
 }
 
+static inline int test_sctp_send(int s, const void *msg, size_t len,
+				 const struct sctp_sndrcvinfo *sinfo, 
+				 int flags)
+{
+	int error = sctp_send(s, msg, len, sinfo, flags);
+	if (len != error)
+		tst_brkm(TBROK, tst_exit, "sctp_send: error:%d errno:%d",
+			 error, errno);
+	return error;			
+}
+
 static inline int test_sctp_recvmsg(int sk, void *msg, size_t len,
 				    struct sockaddr *from, socklen_t *fromlen,
 				    struct sctp_sndrcvinfo *sinfo,
