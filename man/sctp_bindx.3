@@ -1,11 +1,11 @@
-.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004.
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2004, 2005.
 .\"
 .\" Permission is granted to distribute possibly modified copies
 .\" of this manual provided the header is included verbatim,
 .\" and in case of nontrivial modification author and date
 .\" of the modification is added to the header.
 .\"
-.TH SCTP_BINDX 3 2004-01-30 "Linux 2.6" "Linux Programmer's Manual"
+.TH SCTP_BINDX 3 2005-10-25 "Linux 2.6" "Linux Programmer's Manual"
 .SH NAME
 sctp_bindx \- Add or remove bind addresses on a socket.
 .SH SYNOPSIS
@@ -83,8 +83,10 @@ The address is protected, and the user is not the super-user.
 .SH "SEE ALSO"
 .BR sctp (7)
 .BR sctp_sendmsg (3),
+.BR sctp_send (3),
 .BR sctp_recvmsg (3),
 .BR sctp_peeloff (3),
 .BR sctp_getpaddrs (3),
 .BR sctp_getladdrs (3),
 .BR sctp_opt_info (3),
+.BR sctp_connectx (3)

@@ -2,6 +2,15 @@ Version 2.6.13-1.0.3 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
+T:NA           Add sctp_send() API support, testcases and manpage.
+T:NA           Add preprocessor constants for PR-SCTP, ADDIP & CANSET_PRIMARY
+K,T:NA         Fix SCTP socket options to work with 32-bit apps on 64-bit
+               kernels.
+K,T:NA         Fix sctp_get{pl}addrs() API to work with 32-bit apps on 64-bit
+               kernels.
+T:NA           Ignore MSG_CMSG_COMPAT flag leaked to 32-bit userspace with
+               64-bit kernels <= 2.6.13.
+K,T:Bug 1122994Fix SCTP_SHUTDOWN notifications for 1-1 style sockets.
 
 lksctp-2.6.13-1.0.3: Thu Sep  1 10:54:22 PDT 2005
 T:NA           Update to 2.6.13
