@@ -1,0 +1,48 @@
+.\" (C) Copyright Sridhar Samudrala IBM Corp. 2005.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_SEND 3 2005-10-25 "Linux 2.6" "Linux Programmer's Manual"
+.SH NAME
+sctp_send \- Send a message from a SCTP socket. 
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_send(int " sd ", const void * " msg ", size_t " len ,
+.BI "                 const struct sctp_sndrcvinfo *" sinfo ",
+.BI "                 uint32_t " flags );
+.fi
+.SH DESCRIPTION
+.BR sctp_send
+is a wrapper library function that can be used to send a message from a socket
+without the use of the CMSG header structures.
+.I sd
+is the socket descriptor from which the message pointed to by
+.I msg
+of length
+.I len
+is sent.
+.I sinfo
+is a pointer to a sctp_sndrcvinfo structure.  
+.I flags
+parameter is composed of a bitwise OR of the flags that can be be passed as
+the 3rd argument of a standard sendmsg() call.
+.SH "RETURN VALUE"
+On success,
+.BR sctp_sendmsg
+returns the number of bytes sent or -1 if an error occurred.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_recvmsg (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),
+.BR sctp_opt_info (3),
+.BR sctp_sendmsg (3)
