@@ -4,7 +4,7 @@
 # Author          : Francois-Xavier Kowalski
 # Created On      : Sat Jan 10 14:53:53 2004
 # Last Modified By: Sridhar Samudrala 
-# Last Modified On: Thu Sep  1 10:54:22 PDT 2005
+# Last Modified On: Fri Oct 28 10:56:04 PDT 2005
 # 
 #   (c) Copyright Hewlett-Packard Company 2004
 #   (C) Copyright IBM Corp. 2004
@@ -25,7 +25,7 @@
 #   Free Software Foundation, Inc., 675 Mass Ave, Cambridge,
 #   MA 02139, USA.
 
-%define kernel_version 2.6.13
+%define kernel_version 2.6.14
 %define kernel_extraflags
 %define lksctp_version @VERSION@
 
@@ -129,6 +129,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Fri Oct 28 2005 Sridhar Samudrala <sri@us.ibm.com> 1.0.4-1
+- 1.0.4 Release
+ 
 * Thu Sep 1 2005 Sridhar Samudrala <sri@us.ibm.com> 1.0.3-1
 - 1.0.3 Release
  

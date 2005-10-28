@@ -1,7 +1,8 @@
-Version 2.6.13-1.0.3 of the Developers' Release of the SCTP
+Version 2.6.14-1.0.4 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
+lksctp-2.6.14-1.0.4: Fri Oct 28 10:56:04 PDT 2005
 T:NA           Add sctp_send() API support, testcases and manpage.
 T:NA           Add preprocessor constants for PR-SCTP, ADDIP & CANSET_PRIMARY
 K,T:NA         Fix SCTP socket options to work with 32-bit apps on 64-bit
