@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.vars
 include $(top_srcdir)/Makefile.rules
 
 internet_drafts = \
-   draft-ietf-tsvwg-sctpimpguide-15.txt \
+   draft-ietf-tsvwg-sctpimpguide-16.txt \
    draft-ietf-tsvwg-sctpsocket-11.txt \
    draft-ietf-tsvwg-addip-sctp-12.txt
 

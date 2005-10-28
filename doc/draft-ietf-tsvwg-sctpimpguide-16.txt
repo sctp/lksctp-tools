@@ -4,7 +4,7 @@
 
 Network Working Group                                         R. Stewart
 Internet-Draft                                       Cisco Systems, Inc.
-Expires: March 5, 2006                                I. Arias-Rodriguez
+Expires: April 27, 2006                               I. Arias-Rodriguez
                                                    Nokia Research Center
                                                                  K. Poon
                                                   Sun Microsystems, Inc.
@@ -12,12 +12,12 @@ Expires: March 5, 2006                                I. Arias-Rodriguez
                                                   University of Delaware
                                                                M. Tuexen
                                       Muenster Univ. of Applied Sciences
-                                                               Sept 2005
+                                                        October 24, 2005
 
 
   Stream Control Transmission Protocol (SCTP) Specification Errata and
                                  Issues
-                  draft-ietf-tsvwg-sctpimpguide-15.txt
+                  draft-ietf-tsvwg-sctpimpguide-16.txt
 
 Status of this Memo
 
@@ -42,7 +42,7 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on March 5, 2006.
+   This Internet-Draft will expire on April 27, 2006.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Abstract
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 1]
+Stewart, et al.          Expires April 27, 2006                 [Page 1]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    This document is a compilation of issues found during six
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 2]
+Stewart, et al.          Expires April 27, 2006                 [Page 2]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
      2.32. Unrecognized Parameters . . . . . . . . . . . . . . . . .  65
@@ -119,30 +119,30 @@ Internet-Draft                 SCTP Errata                     Sept 2005
      2.34. Tie Tags  . . . . . . . . . . . . . . . . . . . . . . . .  68
      2.35. Port number verification in the COOKIE-ECHO . . . . . . .  70
      2.36. Path Initialization . . . . . . . . . . . . . . . . . . .  71
-     2.37. ICMP handling procedures  . . . . . . . . . . . . . . . .  73
-     2.38. Checksum  . . . . . . . . . . . . . . . . . . . . . . . .  75
-     2.39. Retransmission Policy . . . . . . . . . . . . . . . . . .  82
-     2.40. Port Number 0 . . . . . . . . . . . . . . . . . . . . . .  84
-     2.41. T Bit . . . . . . . . . . . . . . . . . . . . . . . . . .  85
-     2.42. Unknown Parameter Handling  . . . . . . . . . . . . . . .  89
-     2.43. Cookie Echo Chunk . . . . . . . . . . . . . . . . . . . .  91
-     2.44. Partial Chunks  . . . . . . . . . . . . . . . . . . . . .  92
-     2.45. Non-unicast addresses . . . . . . . . . . . . . . . . . .  93
-     2.46. Processing of ABORT chunks  . . . . . . . . . . . . . . .  94
-     2.47. Sending of ABORT chunks . . . . . . . . . . . . . . . . .  95
-     2.48. Handling of Supported Address Types parameter . . . . . .  96
-     2.49. Handling of unexpected parameters . . . . . . . . . . . .  97
-     2.50. Payload Protocol Identifier . . . . . . . . . . . . . . .  99
-     2.51. Karns Algorithm . . . . . . . . . . . . . . . . . . . . . 100
-     2.52. Fast Retransmit algorithm . . . . . . . . . . . . . . . . 101
-   3.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . 103
-   4.  IANA considerations . . . . . . . . . . . . . . . . . . . . . 104
-   5.  Security considerations . . . . . . . . . . . . . . . . . . . 105
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . . 106
-     6.1.  Normative references  . . . . . . . . . . . . . . . . . . 106
-     6.2.  Informational References  . . . . . . . . . . . . . . . . 106
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 107
-   Intellectual Property and Copyright Statements  . . . . . . . . . 109
+     2.37. ICMP handling procedures  . . . . . . . . . . . . . . . .  74
+     2.38. Checksum  . . . . . . . . . . . . . . . . . . . . . . . .  77
+     2.39. Retransmission Policy . . . . . . . . . . . . . . . . . .  84
+     2.40. Port Number 0 . . . . . . . . . . . . . . . . . . . . . .  86
+     2.41. T Bit . . . . . . . . . . . . . . . . . . . . . . . . . .  87
+     2.42. Unknown Parameter Handling  . . . . . . . . . . . . . . .  91
+     2.43. Cookie Echo Chunk . . . . . . . . . . . . . . . . . . . .  93
+     2.44. Partial Chunks  . . . . . . . . . . . . . . . . . . . . .  94
+     2.45. Non-unicast addresses . . . . . . . . . . . . . . . . . .  95
+     2.46. Processing of ABORT chunks  . . . . . . . . . . . . . . .  96
+     2.47. Sending of ABORT chunks . . . . . . . . . . . . . . . . .  97
+     2.48. Handling of Supported Address Types parameter . . . . . .  98
+     2.49. Handling of unexpected parameters . . . . . . . . . . . .  99
+     2.50. Payload Protocol Identifier . . . . . . . . . . . . . . . 101
+     2.51. Karns Algorithm . . . . . . . . . . . . . . . . . . . . . 102
+     2.52. Fast Retransmit algorithm . . . . . . . . . . . . . . . . 103
+   3.  Acknowledgments . . . . . . . . . . . . . . . . . . . . . . . 105
+   4.  IANA considerations . . . . . . . . . . . . . . . . . . . . . 106
+   5.  Security considerations . . . . . . . . . . . . . . . . . . . 107
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . . 108
+     6.1.  Normative references  . . . . . . . . . . . . . . . . . . 108
+     6.2.  Informational References  . . . . . . . . . . . . . . . . 108
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . . 109
+   Intellectual Property and Copyright Statements  . . . . . . . . . 111
 
 
 
@@ -165,27 +165,27 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 3]
+Stewart, et al.          Expires April 27, 2006                 [Page 3]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 1.  Introduction
 
    This document contains a compilation of all defects found up until
    the publishing of this document for the Stream Control Transmission
-   Protocol (SCTP) RFC2960 [6].  These defects may be of an editorial or
+   Protocol (SCTP) RFC2960 [7].  These defects may be of an editorial or
    technical nature.  This document may be thought of as a companion
    document to be used in the implementation of SCTP to clarify errors
    in the original SCTP document.
 
    This document provides a history of the changes that will be
-   compliled into RFC2960's [6] BIS document.  Each error will be
+   compliled into RFC2960's [7] BIS document.  Each error will be
    detailed within this document in the form of:
 
    o  The problem description,
 
-   o  The text quoted from RFC2960 [6],
+   o  The text quoted from RFC2960 [7],
 
    o  The replacement text that should be placed into the BIS document,
 
@@ -193,7 +193,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
    Note that when reading this document one must use care to assure that
    a field or item is not updated further on within the document.  Each
-   section should be applied in sequence to the original RFC2960 [6]
+   section should be applied in sequence to the original RFC2960 [7]
    since this document is a historical record of the sequential changes
    that have been found necessary at various inter-op events and through
    discussion on the list.
@@ -203,7 +203,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    The keywords MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD,
    SHOULD NOT, RECOMMENDED, NOT RECOMMENDED, MAY, and OPTIONAL, when
    they appear in this document, are to be interpreted as described in
-   RFC2119 [2].
+   RFC2119 [3].
 
 
 
@@ -221,9 +221,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 4]
+Stewart, et al.          Expires April 27, 2006                 [Page 4]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.  Corrections to RFC2960
@@ -232,7 +232,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.1.1.  Description of the problem
 
-   A typo was discovered in RFC2960 [6] that incorrectly specifies an
+   A typo was discovered in RFC2960 [7] that incorrectly specifies an
    action to be taken when processing chunks of unknown identity.
 
 2.1.2.  Text changes to the document
@@ -277,9 +277,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 5]
+Stewart, et al.          Expires April 27, 2006                 [Page 5]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.2.2.  Text changes to the document
@@ -333,9 +333,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 6]
+Stewart, et al.          Expires April 27, 2006                 [Page 6]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    Chunk Length: 16 bits (unsigned integer)
@@ -389,9 +389,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 7]
+Stewart, et al.          Expires April 27, 2006                 [Page 7]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       dependent on the Chunk Type.
@@ -445,9 +445,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 8]
+Stewart, et al.          Expires April 27, 2006                 [Page 8]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -501,9 +501,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                 [Page 9]
+Stewart, et al.          Expires April 27, 2006                 [Page 9]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.4.3.  Solution description
@@ -523,7 +523,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    allowed in the MIS value of the INIT.  In particular the value in the
    INIT ACK requested in its OS value was larger than the MIS value
    received in the INIT chunk.  This behavior is illegal yet it was
-   unspecified in RFC2960 [6]
+   unspecified in RFC2960 [7]
 
 2.5.2.  Text changes to the document
 
@@ -557,9 +557,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 10]
+Stewart, et al.          Expires April 27, 2006                [Page 10]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.5.3.  Solution description
@@ -613,9 +613,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 11]
+Stewart, et al.          Expires April 27, 2006                [Page 11]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    Guidelines for the IETF to define new error cause values are
@@ -669,9 +669,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 12]
+Stewart, et al.          Expires April 27, 2006                [Page 12]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -714,7 +714,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    association. If the INIT message indicates that a new address(es)
    have been added to the association, then the entire INIT MUST be
    discarded and NO changes should be made to the existing association.
-   An ABORT MUST be sent in response that MAY include the error
+   An ABORT SHOULD be sent in response that MAY include the error
    'Restart of an association with new addresses'. The error SHOULD list
    the addresses that were added to the restarting association.
 
@@ -725,9 +725,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 13]
+Stewart, et al.          Expires April 27, 2006                [Page 13]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    its INIT to calculate the State Cookie.
@@ -781,9 +781,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 14]
+Stewart, et al.          Expires April 27, 2006                [Page 14]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    list the addresses that were added to the restarting association.
@@ -837,9 +837,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 15]
+Stewart, et al.          Expires April 27, 2006                [Page 15]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.7.2.  Text changes to the document
@@ -893,9 +893,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 16]
+Stewart, et al.          Expires April 27, 2006                [Page 16]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    acknowledgment in the SHUTDOWN chunk.  A SACK chunk can acknowledge
@@ -949,9 +949,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 17]
+Stewart, et al.          Expires April 27, 2006                [Page 17]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -1005,9 +1005,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 18]
+Stewart, et al.          Expires April 27, 2006                [Page 18]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       to constraint of the path MTU of the destination transport address
@@ -1061,9 +1061,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 19]
+Stewart, et al.          Expires April 27, 2006                [Page 19]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       destination address(es) to which the missing DATA chunks were
@@ -1109,7 +1109,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    The effect of the above wording changes are as follows:
 
    o  It requires with a MUST the sending of GAP Ack blocks instead of
-      the current RFC2960 [6] SHOULD.
+      the current RFC2960 [7] SHOULD.
 
    o  It allows a TSN being Fast Retransmitted (FR) to be sent only once
       via FR.
@@ -1117,9 +1117,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 20]
+Stewart, et al.          Expires April 27, 2006                [Page 20]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    o  It ends the delay in awaiting for the flight size to drop when a
@@ -1130,7 +1130,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
    o  It introduces a Fast Recovery period to avoid multiple congestion
       window reductions when there are multiple losses in a single RTT
-      (as shown by Caro et al. [3]).
+      (as shown by Caro et al. [4]).
 
    These changes will effectively allow SCTP to follow a similar model
    as TCP+SACK in the handling of Fast Retransmit.
@@ -1173,9 +1173,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 21]
+Stewart, et al.          Expires April 27, 2006                [Page 21]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.9.2.  Text changes to the document
@@ -1229,9 +1229,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 22]
+Stewart, et al.          Expires April 27, 2006                [Page 22]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    clear that along with ssthresh and cwnd, partial_bytes_acked should
@@ -1285,9 +1285,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 23]
+Stewart, et al.          Expires April 27, 2006                [Page 23]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       peer endpoint is acknowledged (by the reception of a SACK), or a
@@ -1341,9 +1341,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 24]
+Stewart, et al.          Expires April 27, 2006                [Page 24]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       transport address(es). HEARTBEAT sending MAY begin upon
@@ -1397,9 +1397,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 25]
+Stewart, et al.          Expires April 27, 2006                [Page 25]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.10.3.  Solution description
@@ -1453,9 +1453,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 26]
+Stewart, et al.          Expires April 27, 2006                [Page 26]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    [RFC1750]  Eastlake, D. (ed.), "Randomness Recommendations for
@@ -1509,9 +1509,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 27]
+Stewart, et al.          Expires April 27, 2006                [Page 27]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    [RFC2522]  Karn, P. and W. Simpson, "Photuris: Session-Key Management
@@ -1525,7 +1525,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 2.11.3.  Solution description
 
    The above text adding a new subsection to the Security Considerations
-   section of RFC2960 [6] makes clear that, to make easier the
+   section of RFC2960 [7] makes clear that, to make easier the
    interaction with firewalls, an INIT chunk must not be bundled in any
    case with any other chunk, being this rule enforced by the packet
    receiver, that will silently discard the packets that do not follow
@@ -1565,9 +1565,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 28]
+Stewart, et al.          Expires April 27, 2006                [Page 28]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -1621,9 +1621,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 29]
+Stewart, et al.          Expires April 27, 2006                [Page 29]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.12.3.  Solution description
@@ -1677,9 +1677,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 30]
+Stewart, et al.          Expires April 27, 2006                [Page 30]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.13.2.  Text changes to the document
@@ -1733,9 +1733,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 31]
+Stewart, et al.          Expires April 27, 2006                [Page 31]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.14.1.  Description of the problem
@@ -1750,7 +1750,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    Recovery since a full cwnd during Fast Recovery does not qualify the
    cwnd as being fully utilized.  Additionally, multiple loss scenarios
    in a single window may cause the cwnd to grow more rapidly as the
-   number of losses in a window increases [3].
+   number of losses in a window increases [4].
 
 2.14.2.  Text changes to the document
 
@@ -1789,9 +1789,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 32]
+Stewart, et al.          Expires April 27, 2006                [Page 32]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       use the slow start algorithm to increase cwnd (assuming the
@@ -1845,9 +1845,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 33]
+Stewart, et al.          Expires April 27, 2006                [Page 33]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    14. Suggested SCTP Protocol Parameter Values
@@ -1901,9 +1901,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 34]
+Stewart, et al.          Expires April 27, 2006                [Page 34]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    When the receiver's advertised window is 0, the receiver MUST drop
@@ -1957,9 +1957,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 35]
+Stewart, et al.          Expires April 27, 2006                [Page 35]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       If the sender continues to receive new packets from the receiver
@@ -1997,7 +1997,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    prohibits an implementation from offering its users an option to
    disable sends that exceed the SCTP fragmentation point.
 
-   The restriction in RFC2960 [6] section 6.9 was never meant to
+   The restriction in RFC2960 [7] section 6.9 was never meant to
    restrict an implementations API from this behavior.
 
 
@@ -2013,9 +2013,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 36]
+Stewart, et al.          Expires April 27, 2006                [Page 36]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.16.2.  Text changes to the document
@@ -2069,9 +2069,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 37]
+Stewart, et al.          Expires April 27, 2006                [Page 37]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.16.3.  Solution description
@@ -2125,9 +2125,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 38]
+Stewart, et al.          Expires April 27, 2006                [Page 38]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    their handling.
@@ -2181,9 +2181,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 39]
+Stewart, et al.          Expires April 27, 2006                [Page 39]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    section 2.6), or an incoming INIT ACK chunk sent from a source
@@ -2237,9 +2237,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 40]
+Stewart, et al.          Expires April 27, 2006                [Page 40]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.19.2.  Text changes to the document
@@ -2293,9 +2293,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 41]
+Stewart, et al.          Expires April 27, 2006                [Page 41]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.20.  Indefinite postponement
@@ -2349,9 +2349,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 42]
+Stewart, et al.          Expires April 27, 2006                [Page 42]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.20.3.  Solution description
@@ -2405,9 +2405,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 43]
+Stewart, et al.          Expires April 27, 2006                [Page 43]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -2461,9 +2461,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 44]
+Stewart, et al.          Expires April 27, 2006                [Page 44]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -2517,9 +2517,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 45]
+Stewart, et al.          Expires April 27, 2006                [Page 45]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       After checking the Verification Tag, the receiving endpoint MUST
@@ -2573,9 +2573,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 46]
+Stewart, et al.          Expires April 27, 2006                [Page 46]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       Optional attributes:
@@ -2629,9 +2629,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 47]
+Stewart, et al.          Expires April 27, 2006                [Page 47]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       o  association id - local handle to the SCTP association
@@ -2685,9 +2685,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 48]
+Stewart, et al.          Expires April 27, 2006                [Page 48]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.22.2.  Text changes to the document
@@ -2741,9 +2741,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 49]
+Stewart, et al.          Expires April 27, 2006                [Page 49]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.23.  ABORT sending in response to an INIT
@@ -2797,9 +2797,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 50]
+Stewart, et al.          Expires April 27, 2006                [Page 50]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.24.2.  Text changes to the document
@@ -2853,9 +2853,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 51]
+Stewart, et al.          Expires April 27, 2006                [Page 51]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.25.2.  Text changes to the document
@@ -2909,9 +2909,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 52]
+Stewart, et al.          Expires April 27, 2006                [Page 52]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
        1              Invalid Stream Identifier
@@ -2965,9 +2965,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 53]
+Stewart, et al.          Expires April 27, 2006                [Page 53]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       Set to the size of the parameter in bytes, including the Cause
@@ -3014,16 +3014,16 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.27.1.  Description of the problem
 
-   It is not stated clearly in RFC2960 [6] how unrecognized parameters
+   It is not stated clearly in RFC2960 [7] how unrecognized parameters
    should be reported.  Unrecognized parameters in an INIT chunk could
    be reported in the INIT-ACK chunk or in a separate ERROR chunk which
    can get lost.  Unrecognized parameters in an INIT-ACK chunk have to
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 54]
+Stewart, et al.          Expires April 27, 2006                [Page 54]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    be reported in an ERROR-chunk.  This can be bundled with the COOKIE-
@@ -3077,9 +3077,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 55]
+Stewart, et al.          Expires April 27, 2006                [Page 55]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -3117,7 +3117,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.28.1.  Description of the problem
 
-   It is not stated clearly in RFC2960 [6] how a SCTP endpoint which
+   It is not stated clearly in RFC2960 [7] how a SCTP endpoint which
    supports either IPv4 addresses or IPv6 addresses should respond if
    IPv4 and IPv6 addresses are presented by the peer in the INIT or
    INIT-ACK chunk.
@@ -3133,9 +3133,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 56]
+Stewart, et al.          Expires April 27, 2006                [Page 56]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.28.2.  Text changes to the document
@@ -3178,7 +3178,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.29.1.  Description of the problem
 
-   The description of the behavior in RFC2960 [6] when a COOKIE ECHO
+   The description of the behavior in RFC2960 [7] when a COOKIE ECHO
    chunk and a TCB exists could be misunderstood.  When a COOKIE ECHO is
    received, a TCB exist and the local and peer's tag match it is stated
    that the endpoint should enter the ESTABLISHED state if it has not
@@ -3189,9 +3189,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 57]
+Stewart, et al.          Expires April 27, 2006                [Page 57]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    has no TCB and in state COOKIE-WAIT it has a TCB but knows nothing
@@ -3245,9 +3245,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 58]
+Stewart, et al.          Expires April 27, 2006                [Page 58]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -3301,9 +3301,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 59]
+Stewart, et al.          Expires April 27, 2006                [Page 59]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       slow start by:
@@ -3342,7 +3342,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 2.31.1.  Description of the problem
 
    In Section 2.24 of this document it is clarified that the SSN are
-   initialized with 0.  Two figures in RFC2960 [6] illustrate that they
+   initialized with 0.  Two figures in RFC2960 [7] illustrate that they
    start with 1.
 
 2.31.2.  Text changes to the document
@@ -3357,9 +3357,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 60]
+Stewart, et al.          Expires April 27, 2006                [Page 60]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
     (build TCB)
@@ -3413,9 +3413,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 61]
+Stewart, et al.          Expires April 27, 2006                [Page 61]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
     INIT [I-Tag=Tag_A
@@ -3469,9 +3469,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 62]
+Stewart, et al.          Expires April 27, 2006                [Page 62]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    {app sets up a association with Z}
@@ -3525,9 +3525,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 63]
+Stewart, et al.          Expires April 27, 2006                [Page 63]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    {A crashes and restarts}
@@ -3581,9 +3581,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 64]
+Stewart, et al.          Expires April 27, 2006                [Page 64]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.32.  Unrecognized Parameters
@@ -3637,9 +3637,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 65]
+Stewart, et al.          Expires April 27, 2006                [Page 65]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
             unrecognized parameters copied from the INIT chunk complete
@@ -3674,7 +3674,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.33.1.  Description of the problem
 
-   It is not stated clearly in RFC2960 [6] how unrecognized parameters
+   It is not stated clearly in RFC2960 [7] how unrecognized parameters
    should be handled.  The problem came up when an INIT contains an
    unrecognized parameter with highest bits 00.  It was not clear if an
    INIT-ACK should be sent or not.
@@ -3693,9 +3693,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 66]
+Stewart, et al.          Expires April 27, 2006                [Page 66]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    01 - Stop processing this SCTP packet and discard it, do not process
@@ -3749,9 +3749,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 67]
+Stewart, et al.          Expires April 27, 2006                [Page 67]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       INIT-ACK can not bundle the COOKIE-ECHO chunk with the ERROR
@@ -3805,9 +3805,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 68]
+Stewart, et al.          Expires April 27, 2006                [Page 68]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       populate its Tie-Tags with the Tag information of itself and
@@ -3861,9 +3861,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 69]
+Stewart, et al.          Expires April 27, 2006                [Page 69]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.34.3.  Solution description
@@ -3917,9 +3917,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 70]
+Stewart, et al.          Expires April 27, 2006                [Page 70]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -3973,9 +3973,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 71]
+Stewart, et al.          Expires April 27, 2006                [Page 71]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.36.2.  Text changes to the document
@@ -4029,9 +4029,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 72]
+Stewart, et al.          Expires April 27, 2006                [Page 72]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    of the RTO timer the error counter of any path that was
@@ -4041,16 +4041,82 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    is NOT incremented.
 
    The number of HEARTBEATS sent at each RTO SHOULD be limited
-   by the Max.Burst parameter. It is an implementation decision
+   by the HB.Max.Burst parameter. It is an implementation decision
    as to how to distribute HEARTBEATS to the peers addresses
    for path verification.
-
 
    Whenever a path is confirmed an indication MAY be given to
    to the upper layer.
 
-   An endpoint MUST NOT send any DATA chunks to an UNCONFIRMED
-   address.
+   An endpoint MUST NOT send any chunks to an UNCONFIRMED
+   address with the following exceptions:
+
+   - A HEARTBEAT including a nonce MAY be sent to an UNCONFIRMED
+     address.
+
+   - A HEARTBEAT-ACK MAY be sent to an UNCONFIRMED address.
+
+   - A COOKIE-ACK MAY be sent to an UNCONFIRMED address but
+     it MUST be bundled with a HEARTBEAT including a nonce.
+     An implementation that does NOT support bundling MUST
+     NOT send a COOKIE-ACK to an UNCONFIRMED address.
+
+   - A COOKE-ECHO MAY be sent to an UNCONFIRMED address but
+     it MUST be bundled with a HEARTBEAT including a nonce
+     and the packet MUST NOT exceed the path MTU. If the
+     implementation does NOT support bundling or the bundled
+     COOKIE-ECHO plus HEARTBEAT (including nonce) would exceed
+     the path MTU, then the implemenation MUST NOT send
+     a COOKIE-ECHO to an UNCONFIRMED address.
+
+
+   ---------
+   Old text: (Section 14)
+   ---------
+
+   14. Suggested SCTP Protocol Parameter Values
+
+   The following protocol parameters are RECOMMENDED:
+
+   RTO.Initial              - 3  seconds
+   RTO.Min                  - 1  second
+   RTO.Max                 -  60 seconds
+   RTO.Alpha                - 1/8
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 73]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
+   RTO.Beta                 - 1/4
+   Valid.Cookie.Life        - 60  seconds
+   Association.Max.Retrans  - 10 attempts
+   Path.Max.Retrans         - 5  attempts (per destination address)
+   Max.Init.Retransmits     - 8  attempts
+   HB.interval              - 30 seconds
+
+   ---------
+   New text: (Section 14)
+   ---------
+
+   14. Suggested SCTP Protocol Parameter Values
+
+   The following protocol parameters are RECOMMENDED:
+
+   RTO.Initial              - 3  seconds
+   RTO.Min                  - 1  second
+   RTO.Max                  - 60 seconds
+   Max.Burst                - 4
+   RTO.Alpha                - 1/8
+   RTO.Beta                 - 1/4
+   Valid.Cookie.Life        - 60 seconds
+   Association.Max.Retrans  - 10 attempts
+   Path.Max.Retrans         - 5  attempts (per destination address)
+   Max.Init.Retransmits     - 8  attempts
+   HB.Interval              - 30 seconds
+   HB.Max.Burst             - 1
 
 
 2.36.3.  Solution description
@@ -4066,32 +4132,57 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    RFC2960 does not describe how ICMP messages should be processed by an
    SCTP endpoint.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 73]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
-
 2.37.2.  Text changes to the document
 
+
+   --------
+   Old text: None
+   --------
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 74]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
+   ---------
+   New text
+   ---------
+
+   11.5 Protection of non-SCTP capable hosts.
+
+   To provide non-SCTP capable host with the same level of
+   protection against attacks as SCTP capable ones all SCTP
+   stacks MUST implement the ICMP handling described in Appendix C.
+
+   When an SCTP stack receives a packet containing multiple
+   control or DATA chunks and the processing of the packet
+   requires the sending of multiple chunks in response,
+   the sender of the response chunk('s) MUST NOT send
+   more than one packet. If bundling is supported multiple
+   response chunks that fit into a single packet MAY be
+   bundled together into one single response packet. If bundling
+   is not supported then the sender MUST NOT send more
+   than one response chunk and MUST discard all other
+   responses. Note that this rule does NOT apply to a
+   SACK chunk since a SACK chunk is, in itself, a response
+   to DATA and a SACK does not require a response of more DATA.
+
+   An SCTP implementation SHOULD abort the association if
+   it receives a SACK acknowledging a TSN which has not been sent.
+
+   An SCTP implementation that receives an INIT that would
+   require a large packet in response, due to the inclusion
+   of multiple ERROR parameters, MAY (at its discrection)
+   elect to omit some or all of the ERROR parameters
+   to reduce the size of the INIT-ACK. Due to a combination
+   of the size of the COOKIE parameter and the number
+   of addresses a receiver of an INIT may be indicating
+   to a peer, it is always possible that the INIT-ACK will
+   be larger than the original INIT. An SCTP implementation
+   SHOULD attempt to make the INIT-ACK as small as possible
+   to reduce the possibility of byte amplification attacks.
 
    ---------
    Old text: None
@@ -4103,50 +4194,83 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
    Appendix C ICMP Handling
 
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 75]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
    Whenever an ICMP message is received by an SCTP endpoint the
-   following procedures should be followed to assure proper
+   following procedures MUST be followed to assure proper
    utilization of the information being provided by layer 3.
 
-   ICMP1) Ignore all ICMPv4 messages where the type field is
-          not set to "Destination Unreachable".
+   ICMP1) An implementation MAY ignore all ICMPv4 messages
+          where the type field is not set to "Destination
+          Unreachable".
 
-   ICMP2) Ignore all ICMPv6 messages where the type field is
-          not "Destination Unreachable, "Parameter Problem" or
-          "Packet Too Big".
+   ICMP2) An implementation MAY ignore all ICMPv6 messages
+          where the type field is not "Destination Unreachable,
+          "Parameter Problem" or "Packet Too Big".
 
-   ICMP3) Ignore any ICMPv4 messages where the code does not
-          indicate "Protocol Unreachable" or "Fragmentation Needed".
+   ICMP3) An implementation MAY ignore any ICMPv4 messages
+          where the code does not indicate "Protocol Unreachable"
+          or "Fragmentation Needed".
 
-   ICMP4) Ignore all ICMPv6 messages of type "Parameter Problem" if
-          the code is not "Unrecognized next header type encountered".
+   ICMP4) An implementation MAY ignore all ICMPv6 messages
+          of type "Parameter Problem" if the code is not
+          "Unrecognized next header type encountered".
 
-   ICMP5) Use the payload of the ICMP message (V4 or V6) to locate the
-          association which sent the message that ICMP is responding to.
-          If the association cannot be found, ignore the ICMP message.
+   ICMP5) An implementation MUST use the payload of the
+          ICMP message (V4 or V6) to locate the association
+          which sent the message that ICMP is responding to.
+          If the association cannot be found, An implementation SHOULD
+          ignore the ICMP message.
 
-   ICMP6) Validate that the verification tag contained in the ICMP
-          message matches the verification tag of the peer. If the
-          verification tag does NOT match, discard the ICMP message.
+   ICMP6) An implementation MUST validate that the verification tag
+          contained in the ICMP message matches the verification
+          tag of the peer. If the verification tag is not 0 and does
+          NOT match, discard the ICMP message. If it is 0 and the
+          ICMP message contains enough bytes to verify that the chunk
+          type is an INIT chunk and that the initiate tag matches
+          the tag of the peer continue with ICMP7. If the ICMP
+          message is too short or, the chunk type or the
+          initiate tag does not match, silently discard the packet.
 
    ICMP7) If the ICMP message is either a V6 "Packet Too Big" or a V4
-          "Fragmentation Needed" process this information as defined for
-          PATH MTU discovery.
+          "Fragmentation Needed" an implemenation MAY process this
+          information as defined for PATH MTU discovery.
 
    ICMP8) If the ICMP code is a "Unrecognized next header type
-          encountered" or a "Protocol Unreachable" treat this message
-          as an abort with the T bit set.
+          encountered" or a "Protocol Unreachable" an implementation
+          MUST treat this message as an abort with the T bit set
+          if it does not contain an INIT chunk. If it does contain
+          an INIT chunk and the association is in COOKIE-WAIT state,
+          handle the ICMP message like an ABORT.
 
    ICMP9) If the ICMPv6 code is "Destination Unreachable" the
-          implementation MAY mark the destination into the unreachable
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 74]
+Stewart, et al.          Expires April 27, 2006                [Page 76]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
+          implementation MAY mark the destination into the unreachable
           state or alternatively increment the path error counter.
+
+
+
+   Note that these procedures differ with RFC1122 [1] and its
+   requirements for processing of port unreachable messages and the
+   requirements that an implemenation MUST abort associations in
+   response to a "protocol unreachable" message.  Port unreachable
+   messages are not processed since an implementation will send an ABORT
+   not a port unreachable.  The stricter handling of the "protocol
+   unreachable" message is due to security concerns for hosts that do
+   NOT support SCTP.
 
 2.37.3.  Solution description
 
@@ -4157,7 +4281,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.38.1.  Description of the problem
 
-   RFC3309 [7] changes the SCTP checksum due to weaknesses in the
+   RFC3309 [8] changes the SCTP checksum due to weaknesses in the
    original Adler 32 checksum for small messages.  This document, being
    used as a guide for a cut and paste replacement to update RFC2960,
    thus needs to also incorporate the checksum changes.  The idea being
@@ -4182,6 +4306,14 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       and one or more control or DATA chunks), the transmitter shall:
 
       1) Fill in the proper Verification Tag in the SCTP common header
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 77]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
          and initialize the checksum field to 0's.
 
       2) Calculate the Adler-32 checksum of the whole packet, including
@@ -4193,14 +4325,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
       When an SCTP packet is received, the receiver MUST first check the
       Adler-32 checksum:
-
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 75]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
 
       1) Store the received Adler-32 checksum value aside,
 
@@ -4238,6 +4362,14 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       3) Put the resultant value into the checksum field in the common
          header, and leave the rest of the bits unchanged.
 
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 78]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
       When an SCTP packet is received, the receiver MUST first check the
       CRC32c checksum:
 
@@ -4250,13 +4382,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       3) Verify that the calculated CRC32c checksum is the same as the
          received CRC32c checksum.  If not, the receiver MUST treat
          the packet as an invalid SCTP packet.
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 76]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
 
       The default procedure for handling invalid SCTP packets is to
       silently discard them.
@@ -4293,6 +4418,14 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       ++     "n++" increments the variable n.
       %      modulo operator: a % b is the remainder of a divided by b.
        #define BASE 65521 /* largest prime smaller than 65536 */
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 79]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
        /*
          Update a running Adler-32 checksum with the bytes buf[0..len-1]
          and return the updated checksum.  The Adler-32 checksum should
@@ -4306,14 +4439,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
               adler = update_adler32(adler, buffer, length);
             }
             if (adler != original_adler) error();
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 77]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
-
          */
          unsigned long update_adler32(unsigned long adler,
             unsigned char *buf, int len)
@@ -4349,6 +4474,14 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       [ITU32], modified to reflect transport level usage.
       CRC computation uses polynomial division.  A message
       bit-string M is transformed to a polynomial, M(X), and the CRC
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 80]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
       is calculated from M(X) using polynomial arithmetic [PETERSON 72].
 
       When CRCs are used at the link layer, the polynomial is derived
@@ -4362,14 +4495,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       A convention must therefore be established for mapping SCTP
       transport messages to polynomials for purposes of CRC computation.
       The bit-ordering for mapping SCTP messages to polynomials is that
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 78]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
-
       bytes are taken most-significant first; but within each byte, bits
       are taken least-significant first.  The first byte of the message
       provides the eight highest coefficients.  Within each byte,
@@ -4406,6 +4531,13 @@ Internet-Draft                 SCTP Errata                     Sept 2005
          -  the bit sequence is complemented.  The result is the CRC
             polynomial.
 
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 81]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
          -  The CRC polynomial is mapped back into SCTP transport-level
             bytes.  Coefficient of x^31 gives the value of bit 7 of
             SCTP byte 0, the coefficient of x^24 gives the value of
@@ -4418,14 +4550,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
       literature on CRCs often follow an alternative formulation, in
       which the register used to hold the remainder of the
       long-division algorithm is initialized to zero rather than
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 79]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
-
       all-1s, and instead the first 32 bits of the message are
       complemented.  The long-division algorithm used in our
       formulation is specified, such that the the initial
@@ -4463,6 +4587,13 @@ Internet-Draft                 SCTP Errata                     Sept 2005
               Tahoe, Reno, and SACK TCP, Computer Communications Review,
               V. 26 N. 3, July 1996, pp. 5-21.
 
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 82]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
    [RFC1750]  Eastlake, D. (ed.), "Randomness Recommendations for
               Security", RFC 1750, December 1994.
 
@@ -4474,13 +4605,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
    [RFC2196]  Fraser, B., "Site Security Handbook", FYI 8, RFC 2196,
               September 1997.
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 80]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
 
    [RFC2522]  Karn, P. and W. Simpson, "Photuris: Session-Key Management
               Protocol", RFC 2522, March 1999.
@@ -4518,6 +4642,14 @@ Internet-Draft                 SCTP Errata                     Sept 2005
               October 1995.
 
    [RFC1950]  Deutsch P. and J. Gailly, "ZLIB Compressed Data Format
+
+
+
+Stewart, et al.          Expires April 27, 2006                [Page 83]
+
+Internet-Draft                 SCTP Errata                  October 2005
+
+
               Specification version 3.3", RFC 1950, May 1996.
 
    [RFC2104]  Krawczyk, H., Bellare, M. and R. Canetti, "HMAC:  Keyed-
@@ -4530,14 +4662,6 @@ Internet-Draft                 SCTP Errata                     Sept 2005
               Protocol", RFC 2522, March 1999.
 
    [SAVAGE99] Savage, S., Cardwell, N., Wetherall, D., and Anderson, T.,
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 81]
-
-Internet-Draft                 SCTP Errata                     Sept 2005
-
-
               "TCP Congestion Control with a Misbehaving Receiver",  ACM
               Computer Communication Review, 29(5), October 1999.
 
@@ -4553,8 +4677,8 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 2.38.3.  Solution description
 
    This change adds the implementors guide the complete set of changes
-   that when combined with RFC2960 [6] encompasses the changes from
-   RFC3309 [7].
+   that when combined with RFC2960 [7] encompasses the changes from
+   RFC3309 [8].
 
 2.39.  Retransmission Policy
 
@@ -4565,7 +4689,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
    under certain loss conditions with multihomed endpoints.  Instead,
    fast retransmissions should be sent to the same destination, and only
    timeout retransmissions should be sent to an alternate destination
-   [4].
+   [5].
 
 
 
@@ -4577,21 +4701,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires March 5, 2006                [Page 82]
+Stewart, et al.          Expires April 27, 2006                [Page 84]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.39.2.  Text changes to the document
@@ -4645,9 +4757,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 83]
+Stewart, et al.          Expires April 27, 2006                [Page 85]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.40.  Port Number 0
@@ -4701,9 +4813,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 84]
+Stewart, et al.          Expires April 27, 2006                [Page 86]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 2.40.3.  Solution description
@@ -4757,9 +4869,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 85]
+Stewart, et al.          Expires April 27, 2006                [Page 87]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -4813,9 +4925,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 86]
+Stewart, et al.          Expires April 27, 2006                [Page 88]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
          Tag field of the outbound packet with the Verification Tag
@@ -4869,9 +4981,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 87]
+Stewart, et al.          Expires April 27, 2006                [Page 89]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -4925,9 +5037,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 88]
+Stewart, et al.          Expires April 27, 2006                [Page 90]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
          -  When sending a SHUTDOWN COMPLETE, if the receiver of the
@@ -4981,9 +5093,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 89]
+Stewart, et al.          Expires April 27, 2006                [Page 91]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    10 - Skip this parameter and continue processing.
@@ -5037,9 +5149,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 90]
+Stewart, et al.          Expires April 27, 2006                [Page 92]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       response to the INIT-ACK chunk. If the receiver of the INIT-ACK
@@ -5059,7 +5171,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.43.1.  Description of the problem
 
-   The description given in section 3.3.11 of RFC2960 [6] is unclear as
+   The description given in section 3.3.11 of RFC2960 [7] is unclear as
    to how the COOKIE-ECHO is composed.
 
 2.43.2.  Text changes to the document
@@ -5093,9 +5205,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 91]
+Stewart, et al.          Expires April 27, 2006                [Page 93]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5138,7 +5250,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.44.1.  Description of the problem
 
-   Section 6.10 of RFC2960 [6] uses the notion of 'partial chunks'
+   Section 6.10 of RFC2960 [7] uses the notion of 'partial chunks'
    without defining it.
 
 2.44.2.  Text changes to the document
@@ -5149,9 +5261,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 92]
+Stewart, et al.          Expires April 27, 2006                [Page 94]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5175,7 +5287,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.45.1.  Description of the problem
 
-   Section 8.4 of RFC2960 [6] forces the OOTB handling to discard all
+   Section 8.4 of RFC2960 [7] forces the OOTB handling to discard all
    non-unicast addresses.  This MUST, leaves future use of any-cast
    addresses in question.  With the addition of the add-ip feature SCTP
    should be able to easily handle any-cast INIT's that can be followed,
@@ -5205,9 +5317,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 93]
+Stewart, et al.          Expires April 27, 2006                [Page 95]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5254,16 +5366,16 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.46.1.  Description of the problem
 
-   Section 3.3.7 of RFC2960 [6] requires an SCTP endpoint to silently
+   Section 3.3.7 of RFC2960 [7] requires an SCTP endpoint to silently
    discard ABORT chunks received for associations that do not exist.  It
    is not clear what this means in the COOKIE-WAIT state, for example.
    Therefore it was not clear if an ABORT sent in response to an INIT
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 94]
+Stewart, et al.          Expires April 27, 2006                [Page 96]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    should be processed or silently discarded.
@@ -5294,7 +5406,7 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.47.1.  Description of the problem
 
-   Section 5.1 of RFC2960 [6] requires that an ABORT chunk is sent in
+   Section 5.1 of RFC2960 [7] requires that an ABORT chunk is sent in
    response to an INIT chunk when there is no listening end point.  To
    make port scanning harder someone might not want these ABORTs to be
    received by the sender of the INIT chunks.  Currently the only way to
@@ -5317,9 +5429,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 95]
+Stewart, et al.          Expires April 27, 2006                [Page 97]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5373,9 +5485,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 96]
+Stewart, et al.          Expires April 27, 2006                [Page 98]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5422,16 +5534,16 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 2.49.1.  Description of the problem
 
-   RFC2960 [6] clearly describes how unknown parameters in the INIT and
+   RFC2960 [7] clearly describes how unknown parameters in the INIT and
    INIT-ACK chunk should be processed.  But it is not described how
    unexpected parameters should be processed.  A parameter is unexpected
    if it is known and an optional parameter in either the INIT or INIT-
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 97]
+Stewart, et al.          Expires April 27, 2006                [Page 99]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ACK chunk but received in the chunk for which it is not an optional
@@ -5485,9 +5597,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 98]
+Stewart, et al.          Expires April 27, 2006               [Page 100]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
       IMPLEMENTATION NOTE: An implementation MUST be prepared to receive
@@ -5541,9 +5653,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006                [Page 99]
+Stewart, et al.          Expires April 27, 2006               [Page 101]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5597,9 +5709,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 100]
+Stewart, et al.          Expires April 27, 2006               [Page 102]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    enough to assure that an implementation in a multi-homed association
@@ -5653,9 +5765,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 101]
+Stewart, et al.          Expires April 27, 2006               [Page 103]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    ---------
@@ -5709,9 +5821,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 102]
+Stewart, et al.          Expires April 27, 2006               [Page 104]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 3.  Acknowledgments
@@ -5765,17 +5877,17 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 103]
+Stewart, et al.          Expires April 27, 2006               [Page 105]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 4.  IANA considerations
 
-   This document recommends changes for the RFC2960 [6] BIS document.
+   This document recommends changes for the RFC2960 [7] BIS document.
    As such, even though it lists new error cause code, this document in
    itself does NOT define those new codes.  Instead, the BIS document
-   will make the needed changes to RFC2960 [6] and thus it's IANA
+   will make the needed changes to RFC2960 [7] and thus it's IANA
    section will require changes to be made.
 
 
@@ -5821,16 +5933,16 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 104]
+Stewart, et al.          Expires April 27, 2006               [Page 106]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 5.  Security considerations
 
    This document should add no additional security risks to SCTP and in
    fact SHOULD correct some original security flaws within the original
-   document once incorporated into a RFC2960 [6] BIS document .
+   document once incorporated into a RFC2960 [7] BIS document .
 
 
 
@@ -5877,39 +5989,42 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 105]
+Stewart, et al.          Expires April 27, 2006               [Page 107]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 6.  References
 
 6.1.  Normative references
 
-   [1]  Bradner, S., "The Internet Standards Process -- Revision 3",
+   [1]  Braden, R., "Requirements for Internet Hosts - Communication
+        Layers", STD 3, RFC 1122, October 1989.
+
+   [2]  Bradner, S., "The Internet Standards Process -- Revision 3",
         BCP 9, RFC 2026, October 1996.
 
-   [2]  Bradner, S., "Key words for use in RFCs to Indicate Requirement
+   [3]  Bradner, S., "Key words for use in RFCs to Indicate Requirement
         Levels", BCP 14, RFC 2119, March 1997.
 
-   [3]  Caro, A., Shah, K., Iyengar, J., Amer, P., and R. Stewart, "SCTP
+   [4]  Caro, A., Shah, K., Iyengar, J., Amer, P., and R. Stewart, "SCTP
         and TCP Variants: Congestion Control Under Multiple Losses",
          Technical Report TR2003-04, Computer and Information Sciences
         Department, University of Delaware, February 2003,
         <http://www.armandocaro.net/papers>.
 
-   [4]  Caro, A., Amer, P., and R. Stewart, "Retransmission Schemes for
+   [5]  Caro, A., Amer, P., and R. Stewart, "Retransmission Schemes for
         End-to-end Failover with Transport Layer Multihoming",
          GLOBECOM, November 2004., <http://www.armandocaro.net/papers>.
 
-   [5]  Handley, M., Padhye, J., and S. Floyd, "TCP Congestion Window
+   [6]  Handley, M., Padhye, J., and S. Floyd, "TCP Congestion Window
         Validation", RFC 2861, June 2000.
 
-   [6]  Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
+   [7]  Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
         H., Taylor, T., Rytina, I., Kalla, M., Zhang, L., and V. Paxson,
         "Stream Control Transmission Protocol", RFC 2960, October 2000.
 
-   [7]  Stone, J., Stewart, R., and D. Otis, "Stream Control
+   [8]  Stone, J., Stewart, R., and D. Otis, "Stream Control
         Transmission Protocol (SCTP) Checksum Change", RFC 3309,
         September 2002.
 
@@ -5930,12 +6045,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-
-
-
-Stewart, et al.           Expires March 5, 2006               [Page 106]
+Stewart, et al.          Expires April 27, 2006               [Page 108]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 Authors' Addresses
@@ -5989,9 +6101,9 @@ Authors' Addresses
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 107]
+Stewart, et al.          Expires April 27, 2006               [Page 109]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
    Michael Tuexen
@@ -6045,9 +6157,9 @@ Internet-Draft                 SCTP Errata                     Sept 2005
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 108]
+Stewart, et al.          Expires April 27, 2006               [Page 110]
 
-Internet-Draft                 SCTP Errata                     Sept 2005
+Internet-Draft                 SCTP Errata                  October 2005
 
 
 Intellectual Property Statement
@@ -6101,6 +6213,6 @@ Acknowledgment
 
 
 
-Stewart, et al.           Expires March 5, 2006               [Page 109]
+Stewart, et al.          Expires April 27, 2006               [Page 111]
 
 
