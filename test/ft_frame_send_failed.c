@@ -129,11 +129,11 @@ int main(int argc, char *argv[])
 	outcmsg1->cmsg_type = SCTP_SNDRCV;
 	outcmsg1->cmsg_len = CMSG_LEN(sizeof(struct sctp_sndrcvinfo));
 
-	/* Set MSG_ABORT flag in the sndrcvinfo.  */
+	/* Set SCTP_ABORT flag in the sndrcvinfo.  */
 	sinfo1 = (struct sctp_sndrcvinfo *)CMSG_DATA(outcmsg1);
 	memset(sinfo1, 0x00, sizeof(struct sctp_sndrcvinfo));
 	sinfo1->sinfo_context = 100;
-	sinfo1->sinfo_flags |= MSG_ABORT;
+	sinfo1->sinfo_flags |= SCTP_ABORT;
 
 	/* Abort the associations of the socket sk1 in a loop.  */
 	sinfo1->sinfo_assoc_id = sctp_assoc2id(asoc1);

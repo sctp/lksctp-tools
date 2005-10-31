@@ -294,7 +294,7 @@ test_recvmsg(struct sctp_association *asoc)
 
 	sinfo.sinfo_stream = 10;
 	sinfo.sinfo_ppid = 5000;
-	sinfo.sinfo_flags = MSG_UNORDERED;
+	sinfo.sinfo_flags = SCTP_UNORDERED;
 
 
 	chunk = sctp_make_data(asoc, 

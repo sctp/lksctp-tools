@@ -11,8 +11,8 @@
  * TEST5: Invalid iovec length
  * TEST6: Invalid msghdr pointer
  * TEST7: Invalid sinfo flags
- * TEST8: MSG_EOF flag set
- * TEST9: MSG_ABORT flag set
+ * TEST8: SCTP_EOF flag set
+ * TEST9: SCTP_ABORT flag set
  * TEST10: On a closed association
  *
  * TEST11: Sending data from server socket to client socket
@@ -213,23 +213,23 @@ main(int argc, char *argv[])
 
 	tst_resm(TPASS, "sendmsg() with invalid sinfo flags - EINVAL");
 
-	/*sendmsg () TEST8: MSG_EOF flag EINVAL, Expected error*/
-	sinfo->sinfo_flags = MSG_EOF;
+	/*sendmsg () TEST8: SCTP_EOF flag EINVAL, Expected error*/
+	sinfo->sinfo_flags = SCTP_EOF;
 	count = sendmsg(sk, &outmessage, flag);
 	if (count != -1 || errno != EINVAL)
-		tst_brkm(TBROK, tst_exit, "sendmsg with MSG_EOF flag "
+		tst_brkm(TBROK, tst_exit, "sendmsg with SCTP_EOF flag "
 			 "count:%d, errno:%d", count, errno);
 
-	tst_resm(TPASS, "sendmsg() with MSG_EOF flag - EINVAL");
+	tst_resm(TPASS, "sendmsg() with SCTP_EOF flag - EINVAL");
 
-	/*sendmsg () TEST9: MSG_ABORT flag EINVAL, Expected error*/
-	sinfo->sinfo_flags = MSG_ABORT;
+	/*sendmsg () TEST9: SCTP_ABORT flag EINVAL, Expected error*/
+	sinfo->sinfo_flags = SCTP_ABORT;
 	count = sendmsg(sk, &outmessage, flag);
 	if (count != -1 || errno != EINVAL)
-		tst_brkm(TBROK, tst_exit, "sendmsg with MSG_ABORT flag "
+		tst_brkm(TBROK, tst_exit, "sendmsg with SCTP_ABORT flag "
 			 "count:%d, errno:%d", count, errno);
 
-	tst_resm(TPASS, "sendmsg() with MSG_ABORT flag - EINVAL");
+	tst_resm(TPASS, "sendmsg() with SCTP_ABORT flag - EINVAL");
 
 	sinfo->sinfo_flags = 0; 
 	

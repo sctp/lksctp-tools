@@ -245,7 +245,7 @@ int main(int argc, char *argv[])
 
 	sinfo1 = (struct sctp_sndrcvinfo *)CMSG_DATA(outcmsg1);
 	memset(sinfo1, 0x00, sizeof(struct sctp_sndrcvinfo));
-	sinfo1->sinfo_flags |= MSG_ABORT;
+	sinfo1->sinfo_flags |= SCTP_ABORT;
 
 	/* Call sendmsg() to abort the association.  */
 	bytes_sent = sctp_sendmsg(NULL, sk1, &outmsg1, 0);

@@ -144,14 +144,14 @@ main(int argc, char **argv)
 	/* Test sndrcvinfo with valid sinfo_flags. */
 	printk("Testing valid sinfo_flags.\n");
 
-	sndrcvinfo->sinfo_flags = MSG_UNORDERED;
+	sndrcvinfo->sinfo_flags = SCTP_UNORDERED;
 	error = sctp_msghdr_parse(&msg, &cmsgs);
 	if (0 != error) { DUMP_CORE; }	
 		
 	/* Test sndrcvinfo with invalid sinfo_flags. */
 	printk("Testing invalid sinfo_flags.\n");
 
-	sndrcvinfo->sinfo_flags = MSG_ABORT<<1;
+	sndrcvinfo->sinfo_flags = SCTP_ABORT<<1;
 	error = sctp_msghdr_parse(&msg, &cmsgs);
 	if (0 == error) { DUMP_CORE; }	
 

@@ -223,7 +223,7 @@ _test_multistream(struct sctp_association *asoc, struct sctp_ulpq *ulpq)
 
 
 		chunks[i][3] = _test_make_recvchunk(asoc, msgs[i][3], i,
-						    0xdead, MSG_UNORDERED, 0);
+						    0xdead, SCTP_UNORDERED, 0);
 
 		if (NULL == chunks[i][3]) { DUMP_CORE; }
 

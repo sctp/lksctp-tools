@@ -420,27 +420,27 @@ main(int argc, char *argv[])
 	sinfo = (struct sctp_sndrcvinfo *)CMSG_DATA(cmsg);
 	memset(sinfo, 0x00, sizeof(struct sctp_sndrcvinfo));
 
-	/* Verify that MSG_EOF cannot be used to shutdown an association
+	/* Verify that SCTP_EOF cannot be used to shutdown an association
 	 * on a TCP-style socket.
 	 */
-	sinfo->sinfo_flags |= MSG_EOF;
+	sinfo->sinfo_flags |= SCTP_EOF;
 	error = sendmsg(clt2_sk, &outmessage, 0);
 	if ((-1 != error) || (EINVAL != errno))
-		tst_brkm(TBROK, tst_exit, "sendmsg with MSG_EOF flag "
+		tst_brkm(TBROK, tst_exit, "sendmsg with SCTP_EOF flag "
 			 "error:%d, errno:%d", error, errno);
 
-	tst_resm(TPASS, "sendmsg with MSG_EOF flag");
+	tst_resm(TPASS, "sendmsg with SCTP_EOF flag");
 
-	/* Verify that MSG_ABORT cannot be used to abort an association
+	/* Verify that SCTP_ABORT cannot be used to abort an association
 	 * on a TCP-style socket.
 	 */
-	sinfo->sinfo_flags |= MSG_ABORT;
+	sinfo->sinfo_flags |= SCTP_ABORT;
 	error = sendmsg(clt2_sk, &outmessage, 0);
 	if ((-1 != error) || (EINVAL != errno))
-		tst_brkm(TBROK, tst_exit, "sendmsg with MSG_ABORT flag "
+		tst_brkm(TBROK, tst_exit, "sendmsg with SCTP_ABORT flag "
 			 "error:%d, errno:%d", error, errno);
 
-	tst_resm(TPASS, "sendmsg with MSG_ABORT flag");
+	tst_resm(TPASS, "sendmsg with SCTP_ABORT flag");
 
 	/* Verify that a normal message can be sent using sendmsg. */
 	outmessage.msg_iov = &out_iov;

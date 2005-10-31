@@ -117,10 +117,10 @@ main(int argc, char *argv[])
 	outcmsg->cmsg_type = SCTP_SNDRCV;
 	outcmsg->cmsg_len = CMSG_LEN(sizeof(struct sctp_sndrcvinfo));
 
-	/* Set MSG_EOF flag in the sndrcvinfo.  */ 
+	/* Set SCTP_EOF flag in the sndrcvinfo.  */ 
 	sinfo = (struct sctp_sndrcvinfo *)CMSG_DATA(outcmsg);
 	memset(sinfo, 0x00, sizeof(struct sctp_sndrcvinfo));
-	sinfo->sinfo_flags |= MSG_EOF;
+	sinfo->sinfo_flags |= SCTP_EOF;
 
 	/* Shutdown all the associations of the server socket in a loop.  */
 	for (i = 0; i < MAX_CLIENTS; i++) { 

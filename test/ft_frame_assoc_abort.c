@@ -141,15 +141,15 @@ main(int argc, char *argv[])
 	outcmsg2->cmsg_type = SCTP_SNDRCV;
 	outcmsg2->cmsg_len = CMSG_LEN(sizeof(struct sctp_sndrcvinfo));
 
-	/* Set MSG_ABORT flag in the sndrcvinfo.  */
+	/* Set SCTP_ABORT flag in the sndrcvinfo.  */
 	sinfo1 = (struct sctp_sndrcvinfo *)CMSG_DATA(outcmsg1);
 	memset(sinfo1, 0x00, sizeof(struct sctp_sndrcvinfo));
-	sinfo1->sinfo_flags |= MSG_ABORT;
+	sinfo1->sinfo_flags |= SCTP_ABORT;
 
-	/* Set MSG_EOF flag in the sndrcvinfo.  */
+	/* Set SCTP_EOF flag in the sndrcvinfo.  */
 	sinfo2 = (struct sctp_sndrcvinfo *)CMSG_DATA(outcmsg2);
 	memset(sinfo2, 0x00, sizeof(struct sctp_sndrcvinfo));
-	sinfo2->sinfo_flags |= MSG_EOF;
+	sinfo2->sinfo_flags |= SCTP_EOF;
 
 	/* Abort all the associations of the server socket in a loop.  */
 	for (i = 0; i < MAX_CLIENTS/2; i++) {
@@ -278,7 +278,7 @@ main(int argc, char *argv[])
         		DUMP_CORE;
 		}
 
-		/* Set MSG_ABORT flag in the sndrcvinfo.  */
+		/* Set SCTP_ABORT flag in the sndrcvinfo.  */
 		sinfo1->sinfo_assoc_id = sctp_assoc2id(svr_asoc[i]);
 
 		/* Call sendmsg() to abort the server's association */

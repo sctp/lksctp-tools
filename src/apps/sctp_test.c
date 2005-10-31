@@ -766,7 +766,7 @@ int send_r(int sk, int stream, int order, int send_size, int assoc_i)
 	sinfo->sinfo_stream = stream;
 	sinfo->sinfo_flags = 0;
 	if (!order)
-		sinfo->sinfo_flags = MSG_UNORDERED;
+		sinfo->sinfo_flags = SCTP_UNORDERED;
 
 	DEBUG_PRINT(DEBUG_MIN, "\tsendmsg(sk=%d, assoc=%d) %4d bytes.\n",
 		    sk, assoc_i, send_size);

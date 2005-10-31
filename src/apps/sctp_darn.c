@@ -2128,9 +2128,9 @@ shutdown_func(char *argv0, int *skp, int shutdown_type)
 		sinfo = (struct sctp_sndrcvinfo *)CMSG_DATA(cmsg);
 		memset(sinfo, 0x00, sizeof(struct sctp_sndrcvinfo));
 		if (shutdown_type == SHUTDOWN_ABORT)
-			sinfo->sinfo_flags |= MSG_ABORT;
+			sinfo->sinfo_flags |= SCTP_ABORT;
 		else
-			sinfo->sinfo_flags |= MSG_EOF;
+			sinfo->sinfo_flags |= SCTP_EOF;
 
 		sinfo->sinfo_assoc_id = associd;
 	

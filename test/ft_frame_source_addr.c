@@ -331,7 +331,7 @@ main(int argc, char *argv[])
 		}
 
 		test_frame_send_message2(sk2, (struct sockaddr *)&addr3,
-					message, 0, 0, 0, MSG_ADDR_OVER);
+					message, 0, 0, 0, SCTP_ADDR_OVER);
 
 		net = test_get_network_sctp_addr(&transport->ipaddr);
 		if ((skb = test_peek_packet(net)) == NULL)
@@ -459,7 +459,7 @@ main(int argc, char *argv[])
 #endif /* TEST_V6 */
 
 		test_frame_send_message2(sk2, (struct sockaddr *)&addr3,
-					message, 0, 0, 0, MSG_ADDR_OVER);
+					message, 0, 0, 0, SCTP_ADDR_OVER);
 
 		net = test_get_network_sctp_addr(&transport->ipaddr);
 		if ((skb = test_peek_packet(net)) == NULL)

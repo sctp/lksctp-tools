@@ -165,7 +165,7 @@ main(int argc, char *argv[])
 
 	/* Now, send that 1 byte message. */
 	test_frame_send_message2(sk1, (struct sockaddr *)&loop2, small_msg,
-				 (sctp_assoc_t)asoc1, 1, 0, MSG_UNORDERED);
+				 (sctp_assoc_t)asoc1, 1, 0, SCTP_UNORDERED);
 	if (0 != test_run_network()) { DUMP_CORE; }
 
 	/* Make sure we send a SACK back just in case. */

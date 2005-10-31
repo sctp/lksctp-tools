@@ -6,7 +6,7 @@
  * Copyright (c) 2001 Nokia, Inc.
  * Copyright (c) 2001 La Monte H.P. Yarroll
  *
- * This is the Functional Test for testing MSG_ADDR_OVER flag to override the
+ * This is the Functional Test for testing SCTP_ADDR_OVER flag to override the
  * primary address to a peer.  Additionally, a test is added for
  * SCTP_PRIMARY_ADDR get/setsockopt.  
  *
@@ -215,12 +215,12 @@ int main(int argc, char *argv[])
         if (error != 0) { DUMP_CORE; }
 
         /* Build up another msghdr structure for sending with
-	 * MSG_ADDR_OVER flag.
+	 * SCTP_ADDR_OVER flag.
 	 */
         outmsg.msg_name = &svr_eth0;
         outmsg.msg_namelen = sizeof(svr_eth0);
 
-        sinfo->sinfo_flags |= MSG_ADDR_OVER;
+        sinfo->sinfo_flags |= SCTP_ADDR_OVER;
 
 	/* Send the second message.  This will change the primary path.  */
         outmsg.msg_iov->iov_base = telephone;
