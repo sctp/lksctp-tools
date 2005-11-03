@@ -298,11 +298,6 @@ main(void)
 
 	tst_resm(TPASS, "getsockopt() SCTP_STATUS - SUCCESS");
 
-	if (gstatus.sstat_rwnd != rcvbuf_val_get)
-		tst_brkm(TBROK, tst_exit, "Value Mismatch for rwnd obtained "
-			 "from SCTP_STATUS val=%d and SO_RCVBUF val=%d ",
-			 rcvbuf_val_get,gstatus.sstat_rwnd);
-
 	/* Reducing the SO_RCVBUF value using setsockopt() */
 	/*Minimum value is 128 and hence I am using it*/
 	len = sizeof(int);
