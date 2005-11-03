@@ -1678,7 +1678,6 @@ void fastcall init_timer(struct timer_list *timer)
 {
 	timer->entry.next = NULL;
 	timer->base = NULL;
-	timer->magic = TIMER_MAGIC;
 }
 
 int __mod_timer(struct timer_list *timer, unsigned long expires)
@@ -1696,7 +1695,7 @@ int __mod_timer(struct timer_list *timer, unsigned long expires)
 	}
 	list_add_tail(&timer->entry, lh);
 
-	timer->base = &timer_base;
+	timer->base = (struct timer_base_s *)&timer_base;
 
 	return 0;
 
@@ -3167,3 +3166,46 @@ void __net_timestamp(struct sk_buff *skb)
 }
 
 cpumask_t cpu_possible_map = CPU_MASK_ALL;
+
+int find_next_bit(const unsigned long *addr, int size, int offset)
+{
+	const unsigned long *base;
+	const int NBITS = sizeof(*addr) * 8;
+	unsigned long tmp;
+
+	base = addr;
+	if (offset) {
+		int suboffset;
+
+		addr += offset / NBITS;
+
+		suboffset = offset % NBITS;
+		if (suboffset) {
+			tmp = *addr;
+			tmp >>= suboffset;
+			if (tmp)
+				goto finish;
+		}
+
+		addr++;
+	}
+
+	while ((tmp = *addr) == 0)
+		addr++;
+
+	offset = (addr - base) * NBITS;
+
+ finish:
+	/* count the remaining bits without using __ffs() since that takes a 32-bit arg */
+	while (!(tmp & 0xff)) {
+		offset += 8;
+		tmp >>= 8;
+	}
+
+	while (!(tmp & 1)) {
+		offset++;
+		tmp >>= 1;
+	}
+
+	return offset;
+}
