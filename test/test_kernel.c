@@ -1752,7 +1752,7 @@ __read_lock_failed(rwlock_t *rw)
 }
 
 
-int ipv6_addr_type(const struct in6_addr *addr)
+int __ipv6_addr_type(const struct in6_addr *addr)
 {
 	u32 st;
 
@@ -2861,16 +2861,16 @@ void *_mmx_memcpy(void *to, const void *from, size_t size)
 
 
 /* slab.c */
-struct kmem_cache_s {
+struct kmem_cache {
 	int objsize;
 };
 kmem_cache_t *kmem_cache_create(const char *name, size_t size, 
-		size_t offset, unsigned long flags,
+		size_t align, unsigned long flags,
 		void (*ctor)(void *, kmem_cache_t *, unsigned long),
 		void (*dtor)(void *, kmem_cache_t *, unsigned long))
 {
 	kmem_cache_t *cachep;
-	cachep = kmalloc(sizeof(kmem_cache_t), GFP_KERNEL);
+	cachep = kmalloc(sizeof(struct kmem_cache), GFP_KERNEL);
 	if (!cachep)
 		return NULL;
 	cachep->objsize = size;
