@@ -2,6 +2,19 @@ Version 2.6.14-1.0.4 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
+
+K,T:NA         Include ulpevents in socket receive buffer accounting.
+K:NA           Fix ia64 NaT consumption fault with sctp_sideeffect commands.
+K:NA           Remove timeouts[] array from sctp_endpoint.
+K:NA           Fix potential NULL pointer dereference in sctp_v4_get_saddr.
+K:NA           Do not allow unprivileged programs initiating new assocs on
+               privileged ports.
+K:NA           Allow SCTP_MAXSEG to revert to default frag point with a '0'
+               value.    
+K:NA           Fix SCTP_SETADAPTION sockopt to use the correct structure.
+K,T:NA         Rename SCTP specific control message flags to use SCTP_ prefix
+               rather than MSG_ prefix.
+
 lksctp-2.6.14-1.0.4: Fri Oct 28 10:56:04 PDT 2005
 T:NA           Add sctp_send() API support, testcases and manpage.
 T:NA           Add preprocessor constants for PR-SCTP, ADDIP & CANSET_PRIMARY
