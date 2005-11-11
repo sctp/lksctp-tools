@@ -75,6 +75,10 @@ int main(int argc, char *argv[])
 	/* Create the two endpoints which will talk to each other.  */
 	sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
 	sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	/* Set rcvbuf to a large value so that we don't run into drops
+	 * due to out of receive buffer space.
+	 */
+	sk2->sk_rcvbuf = (1<<18);
 
 	sk3 = sctp_socket(PF_INET, SOCK_SEQPACKET);
 

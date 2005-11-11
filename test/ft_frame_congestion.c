@@ -32,6 +32,9 @@ main(int argc, char *argv[])
         /* Create the two endpoints which will talk to each other.  */
         sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
         sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	/* This test assumes that rwnd is initialised to 32768. */
+	sk1->sk_rcvbuf = 65536; 
+	sk2->sk_rcvbuf = 65536; 
 
 	/* Bind this sockets to the test ports.  */
         loop1.sin_family = AF_INET;

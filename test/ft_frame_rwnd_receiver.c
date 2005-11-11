@@ -60,6 +60,8 @@ main(int argc, char *argv[])
         /* Create the two endpoints which will talk to each other.  */
         sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
         sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	sk1->sk_rcvbuf = 65536;
+	sk2->sk_rcvbuf = 65536;
 
         /* Bind these sockets to the test ports.  */
         loop1.sin_family = AF_INET;
@@ -138,7 +140,7 @@ main(int argc, char *argv[])
 	 *      Send fixed-length messages until there is no more room.
 	 *      Send one more... rwnd should not change.
 	 */
-
+	sk2->sk_rcvbuf = 500000;
 	while (msglen <= (rwnd = asoc2->rwnd) ) {
 		
 		/* Send a message.  */

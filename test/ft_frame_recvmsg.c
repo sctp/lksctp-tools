@@ -72,6 +72,7 @@ main(int argc, char *argv[])
 	/* Create the 2 sockets.  */
 	svr_sk = sctp_socket(PF_INET, SOCK_SEQPACKET);
 	clt_sk = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	svr_sk->sk_rcvbuf = 65536;
 
 	/* Bind these sockets to the test ports.  */
 	error = test_bind(svr_sk, (struct sockaddr *)&svr_loop,

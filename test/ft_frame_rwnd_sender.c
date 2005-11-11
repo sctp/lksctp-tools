@@ -337,7 +337,7 @@ main(int argc, char *argv[])
 	 *   Fill our peer's rwnd due to not reading data out.
 	 *   We should be able to probe for an opening in rwnd.
 	 */
-
+	sk2->sk_rcvbuf = 500000;
 	msglen = strlen(messages[3]) + 1;
 	sent = 0;
 	while (asoc1->peer.rwnd >= msglen) {

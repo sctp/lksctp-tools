@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
 	
         /* Verify the initial Congestion Parameters. */
-	test_verify_congestion_parameters(t1, 4380, smallbuf, 0, 0);
+	test_verify_congestion_parameters(t1, 4380, smallbuf/2, 0, 0);
 
 	/* Note: the frametest framework breaks down much beyond this
 	 * without reworking the sock glue.

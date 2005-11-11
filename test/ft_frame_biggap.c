@@ -89,6 +89,10 @@ main(int argc, char *argv[])
         /* Create the two endpoints which will talk to each other.  */
         sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
         sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	/* Set rcvbuf to a large value so that we don't run into drops
+	 * due to out of receive buffer space.
+	 */
+	sk2->sk_rcvbuf = 500000;
 
         /* Bind these sockets to the test ports.  */
         loop1.sin_family = AF_INET;
@@ -182,7 +186,7 @@ main(int argc, char *argv[])
 		}
 #if 0
 		/* I like to watch.  */
-		fprintk(2, "rwnd = %x\n", atomic_read(&asoc2->rwnd));
+		fprintk(2, "rwnd = %x\n", asoc2->rwnd);
 #endif
 				   
 	} /* while we have room in the tsnmap */

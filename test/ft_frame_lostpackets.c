@@ -282,6 +282,10 @@ main(int argc, char *argv[])
 	 * seems to get stranded down on the retransmit queue unless some
 	 * other data were to get transmitted.
 	 */
+	/* Set rcvbuf to a large value so that we don't run into drops
+	 * due to out of receive buffer space.
+	 */
+	sk2->sk_rcvbuf = 500000;
 	msglen = strlen(messages[6]) + 1;
 	for (i=0, sent=0; i <= tran1->pmtu; i += msglen, sent++) {
 		test_kill_next_packet(SCTP_CID_DATA);
