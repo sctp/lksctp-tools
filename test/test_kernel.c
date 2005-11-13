@@ -580,7 +580,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->destructor = NULL;
 #ifdef CONFIG_NETFILTER
 	new->nfmark=old->nfmark;
-	new->nfcache=old->nfcache;
 	new->nfct=old->nfct;
 	nf_conntrack_get(new->nfct);
 #ifdef CONFIG_NETFILTER_DEBUG
