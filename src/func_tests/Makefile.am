@@ -163,5 +163,3 @@ test_getname_v6_CFLAGS = ${V6FLAGS}
 
 test_tcp_style_v6_SOURCES = test_tcp_style.c
 test_tcp_style_v6_CFLAGS = ${V6FLAGS}
-
-test_connectx_v6_CFLAGS = ${V6FLAGS}

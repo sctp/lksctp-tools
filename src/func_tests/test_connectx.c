@@ -51,7 +51,7 @@
 #include <sctputil.h>
 
 char *TCID = __FILE__;
-int TST_TOTAL = 5;
+int TST_TOTAL = 9;
 int TST_CNT = 0;
 
 #define NUMADDR 6

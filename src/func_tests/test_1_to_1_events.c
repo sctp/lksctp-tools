@@ -46,7 +46,7 @@
 #include <string.h>
 
 char *TCID = __FILE__;
-int TST_TOTAL = 3;
+int TST_TOTAL = 4;
 int TST_CNT = 0;
 
 int

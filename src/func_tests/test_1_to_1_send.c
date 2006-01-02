@@ -58,7 +58,7 @@
 #include <sctputil.h>
 
 char *TCID = __FILE__;
-int TST_TOTAL = 9;
+int TST_TOTAL = 8;
 int TST_CNT = 0;
 
 int
