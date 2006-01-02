@@ -39,22 +39,22 @@ identifies the stream number that the application wishes to send this message to
 .I flags
 parameter is composed of a bitwise OR of the following values.
 .TP
-.B MSG_UNORDERED
+.B SCTP_UNORDERED
 This flags requests the un-ordered delivery of the message.
 .TP
-.B MSG_ADDR_OVER
+.B SCTP_ADDR_OVER
 This flag, in the one-to-many style, requests the SCTP stack to override the
 primary destination address with address specified in
 .I to.
 .TP
-.B MSG_ABORT
+.B SCTP_ABORT
 Setting this flag causes the specified association to abort by sending an ABORT
 message to the peer(one-to-many style only). The ABORT chunk will contain an
 error cause 'User Initiated Abort' with cause code 12. The cause specific
 information of this error cause is provided in
 .I msg.
 .TP
-.B MSG_EOF
+.B SCTP_EOF
 Setting this flag invokes the SCTP graceful shutdown procedure on the specific
 association(one-to-many style only).
 .PP

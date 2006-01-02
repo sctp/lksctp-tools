@@ -145,6 +145,12 @@ is 5.
 .B prsctp_enable
 Enable PR-SCTP. This is on by default.
 .TP
+.B rcvbuf_policy
+This controls the socket receive buffer accounting policy. The default value
+is 0 and indicates that all the associations belonging to a socket share the
+same receive buffer space. When set to 1, each association will have its own
+receive buffer space.
+.TP
 .B rto_alpha_exp_divisor
 This is the RTO.Alpha value when expressed in right shifts and is used in
 RTO calculations. The default value is 3.
