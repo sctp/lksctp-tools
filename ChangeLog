@@ -1,12 +1,17 @@
-Version 2.6.14-1.0.4 of the Developers' Release of the SCTP
+Version 2.6.15-1.0.5 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+lksctp-2.6.15-1.0.5: Tue Jan  3 15:49:27 PST 2006
+K:NA           Fix SCTP to not return erroneous POLLOUT events.
+K:NA           Fix getsockname for sctp when an ipv6 socket accepts a
+               connection from an ipv4 socket.
+K:NA           Return socket errors only if the receive queue is empty.
 K,T:NA         Include ulpevents in socket receive buffer accounting.
-K:NA           Fix ia64 NaT consumption fault with sctp_sideeffect commands.
+K:Bug 1350514  Fix ia64 NaT consumption fault with sctp_sideeffect commands.
 K:NA           Remove timeouts[] array from sctp_endpoint.
-K:NA           Fix potential NULL pointer dereference in sctp_v4_get_saddr.
+K:Bug 1350521  Fix potential NULL pointer dereference in sctp_v4_get_saddr.
 K:NA           Do not allow unprivileged programs initiating new assocs on
                privileged ports.
 K:NA           Allow SCTP_MAXSEG to revert to default frag point with a '0'
