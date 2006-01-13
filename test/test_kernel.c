@@ -2726,7 +2726,7 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb, unsigned 
 }
 
 #ifdef CONFIG_SMP
-void *__alloc_percpu(size_t size, size_t align)
+void *__alloc_percpu(size_t size)
 {
 	        return(kmalloc(size, GFP_ATOMIC));
 }
@@ -2737,7 +2737,7 @@ void free_percpu(const void *ptr)
 #endif
 
 struct sock_filter;
-int sk_run_filter(struct sk_buff *skb, struct sock_filter *filter, int flen)
+unsigned int sk_run_filter(struct sk_buff *skb, struct sock_filter *filter, int flen)
 {
 	return 0;
 }
@@ -3207,4 +3207,9 @@ int find_next_bit(const unsigned long *addr, int size, int offset)
 	}
 
 	return offset;
+}
+
+int capable(int cap)
+{
+	return 1;
 }
