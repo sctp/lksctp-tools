@@ -69,8 +69,6 @@ static char *cvs_id __attribute__ ((unused)) = "$Id: ft_frame_hbACK.c,v 1.14 200
 #include <errno.h>
 #include <funtest.h>
 
-extern struct timeval ytime;
-
 int
 main(int argc, char *argv[])
 {
@@ -81,7 +79,6 @@ main(int argc, char *argv[])
         struct msghdr outmsg;
         struct iovec out_iov;
         uint8_t *message = "hello, world!\n";
-	struct timeval hbtime;	/* When did we send the last heartbeat? */
         int error, bytes_sent;
 	struct sctp_transport * t;
 	uint32_t rto;
@@ -142,14 +139,10 @@ main(int argc, char *argv[])
         if (error != 0) { DUMP_CORE; }
 
 	/* Send the first heartbeat. */
-	gettimeofday(&ytime, NULL);
-        hbtime = ytime;
 
         /* Let Heartbeat timeout through modifying jiffies. */
-        if ( !t->error_count) {
-        	printf("Prepare to send first Hearbeat.\n");
-	}
-        jiffies += t->hb_interval + rto + 1;
+       	printf("Prepare to send first Hearbeat.\n");
+        jiffies += t->hbinterval + rto + 1;
 
         /* HB_ACK should reset errorCount to 0 and stateActive to 1. */
         t->error_count = 1;

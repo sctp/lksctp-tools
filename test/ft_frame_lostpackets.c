@@ -287,7 +287,7 @@ main(int argc, char *argv[])
 	 */
 	sk2->sk_rcvbuf = 500000;
 	msglen = strlen(messages[6]) + 1;
-	for (i=0, sent=0; i <= tran1->pmtu; i += msglen, sent++) {
+	for (i=0, sent=0; i <= tran1->pathmtu; i += msglen, sent++) {
 		test_kill_next_packet(SCTP_CID_DATA);
 		test_frame_send_message(sk1, (struct sockaddr *)&loop2,
 					messages[6]);

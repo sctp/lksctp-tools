@@ -2189,6 +2189,23 @@ void test_assoc_peer_transports(struct sctp_association *asoc,
 	}
 }
 
+void get_assoc_peer_transports(struct sctp_association *asoc,
+			       struct sctp_transport **t1, int num_peers)
+{
+	struct list_head *pos;
+	int i;
+
+	i = 0;
+	list_for_each(pos, &asoc->peer.transport_addr_list) {
+		if (i == num_peers) {
+			printf("get_assoc_peer_transports too many peers\n");
+			DUMP_CORE;
+		}
+		t1[i] = list_entry(pos, struct sctp_transport, transports);
+		i++;
+	}
+}
+
 int fill_addr_buf(void *buf, union sctp_addr *addrs, int first, int last)
 {
 	int bufsize = 0, i;
@@ -2197,6 +2214,109 @@ int fill_addr_buf(void *buf, union sctp_addr *addrs, int first, int last)
 		bufsize += ADDR_LEN(addrs[i]);
 	}
 	return bufsize;
+}
+
+void setup_paddrparams(struct sctp_paddrparams *params,
+		       struct sctp_association *asoc,
+		       union  sctp_addr        *loop)
+{
+	memset(params, 0, sizeof(struct sctp_paddrparams));
+
+	if (asoc)
+		params->spp_assoc_id = sctp_assoc2id(asoc);
+	else
+		params->spp_assoc_id = 0;
+	if (loop)
+		memcpy(&params->spp_address, loop, ADDR_LEN((*loop)));
+	else {
+		union sctp_addr *a = (union sctp_addr *) &params->spp_address;
+#if TEST_V6
+		struct in6_addr ipv6_any = SCTP_IN6ADDR_ANY_INIT;
+		a->v6.sin6_family     = AF_INET6;
+		a->v6.sin6_addr       = ipv6_any;
+		a->v6.sin6_port       = htons(0);
+#else
+		a->v4.sin_family      = AF_INET;
+		a->v4.sin_addr.s_addr = INADDR_ANY;
+		a->v4.sin_port        = htons(0);
+#endif
+	}
+}
+
+void change_paddrparams(struct sctp_paddrparams *params,
+		        struct sctp_association *asoc,
+		        union  sctp_addr        *loop)
+{
+	if (asoc)
+		params->spp_assoc_id = sctp_assoc2id(asoc);
+	else
+		params->spp_assoc_id = 0;
+	if (loop)
+		memcpy(&params->spp_address, loop, ADDR_LEN((*loop)));
+	else {
+		union sctp_addr *a = (union sctp_addr *) &params->spp_address;
+#if TEST_V6
+		struct in6_addr ipv6_any = SCTP_IN6ADDR_ANY_INIT;
+		a->v6.sin6_family     = AF_INET6;
+		a->v6.sin6_addr       = ipv6_any;
+		a->v6.sin6_port       = htons(0);
+#else
+		a->v4.sin_family      = AF_INET;
+		a->v4.sin_addr.s_addr = INADDR_ANY;
+		a->v4.sin_port        = htons(0);
+#endif
+	}
+}
+
+int test_paddrparams(struct sock             *sk,
+		     struct sctp_paddrparams *params,
+		     struct sctp_association *asoc,
+		     union  sctp_addr        *loop,
+		     __u32                    flags_mask)
+{
+	struct sctp_paddrparams params_test;
+	int error, optlen = sizeof(params_test);
+
+	setup_paddrparams(&params_test, asoc, loop);
+
+	error = sctp_getsockopt(sk, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params_test, &optlen);
+	if (error) {
+		printf("test_paddrparams failed, sctp_getsockopt returned %d\n", error);
+		return error;
+	}
+
+	if (optlen != sizeof(params_test)) {
+		printf("test_paddrparams failed, sctp_getsockopt returned optlen %d\n", optlen);
+		return -EINVAL;
+	}
+
+	if (params->spp_hbinterval && params->spp_hbinterval != params_test.spp_hbinterval) {
+		printf("test_paddrparams failed, hbinterval expected %d was %d\n",
+		       params->spp_hbinterval, params_test.spp_hbinterval);
+		return -EINVAL;
+	}
+	if (params->spp_pathmaxrxt && params->spp_pathmaxrxt != params_test.spp_pathmaxrxt) {
+		printf("test_paddrparams failed, pathmaxrxt expected %d was %d\n",
+		       params->spp_pathmaxrxt, params_test.spp_pathmaxrxt);
+		return -EINVAL;
+	}
+	if (params->spp_pathmtu && params->spp_pathmtu != params_test.spp_pathmtu) {
+		printf("test_paddrparams failed, pathmtu expected %d was %d\n",
+		       params->spp_pathmtu, params_test.spp_pathmtu);
+		return -EINVAL;
+	}
+	if (params->spp_sackdelay && params->spp_sackdelay != params_test.spp_sackdelay) {
+		printf("test_paddrparams failed, sackdelay expected %d was %d\n",
+		       params->spp_sackdelay, params_test.spp_sackdelay);
+		return -EINVAL;
+	}
+	if ((params->spp_flags & flags_mask) != (params_test.spp_flags & flags_mask)) {
+		printf("test_paddrparams failed, flags expected %d was %d\n",
+		       params->spp_flags & flags_mask, params_test.spp_flags & flags_mask);
+		return -EINVAL;
+	}
+	return 0;
 }
 
 #endif /* TEST_FRAME */

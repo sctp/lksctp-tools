@@ -330,7 +330,7 @@ main(int argc, char *argv[])
 	/* Reset cwnd and max_burst back to the expected values for the 
 	 * remaining tests. 
 	 */
-	asoc1->peer.primary_path->cwnd = 2*asoc1->pmtu;
+	asoc1->peer.primary_path->cwnd = 2*asoc1->pathmtu;
 	asoc1->max_burst = 4;
 
 	/* Test #3

@@ -27,6 +27,8 @@
 #include <net/sctp/sctp.h>
 #include <funtest.h>
 
+#define MAX_RETRANS 3
+
 int
 main(int argc, char *argv[])
 {
@@ -41,6 +43,11 @@ main(int argc, char *argv[])
         struct sockaddr_in loop2;
         struct sockaddr_in big_a1;
         struct sockaddr_in big_a2;
+        union sctp_addr *peer1a = (union sctp_addr *)&loop2;
+        union sctp_addr *peer1b = (union sctp_addr *)&big_a2;
+        union sctp_addr *peer2a = (union sctp_addr *)&loop1;
+        union sctp_addr *peer2b = (union sctp_addr *)&big_a1;
+	struct sctp_paddrparams params;
         uint8_t *messages[] = {
                 "associate",
                 "strike1",
@@ -97,8 +104,18 @@ main(int argc, char *argv[])
 	if (0 != sctp_seqpacket_listen(sk2, 1)) {
 		DUMP_CORE;
 	}
-        
-        
+
+	/* Setup Path Max Retrans for sk2 to allow only 3
+	 * retransmissions.
+	 */
+	setup_paddrparams(&params, NULL, NULL);
+	params.spp_pathmaxrxt = MAX_RETRANS;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
         /* Send the first message.  This will create the association.  */
         test_frame_send_message(sk1, (struct sockaddr *)&loop2, messages[0]);
         
@@ -127,7 +144,100 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
-        /* Get the communication up message from sk2.  */
+	/* Test max retrans parameters for asoc2 (make sure
+	 * they came through from the socket)
+	 */
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_pathmaxrxt = MAX_RETRANS;
+
+	error = test_paddrparams(sk2, &params, asoc2, NULL, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2a);
+	error = test_paddrparams(sk2, &params, asoc2, peer2a, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2b);
+	error = test_paddrparams(sk2, &params, asoc2, peer2b, 0);
+	if (error)
+		DUMP_CORE;
+
+	/* Test max retrans parameters for asoc1 (make sure
+	 * they came through from the socket)
+	 */
+	setup_paddrparams(&params, asoc1, NULL);
+	params.spp_pathmaxrxt = sctp_max_retrans_path;
+
+	error = test_paddrparams(sk1, &params, asoc1, NULL, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1a);
+	error = test_paddrparams(sk1, &params, asoc1, peer1a, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1b);
+	error = test_paddrparams(sk1, &params, asoc1, peer1b, 0);
+	if (error)
+		DUMP_CORE;
+
+	/* Now set max retrans parameters for asoc1 also. */
+	/* First set them for one peer. */
+	change_paddrparams(&params, asoc1, peer1b);
+	params.spp_pathmaxrxt = MAX_RETRANS;
+
+ 	error = sctp_setsockopt(sk1, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1b);
+	error = test_paddrparams(sk1, &params, asoc1, peer1b, 0);
+	if (error)
+		DUMP_CORE;
+
+	/* Test the association and other peer. */
+	setup_paddrparams(&params, asoc1, NULL);
+	params.spp_pathmaxrxt = sctp_max_retrans_path;
+
+	error = test_paddrparams(sk1, &params, asoc1, NULL, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1a);
+	error = test_paddrparams(sk1, &params, asoc1, peer1a, 0);
+	if (error)
+		DUMP_CORE;
+
+	/* Now set them for the association. */
+	change_paddrparams(&params, asoc1, NULL);
+	params.spp_pathmaxrxt = MAX_RETRANS;
+
+ 	error = sctp_setsockopt(sk1, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	/* And test. */
+	setup_paddrparams(&params, asoc1, NULL);
+	error = test_paddrparams(sk1, &params, asoc1, NULL, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1a);
+	error = test_paddrparams(sk1, &params, asoc1, peer1a, 0);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc1, peer1b);
+	error = test_paddrparams(sk1, &params, asoc1, peer1b, 0);
+	if (error)
+		DUMP_CORE;
+
+	/* Get the communication up message from sk2.  */
         test_frame_get_event(sk2, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 
         /* Get the communication up message from sk1.  */

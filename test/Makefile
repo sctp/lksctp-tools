@@ -175,6 +175,7 @@ PASSING_V6_FRAME_TESTS = \
 	ft_frame_basic_v6 \
 	ft_frame_sockopt_v6 \
 	ft_frame_bindx_v6 \
+	ft_frame_heartbeat_v6 \
 	ft_frame_connectx_v6 \
 	ft_frame_connectx_t1_timer_v6 \
 	ft_frame_connectx_t1_timer_fail_v6 \
@@ -461,6 +462,9 @@ ft_frame_bindx: ft_frame_bindx.o  ${FRAME_OBJECTS}
 ft_frame_bindx_v6: ft_frame_bindx_v6.o  ${FRAME_V6_OBJECTS}
 	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
 
+ft_frame_heartbeat_v6: ft_frame_heartbeat_v6.o  ${FRAME_V6_OBJECTS}
+	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
+
 ft_frame_connectx_v6: ft_frame_connectx_v6.o  ${FRAME_V6_OBJECTS}
 	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
 
@@ -621,6 +625,9 @@ ft_frame_bindx.o: ft_frame_bindx.c
 	${CC} -c -DTEST_V6=0 ${CFLAGS} -o $@ $^
 
 ft_frame_bindx_v6.o: ft_frame_bindx.c
+	${CC} -c ${V6FLAGS} ${CFLAGS} -o $@ $^
+
+ft_frame_heartbeat_v6.o: ft_frame_heartbeat.c
 	${CC} -c ${V6FLAGS} ${CFLAGS} -o $@ $^
 
 ft_frame_connectx_v6.o: ft_frame_connectx.c

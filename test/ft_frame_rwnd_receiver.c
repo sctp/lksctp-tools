@@ -195,7 +195,7 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
-	ngets = asoc2->pmtu/msglen + (asoc2->pmtu%msglen?1:-1);
+	ngets = asoc2->pathmtu/msglen + (asoc2->pathmtu%msglen?1:-1);
 	/* Read out just enough data to not force a gratuitous SACK. */
 	for (i = 0; i < ngets; i++) {
 		test_frame_get_message(sk2, messages[1]); 
@@ -227,7 +227,7 @@ main(int argc, char *argv[])
 	 *    fragmented. 
 	 */
 	rwnd = asoc2->rwnd;
-	msg_buf = test_build_msg(2*asoc1->pmtu);
+	msg_buf = test_build_msg(2*asoc1->pathmtu);
 	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 
         error = test_run_network();
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
 	/* Verify that rwnd is decreased correctly after receiving the
 	 * fragmented message.
 	 */
-	if (asoc2->rwnd  != (rwnd - 2*asoc1->pmtu))
+	if (asoc2->rwnd  != (rwnd - 2*asoc1->pathmtu))
 		DUMP_CORE;
 
 	test_frame_get_message(sk2, msg_buf); 

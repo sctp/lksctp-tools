@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
-	tp1->error_count = tp1->max_retrans - 2;
+	tp1->error_count = tp1->pathmaxrxt - 2;
 	i = tp1->error_count;
-	while (i <= tp1->max_retrans) {
+	while (i <= tp1->pathmaxrxt) {
 		rto = tp1->rto;
 		
 		printf("##*******************%d\n", asoc1->peer.active_path->error_count);

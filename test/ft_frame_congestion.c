@@ -205,7 +205,7 @@ main(int argc, char *argv[])
 	 */
 
 	/* Force t1's heartbeat timer. */
-        jiffies += t1->hb_interval + t1->rto + 1;
+        jiffies += t1->hbinterval + t1->rto + 1;
 	/* Delete t2's hb_timer so that it doesn't interfere with the tests by
 	 * generating an HEARTBEAT packet.
 	 */ 

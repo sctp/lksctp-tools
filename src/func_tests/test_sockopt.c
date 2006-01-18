@@ -86,6 +86,7 @@ main(void)
 	char *big_buffer;
 	struct sctp_event_subscribe subscribe;
 	struct sctp_initmsg initmsg;
+	struct sctp_paddrparams paddrparams;
 	struct sctp_sndrcvinfo set_udp_sk_dflt_param, get_udp_sk_dflt_param; 
 	struct sctp_sndrcvinfo set_tcp_sk_dflt_param, get_tcp_sk_dflt_param; 
 	struct sctp_sndrcvinfo set_udp_assoc_dflt_param;
@@ -95,8 +96,10 @@ main(void)
 	struct sctp_sndrcvinfo get_peeloff_assoc_dflt_param; 
 	struct sctp_sndrcvinfo get_accept_assoc_dflt_param; 
 	struct sctp_paddrinfo pinfo;
+	int dflt_pathmaxrxt;
 	socklen_t optlen, addrlen;
 	struct sctp_status status;
+	struct sctp_assoc_value value;
 
         /* Rather than fflush() throughout the code, set stdout to
 	 * be unbuffered.
@@ -471,7 +474,270 @@ main(void)
 	
 	close(udp_svr_sk);
 
-	/* TEST #5: SCTP_DEFAULT_SEND_PARAM socket option. */
+	/* TEST #5: SCTP_PEER_ADDR_PARAMS socket option. */
+        /* Create a socket.  */
+	udp_svr_sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
+
+	/* Get the default parameters for this endpoint */
+	optlen = sizeof(paddrparams);
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_address.ss_family = AF_INET;
+	test_getsockopt(udp_svr_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+								&optlen);
+
+	dflt_pathmaxrxt = paddrparams.spp_pathmaxrxt;
+	tst_resm(TPASS, "getsockopt(SCTP_PEER_ADDR_PARAMS)");
+
+	/* Change the default parameters for this endpoint (socket) */
+	paddrparams.spp_hbinterval = 1000;
+	paddrparams.spp_pathmaxrxt = dflt_pathmaxrxt+1;
+	paddrparams.spp_sackdelay = 100;
+	test_setsockopt(udp_svr_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+							sizeof(paddrparams));
+
+	paddrparams.spp_pathmaxrxt = 0;
+
+	/* Get the updated default parameters for this endpoint. */
+	optlen = sizeof(paddrparams);
+	test_getsockopt(udp_svr_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+								&optlen);
+	if (paddrparams.spp_pathmaxrxt != dflt_pathmaxrxt+1)
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "mismatch");
+
+	value.assoc_id = 0;
+	optlen = sizeof(value);
+	test_getsockopt(udp_svr_sk, SCTP_DELAYED_ACK_TIME, &value,
+								&optlen);
+	if (value.assoc_value != 100)
+		tst_brkm(TBROK, tst_exit, "getsockopt(SCTP_DELAYED_ACK_TIME) "
+			 "mismatch");
+
+	value.assoc_id    = 0;
+	value.assoc_value = 250;
+	test_setsockopt(udp_svr_sk, SCTP_DELAYED_ACK_TIME, &value,
+							sizeof(value));
+	optlen = sizeof(paddrparams);
+	test_getsockopt(udp_svr_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+								&optlen);
+	if (paddrparams.spp_sackdelay != 250)
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_DELAYED_ACK_TIME) "
+			 "mismatch");
+
+	tst_resm(TPASS, "setsockopt(SCTP_DELAYED_ACK_TIME)");
+
+
+	/* Ensure that prior defaults are preserved for a new endpoint */
+	udp_clt_sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
+	optlen = sizeof(paddrparams);
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_address.ss_family = AF_INET;
+	test_getsockopt(udp_clt_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+								&optlen);
+	if (paddrparams.spp_pathmaxrxt != dflt_pathmaxrxt)
+		tst_brkm(TBROK, tst_exit, "getsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "mismatch");
+
+	
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS)");
+
+       	/* Invalid assoc id */
+	paddrparams.spp_assoc_id = 1234;
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid associd error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid associd");
+
+	test_bind(udp_svr_sk, &udp_svr_loop.sa, sizeof(udp_svr_loop));
+	test_bind(udp_clt_sk, &udp_clt_loop.sa, sizeof(udp_clt_loop));
+
+	test_listen(udp_svr_sk, 5);
+
+	test_enable_assoc_change(udp_svr_sk);
+	test_enable_assoc_change(udp_clt_sk);
+
+	/* Do a connect on a UDP-style socket and establish an association. */
+	test_connect(udp_clt_sk, &udp_svr_loop.sa, sizeof(udp_svr_loop));
+
+	/* Receive the COMM_UP notifications and get the associd's */
+	inmessage.msg_controllen = sizeof(incmsg);
+	error = test_recvmsg(udp_svr_sk, &inmessage, MSG_WAITALL);
+	test_check_msg_notification(&inmessage, error,
+				    sizeof(struct sctp_assoc_change),
+				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+	sac = (struct sctp_assoc_change *)iov.iov_base;
+
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_hbinterval = 1000;
+	paddrparams.spp_pathmaxrxt = dflt_pathmaxrxt+1;
+	test_setsockopt(udp_svr_sk, SCTP_PEER_ADDR_PARAMS, &paddrparams,
+							sizeof(paddrparams));
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) - "
+		 "one-to-many style valid associd valid address");
+
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_svr_loop, sizeof(udp_svr_loop));
+	paddrparams.spp_hbinterval = 1000;
+	paddrparams.spp_pathmaxrxt = dflt_pathmaxrxt+1;
+	
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid transport error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid transport");
+
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_hbinterval = 1000;
+	paddrparams.spp_pathmaxrxt = dflt_pathmaxrxt+1;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams) - 1);
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid parameter length error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid parameter length");
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_DELAYED_ACK_TIME,
+			   &value,
+			   sizeof(value) - 1);
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_DELAYED_ACK_TIME) "
+			 "invalid parameter length error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_DELAYED_ACK_TIME) "
+		 "- one-to-many style invalid parameter length");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_sackdelay = 501;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid sack delay error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid sack delay");
+
+	value.assoc_id    = sac->sac_assoc_id;
+	value.assoc_value = 501;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_DELAYED_ACK_TIME,
+			   &value,
+			   sizeof(value));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_DELAYED_ACK_TIME) "
+			 "invalid sack delay error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_DELAYED_ACK_TIME) "
+		 "- one-to-many style invalid sack delay");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_pathmtu = 511;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid path MTU error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid path MTU");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_flags = SPP_HB_ENABLE | SPP_HB_DISABLE;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid hb enable flags error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid hb enable flags");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_flags = SPP_PMTUD_ENABLE | SPP_PMTUD_DISABLE;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid PMTU discovery enable flags error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid PMTU discovery enable flags");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_assoc_id = sac->sac_assoc_id;
+	memcpy(&paddrparams.spp_address, &udp_clt_loop, sizeof(udp_clt_loop));
+	paddrparams.spp_flags = SPP_SACKDELAY_ENABLE | SPP_SACKDELAY_DISABLE;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid sack delay enable flags error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid sack delay enable flags");
+
+	memset(&paddrparams, 0, sizeof(paddrparams));
+	paddrparams.spp_flags = SPP_HB_DEMAND;
+
+        error = setsockopt(udp_clt_sk, SOL_SCTP, SCTP_PEER_ADDR_PARAMS,
+			   &paddrparams,
+			   sizeof(paddrparams));
+	if ((-1 != error) || (EINVAL != errno))
+		tst_brkm(TBROK, tst_exit, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+			 "invalid hb demand error:%d, errno:%d\n",
+			 error, errno);
+
+	tst_resm(TPASS, "setsockopt(SCTP_PEER_ADDR_PARAMS) "
+		 "- one-to-many style invalid hb demand");
+
+	close(udp_svr_sk);
+	close(udp_clt_sk);
+
+
+	/* TEST #6: SCTP_DEFAULT_SEND_PARAM socket option. */
 	/* Create and bind 2 UDP-style sockets(udp_svr_sk, udp_clt_sk) and
 	 * 2 TCP-style sockets. (tcp_svr_sk, tcp_clt_sk)
 	 */
@@ -797,7 +1063,7 @@ main(void)
 	tst_resm(TPASS, "getsockopt(SCTP_DEFAULT_SEND_PARAM) - "
 		 "one-to-one style accepted socket");
 
-	/* TEST #6: SCTP_GET_PEER_ADDR_INFO socket option. */
+	/* TEST #7: SCTP_GET_PEER_ADDR_INFO socket option. */
 	/* Try 0 associd and 0 addr */
 	memset(&pinfo, 0, sizeof(pinfo));
 	optlen = sizeof(pinfo);

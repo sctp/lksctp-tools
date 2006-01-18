@@ -51,6 +51,10 @@
 #include <errno.h>
 #include <funtest.h>
 
+#define SACK_DELAY_2 300
+#define SACK_DELAY_2b 400
+#define SACK_DELAY_3 100
+
 int
 main(int argc, char *argv[])
 {
@@ -61,8 +65,16 @@ main(int argc, char *argv[])
 
         struct sock *sk1;
         struct sock *sk2;
-        struct sockaddr_in loop1;
-        struct sockaddr_in loop2;
+        struct sockaddr_in loop1a;
+        struct sockaddr_in loop1b;
+        struct sockaddr_in loop2a;
+        struct sockaddr_in loop2b;
+        union sctp_addr *peer2a = (union sctp_addr *)&loop1a;
+        union sctp_addr *peer2b = (union sctp_addr *)&loop1b;
+	struct sctp_paddrparams params;
+	struct sctp_assoc_value value;
+	int optlen;
+
 	/* Note that these messages are in ascending length.  */
         uint8_t *messages[] = {
                 "associate",
@@ -86,70 +98,106 @@ main(int argc, char *argv[])
         sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
 
         /* Bind these sockets to the test ports.  */
-        loop1.sin_family = AF_INET;
-        loop1.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-        loop1.sin_port = htons(SCTP_TESTPORT_1);
+        loop1a.sin_family = AF_INET;
+        loop1a.sin_addr.s_addr = SCTP_ADDR_ETH0;
+        loop1a.sin_port = htons(SCTP_TESTPORT_1);
+        loop1b.sin_family = AF_INET;
+        loop1b.sin_addr.s_addr = SCTP_ADDR_ETH1;
+        loop1b.sin_port = htons(SCTP_TESTPORT_1);
 
-        error = test_bind(sk1, (struct sockaddr *)&loop1, sizeof(loop1));
+        error = test_bind(sk1, (struct sockaddr *)&loop1a, sizeof(loop1a));
         if (error != 0) { DUMP_CORE; }
+
+	error = test_bindx(sk1, (struct sockaddr *)&loop1b, sizeof(loop1b),
+		       SCTP_BINDX_ADD_ADDR);
+	if (error != 0) { 
+		printf("Error %d\n", error);
+		DUMP_CORE;
+	}
+
+        loop2a.sin_family = AF_INET;
+        loop2a.sin_addr.s_addr = SCTP_ADDR_ETH0;
+        loop2a.sin_port = htons(SCTP_TESTPORT_2);
+        loop2b.sin_family = AF_INET;
+        loop2b.sin_addr.s_addr = SCTP_ADDR_ETH1;
+        loop2b.sin_port = htons(SCTP_TESTPORT_2);
         
-        loop2.sin_family = AF_INET;
-        loop2.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-        loop2.sin_port = htons(SCTP_TESTPORT_2);
-        
-        error = test_bind(sk2, (struct sockaddr *)&loop2, sizeof(loop2));
+        error = test_bind(sk2, (struct sockaddr *)&loop2a, sizeof(loop2a));
         if (error != 0) { DUMP_CORE; }
         
 	/* Mark sk2 as being able to accept new associations. */
 	if (0 != sctp_seqpacket_listen(sk2, 1)) {
 		DUMP_CORE;
 	}
-        
-        
+
+	error = test_bindx(sk2, (struct sockaddr *)&loop2b, sizeof(loop2b),
+		       SCTP_BINDX_ADD_ADDR);
+	if (error != 0) { DUMP_CORE; }
+
+	/* Setup SACK delay for sk2 to be shorter. */
+	setup_paddrparams(&params, NULL, NULL);
+	params.spp_sackdelay = SACK_DELAY_2;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	value.assoc_id = 0;
+	optlen = sizeof(value);
+	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_DELAYED_ACK_TIME,
+				(char *)&value, &optlen);
+	if (error) {
+		printf("error %d\n", error);
+		DUMP_CORE;
+	}
+	if (value.assoc_value != SACK_DELAY_2)
+		DUMP_CORE;
+
         /* Send the first message.  This will create the association.  */
-        test_frame_send_message(sk1, (struct sockaddr *)&loop2, messages[0]);
+        test_frame_send_message(sk1, (struct sockaddr *)&loop2a, messages[0]);
         
 	/* Walk through the startup sequence.  */
 
         /* We should have an INIT sitting on the Internet. */
-	if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK_ETH0)) {
 		DUMP_CORE;
 	}
 
 	/* Next we expect an INIT ACK. */
-	if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 	/* We expect a COOKIE ECHO.  */
-	if (test_step(SCTP_CID_COOKIE_ECHO, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_COOKIE_ECHO, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 
 #ifndef NO_COOKIE_ECHO_BUNDLE
 	/* We expect DATA bundled with that COOKIE ECHO.  */
-	if (!test_for_chunk(SCTP_CID_DATA, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_DATA, TEST_NETWORK_ETH0)) {
 		DUMP_CORE;
 	}
 #endif /* !NO_COOKIE_ECHO_BUNDLE */
 
 	/* We expect a COOKIE ACK.  */
-	if (test_step(SCTP_CID_COOKIE_ACK, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_COOKIE_ACK, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 
 #ifdef NO_COOKIE_ECHO_BUNDLE
-	if (test_step(SCTP_CID_DATA, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_DATA, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 
-	if (test_step(SCTP_CID_SACK, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_SACK, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 #else
         /* We should see a SACK next.
 	 * We ARE truly clever and bundle the SACK with the COOKIE ACK.
 	 */
-	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
 		DUMP_CORE;
 	}
 
@@ -167,6 +215,26 @@ main(int argc, char *argv[])
         ep2 = sctp_sk(sk2)->ep;
 	asoc2 = test_ep_first_asoc(ep2);
 
+	/* Test SACK delay parameters for asoc2 (make sure
+	 * they came through from the socket)
+	 */
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_sackdelay = SACK_DELAY_2;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2a);
+	error = test_paddrparams(sk2, &params, asoc2, peer2a, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2b);
+	error = test_paddrparams(sk2, &params, asoc2, peer2b, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
 
         /* Get the communication up message from sk2.  */
         test_frame_get_event(sk2, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
@@ -180,22 +248,27 @@ main(int argc, char *argv[])
         /* Now the real testing begins... */
 
 	/* Send a single message.  */
-        test_frame_send_message(sk1, (struct sockaddr *)&loop2, messages[1]);
-        error = test_run_network_once(TEST_NETWORK0);
+	printf("----->Sending to loop2b\n");
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2b,
+        			 messages[1], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH1);
 	if (error < 0) { DUMP_CORE; }
 
 	/* We should NOT see a SACK yet.  */
-	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
 		DUMP_CORE;
 	}
 
 	/* Move time forward by a SACK timeout.  */
-        jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
         error = test_run_timeout();
 	if (0 != error) { DUMP_CORE; }
 
 	/* See that we DID generate a SACK.  */
-	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
 		DUMP_CORE;
 	}
 
@@ -204,36 +277,44 @@ main(int argc, char *argv[])
 	if (0 != error) { DUMP_CORE; }
 
 	/* Start over by sending another message.  */
-        test_frame_send_message(sk1, (struct sockaddr *)&loop2, messages[2]);
-        error = test_run_network_once(TEST_NETWORK0);
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2a,
+        			 messages[2], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
 	if (error < 0) { DUMP_CORE; }
 
 	/* Confirm that we do not see a SACK yet.  */
-	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
 		DUMP_CORE;
 	}
 
 	/* Send a second message.  */
-        test_frame_send_message(sk1, (struct sockaddr *)&loop2, messages[3]);
-        error = test_run_network_once(TEST_NETWORK0);
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2a,
+        			 messages[3], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
 	if (error < 0) { DUMP_CORE; }
 
 	/* The second message should have triggered a SACK.  */
-	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
 		DUMP_CORE;
 	}
 
 	/* Consume that SACK!  */
-        error = test_run_network_once(TEST_NETWORK0);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
 	if (error < 0) { DUMP_CORE; }
 
 	/* Move time forward by a SACK timeout.  */
-        jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
         error = test_run_timeout();
 	if (0 != error) { DUMP_CORE; }
 
 	/* If we see a SACK, we failed to cancel the timer.  */
-	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0)) {
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
 		DUMP_CORE;
 	}
 
@@ -242,21 +323,320 @@ main(int argc, char *argv[])
         test_frame_get_message(sk2, messages[2]);
         test_frame_get_message(sk2, messages[3]);
 
-        /* Shut down the link.  */
+	/* Now test modification of the SACK delay parameters. */
+
+	/* Test disable SACK delay. */
+	setup_paddrparams(&params, asoc2, peer2a);
+	params.spp_flags     = SPP_SACKDELAY_DISABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	/* Start over by sending another message.  */
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2a,
+        			 messages[1], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+	/* Confirm that we do see a SACK immediately.  */
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+
+	/* Consume that SACK!  */
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+	/* Send a second message.  */
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2b,
+        			 messages[2], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH1);
+	if (error < 0) { DUMP_CORE; }
+
+	/* The second message should not have triggered a SACK.  */
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Move time forward by a SACK timeout.  */
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+        error = test_run_timeout();
+	if (0 != error) { DUMP_CORE; }
+
+	/* Now we should see a SACK.  */
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Consume that SACK!  */
+        error = test_run_network_once(TEST_NETWORK_ETH1);
+	if (error < 0) { DUMP_CORE; }
+
+	/* And send one more message.  */
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2a,
+        			 messages[3], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+	/* Confirm that we do see a SACK immediately.  */
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+
+	/* Consume that SACK!  */
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+        /* Collect the retransmitted messages in order.  */
+        test_frame_get_message(sk2, messages[1]);
+        test_frame_get_message(sk2, messages[2]);
+        test_frame_get_message(sk2, messages[3]);
+
+	/* Now test transport specific SACK delay timeouts. */
+	setup_paddrparams(&params, asoc2, peer2a);
+	params.spp_sackdelay = SACK_DELAY_2;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, asoc2, peer2b);
+	params.spp_sackdelay = SACK_DELAY_2b;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	/* Send a message to the first peer address. */
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2a,
+        			 messages[1], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+	/* The message should not have triggered a SACK.  */
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Verify the timeout which will be used. */
+	if (asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] !=
+	    msecs_to_jiffies(SACK_DELAY_2))
+		DUMP_CORE;
+
+	/* Move time forward to just before SACK timeout.  */
+        jiffies += msecs_to_jiffies(SACK_DELAY_2) - 1;
+        error = test_run_timeout();
+	if (0 != error) { DUMP_CORE; }
+
+	/* Still should not see a SACK. */
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Now move time forward to just after SACK timeout. */
+        jiffies += 2;
+        error = test_run_timeout();
+	if (0 != error) { DUMP_CORE; }
+
+	/* Now we should see a SACK.  */
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+
+	/* Consume that SACK!  */
+        error = test_run_network_once(TEST_NETWORK_ETH0);
+	if (error < 0) { DUMP_CORE; }
+
+	/* Send a message to the second peer address. */
+        test_frame_send_message2(sk1, (struct sockaddr *)&loop2b,
+        			 messages[2], 0, 0, 0, SCTP_ADDR_OVER);
+        error = test_run_network_once(TEST_NETWORK_ETH1);
+	if (error < 0) { DUMP_CORE; }
+
+	/* The message should not have triggered a SACK.  */
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Verify the timeout which will be used. */
+	if (asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] !=
+	    msecs_to_jiffies(SACK_DELAY_2b))
+		DUMP_CORE;
+
+	/* Move time forward to just before SACK timeout.  */
+        jiffies += msecs_to_jiffies(SACK_DELAY_2b) - 1;
+        error = test_run_timeout();
+	if (0 != error) { DUMP_CORE; }
+
+	/* Still should not see a SACK. */
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH0)) {
+		DUMP_CORE;
+	}
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Now move time forward to just after SACK timeout. */
+        jiffies += 2;
+        error = test_run_timeout();
+	if (0 != error) { DUMP_CORE; }
+
+	/* Now we should see a SACK.  */
+	if (!test_for_chunk(SCTP_CID_SACK, TEST_NETWORK_ETH1)) {
+		DUMP_CORE;
+	}
+
+	/* Consume that SACK!  */
+        error = test_run_network_once(TEST_NETWORK_ETH1);
+	if (error < 0) { DUMP_CORE; }
+
+        /* Collect the retransmitted messages in order.  */
+        test_frame_get_message(sk2, messages[1]);
+        test_frame_get_message(sk2, messages[2]);
+
+	/* Finish testing SCTP_DELAYED_ACK_TIME. */
+ 	value.assoc_id = 0;
+ 	value.assoc_value = SACK_DELAY_3;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_DELAYED_ACK_TIME,
+				(char *)&value, sizeof(value));
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_sackdelay = SACK_DELAY_2;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, NULL, NULL);
+	params.spp_sackdelay = SACK_DELAY_3;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, NULL, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+ 	value.assoc_id = sctp_assoc2id(asoc2);
+ 	value.assoc_value = SACK_DELAY_2b;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_DELAYED_ACK_TIME,
+				(char *)&value, sizeof(value));
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_sackdelay = SACK_DELAY_2b;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2a);
+	error = test_paddrparams(sk2, &params, asoc2, peer2a, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2b);
+	error = test_paddrparams(sk2, &params, asoc2, peer2b, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, NULL, NULL);
+	params.spp_sackdelay = SACK_DELAY_3;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, NULL, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+ 	value.assoc_id = sctp_assoc2id(asoc2);
+ 	value.assoc_value = 0;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_DELAYED_ACK_TIME,
+				(char *)&value, sizeof(value));
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_sackdelay = SACK_DELAY_2b;
+	params.spp_flags     = SPP_SACKDELAY_DISABLE;
+
+	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2a);
+	error = test_paddrparams(sk2, &params, asoc2, peer2a, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params, asoc2, peer2b);
+	error = test_paddrparams(sk2, &params, asoc2, peer2b, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, NULL, NULL);
+	params.spp_sackdelay = SACK_DELAY_3;
+	params.spp_flags     = SPP_SACKDELAY_ENABLE;
+
+	error = test_paddrparams(sk2, &params, NULL, NULL, SPP_SACKDELAY);
+	if (error)
+		DUMP_CORE;
+
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_flags     = SPP_SACKDELAY_DISABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	value.assoc_id = sctp_assoc2id(asoc2);
+	optlen = sizeof(value);
+	error = sctp_getsockopt(sk2, IPPROTO_SCTP, SCTP_DELAYED_ACK_TIME,
+				(char *)&value, &optlen);
+	if (error)
+		DUMP_CORE;
+	if (value.assoc_value != 0)
+		DUMP_CORE;
+
+      /* Shut down the link.  */
 	sctp_close(sk1, /* timeout */ 0);
 
 	/* The SHUTDOWN sequence starts with a SHUTDOWN message.  */
-	if (!test_for_chunk(SCTP_CID_SHUTDOWN, TEST_NETWORK0)) {
+	if (!test_for_chunk(SCTP_CID_SHUTDOWN, TEST_NETWORK_ETH0)) {
 		DUMP_CORE;
 	}
 
 	/* Next we expect a SHUTDOWN ACK.  */
-	if (test_step(SCTP_CID_SHUTDOWN_ACK, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_SHUTDOWN_ACK, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 
 	/* Finally, we should see a SHUTDOWN COMPLETE.  */
-	if (test_step(SCTP_CID_SHUTDOWN_COMPLETE, TEST_NETWORK0) <= 0) {
+	if (test_step(SCTP_CID_SHUTDOWN_COMPLETE, TEST_NETWORK_ETH0) <= 0) {
 		DUMP_CORE;
 	}
 

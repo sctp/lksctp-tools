@@ -357,6 +357,8 @@ void print_address(const char *label, union sctp_addr *addr);
 void print_assoc_peer_transports(struct sctp_association *assoc);
 void test_assoc_peer_transports(struct sctp_association *assoc,
 				union sctp_addr *peers, int num_peers);
+void get_assoc_peer_transports(struct sctp_association *asoc,
+			       struct sctp_transport **t1, int num_peers);
 
 #endif /* TEST_FRAME */
 
@@ -440,6 +442,17 @@ void sctp_v6_err(struct sk_buff *skb, struct inet6_skb_parm *opt, int type,
 
 #define ADDR_LEN(VAR) sctp_get_af_specific(VAR.v4.sin_family)->sockaddr_len
 
+void setup_paddrparams(struct sctp_paddrparams *params,
+		       struct sctp_association *asoc,
+		       union  sctp_addr        *loop);
+void change_paddrparams(struct sctp_paddrparams *params,
+		        struct sctp_association *asoc,
+		        union  sctp_addr        *loop);
+int test_paddrparams(struct sock             *sk,
+		     struct sctp_paddrparams *params,
+		     struct sctp_association *asoc,
+		     union  sctp_addr        *loop,
+		     __u32                    flags_mask);
 int fill_addr_buf(void *buf, union sctp_addr *addrs, int first, int last);
 
 #endif /* __funtest_h__ */

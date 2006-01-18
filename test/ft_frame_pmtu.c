@@ -54,11 +54,14 @@ int main(int argc, char *argv[])
 	struct sctp_association *asoc1, *asoc2;
 	struct sctp_transport *t1, *t2;
 	struct sockaddr_in loop1, loop2;
+	union sctp_addr *peer1 = (union sctp_addr *)&loop2;
+	union sctp_addr *peer2 = (union sctp_addr *)&loop1;
 	struct sk_buff *skb;
 	sctp_data_chunk_t *data_chunk;
 	uint32_t tsn;
 	void *msg_buf;
 	int error;
+	struct sctp_paddrparams params1, params2;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
 	sctp_init();
@@ -81,6 +84,20 @@ int main(int argc, char *argv[])
 
 	error = test_bind(sk2, (struct sockaddr *)&loop2, sizeof(loop2));
 	if (error != 0) { DUMP_CORE; }
+
+	/* Set pmtu parameters for socket 2. */
+	setup_paddrparams(&params2, NULL, NULL);
+	params2.spp_pathmtu    = 1200;
+	params2.spp_flags      = SPP_PMTUD_DISABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params2, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk2, &params2, NULL, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
 
 	/* Mark sk2 as being able to accept new associations. */
 	if (0 != sctp_seqpacket_listen(sk2, 1)) { DUMP_CORE; }
@@ -120,12 +137,28 @@ int main(int argc, char *argv[])
 	free(msg_buf);
 	msg_buf = test_build_msg(1352);
 
+	/* Test parameters for asoc2 (make sure they came
+	 * through from the socket)
+	 */
+	setup_paddrparams(&params2, asoc2, NULL);
+	params2.spp_pathmtu    = 1200;
+	params2.spp_flags      = SPP_PMTUD_DISABLE;
+
+	error = test_paddrparams(sk2, &params2, asoc2, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	change_paddrparams(&params2, asoc2, peer2);
+	error = test_paddrparams(sk2, &params2, asoc2, peer2, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
 	/* Disable heartbeats. */
-	t1->hb_allowed = 0;
-	t2->hb_allowed = 0;
+	t1->param_flags = (t1->param_flags & ~SPP_HB) | SPP_HB_DISABLE;
+	t2->param_flags = (t2->param_flags & ~SPP_HB) | SPP_HB_DISABLE;
 
 	/* Verify the default pmtu is set correctly. */
-	if ((asoc1->pmtu != 1500) || (t1->pmtu != 1500) ||
+	if ((asoc1->pathmtu != 1500) || (t1->pathmtu != 1500) ||
 	    (dst_mtu(t1->dst) != 1500)) {
 		DUMP_CORE;
 	}
@@ -169,7 +202,7 @@ int main(int argc, char *argv[])
 	if (0 != test_run_network()) { DUMP_CORE; }
 
 	/* Verify that pmtu is updated to the lowered value of 1200. */
-	if ((asoc1->pmtu != 1200) || (t1->pmtu != 1200) ||
+	if ((asoc1->pathmtu != 1200) || (t1->pathmtu != 1200) ||
 	    (dst_mtu(t1->dst) != 1200)) {
 		DUMP_CORE;
 	}
@@ -185,7 +218,7 @@ int main(int argc, char *argv[])
 	test_frame_get_message(sk2, msg_buf);
 
 	/* Verify that pmtu is still 1200. */
-	if ((asoc1->pmtu != 1200) || (t1->pmtu != 1200) ||
+	if ((asoc1->pathmtu != 1200) || (t1->pathmtu != 1200) ||
 	    (dst_mtu(t1->dst) != 1200)) {
 		DUMP_CORE;
 	}
@@ -207,11 +240,106 @@ int main(int argc, char *argv[])
 	 */
 	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 	if (0 != test_run_network()) { DUMP_CORE; }
-	if ((asoc1->pmtu != 1500) || (t1->pmtu != 1500) ||
+	if ((asoc1->pathmtu != 1500) || (t1->pathmtu != 1500) ||
 	    (dst_mtu(t1->dst) != 1500)) {
 		DUMP_CORE;
 	}
 	test_frame_get_message(sk2, msg_buf);
+
+	/* Now test setting and controlling the pmtu options for sk1. */
+	setup_paddrparams(&params1, asoc1, NULL);
+	params1.spp_pathmtu    = 1200;
+	params1.spp_flags      = SPP_PMTUD_DISABLE;
+
+	error = sctp_setsockopt(sk1, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params1, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk1, &params1, asoc1, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk1, &params1, asoc1, peer1, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	/* Send and get a message. */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+	test_frame_get_message(sk2, msg_buf);
+
+	/* Verify that pmtu is still 1200. */
+	error = test_paddrparams(sk1, &params1, asoc1, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk1, &params1, asoc1, peer1, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	/* Generate and handle the delayed SACK. */
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Let the dst expire. */
+	jiffies += t1->dst->expires + 1;
+	if (0 != test_run_timeout()) { DUMP_CORE; }
+
+	/* Verify that the dst is marked obsolete. */
+	if (t1->dst->obsolete != 2)
+		DUMP_CORE;
+
+	/* Send a message and verify that the pmtu is still the same
+	 * value after the dst expiry.
+	 */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	error = test_paddrparams(sk1, &params1, asoc1, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk1, &params1, asoc1, peer1, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	test_frame_get_message(sk2, msg_buf);
+
+	/* Generate and handle the delayed SACK. */
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Now re-enable path mtu discovery. */
+	params1.spp_flags      = SPP_PMTUD_ENABLE;
+
+	error = sctp_setsockopt(sk1, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params1, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	/* Verify that pmtu is now 1500. */
+	params1.spp_pathmtu    = 1500;
+	error = test_paddrparams(sk1, &params1, asoc1, NULL, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	error = test_paddrparams(sk1, &params1, asoc1, peer1, SPP_PMTUD);
+	if (error)
+		DUMP_CORE;
+
+	/* Send and get a message. */
+	free(msg_buf);
+	msg_buf = test_build_msg(2000);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	test_frame_get_message(sk2, msg_buf);
+
+	/* Generate and handle the delayed SACK. */
+        jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
+	if (0 != test_run_network()) { DUMP_CORE; }
 
 	sctp_close(sk1, 0);
 	sctp_close(sk2, 0);

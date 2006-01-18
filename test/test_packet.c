@@ -136,7 +136,7 @@ main(void)
         loop2.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
         loop2.v4.sin_port = htons(SCTP_TESTPORT_2);
         transport = sctp_assoc_add_peer(asoc, &loop2, GFP_KERNEL, SCTP_ACTIVE);
-        transport->asoc->pmtu = REASONABLE_PMTU;
+        transport->asoc->pathmtu = REASONABLE_PMTU;
 
 	/* Register the association with the endpoint.  */        
 	sctp_endpoint_add_asoc(ep, asoc);
@@ -268,7 +268,7 @@ main(void)
 	sctp_packet_config(&packet, vTag, 0);
 
         /* Set the Path MTU to a minuscule amount. */
-        transport->asoc->pmtu = MINUSCULE_PMTU;
+        transport->asoc->pathmtu = MINUSCULE_PMTU;
 
         /* Commit the first chunk to the network. */
         transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[0]);

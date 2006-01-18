@@ -200,7 +200,7 @@ main(int argc, char *argv[])
 	/* Regression test a bug where we were throwing away packets
 	 * that were just over our fragmentation point.  
 	 */
-	asoc1->pmtu = asoc1->pmtu+4;
+	asoc1->pathmtu = asoc1->pathmtu+4;
 
 	/* Figure out the expected TSN of the next DATA chunk. */
 	tsn = asoc1->next_tsn;
@@ -304,9 +304,9 @@ main(int argc, char *argv[])
 	/* Reset cwnd, max_burst and pmtu back to the expected values for the 
 	 * remaining tests. 
 	 */
-	asoc1->peer.primary_path->cwnd = 2*asoc1->pmtu;
+	asoc1->peer.primary_path->cwnd = 2*asoc1->pathmtu;
 	asoc1->max_burst = 4;
-	asoc1->pmtu = SCTP_DEFAULT_MAXSEGMENT;
+	asoc1->pathmtu = SCTP_DEFAULT_MAXSEGMENT;
 
 	msg_cnt = sizeof(msg_sizes) / sizeof(int);
 
@@ -348,7 +348,7 @@ main(int argc, char *argv[])
 	error = test_run_network();
 	if (0 != error) { DUMP_CORE; }
 
-	if (asoc1->pmtu != 1000)
+	if (asoc1->pathmtu != 1000)
 		DUMP_CORE;
 
 	/* Verify that rwnd is decreased correctly.after receiving the data. */

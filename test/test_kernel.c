@@ -87,11 +87,6 @@ extern struct list_head test_timers;
 
 int ft_sctp_lock_bug = 0;
 int ft_sctp_lock_assert = 0;
-#ifdef JUNK
-struct timeval xtime = {0,0};
-#else
-struct timeval ytime = {0,0};
-#endif
 unsigned long volatile jiffies = 0;
 
 cpumask_t cpu_callout_map;
