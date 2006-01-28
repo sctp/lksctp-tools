@@ -3,6 +3,19 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA          Fix sctp_rcv_ootb() to handle the last chunk of a packet
+              correctly.
+K:NA          Fix couple of races between sctp_peeloff() and sctp_rcv().
+K:NA          Fix machine check/connection hang on IA64.
+K:NA          Fix bad sysctl formatting of SCTP timeout values on 64-bit m/cs.
+K:NA          Fix sctp_assoc_seq_show() panics on big-endian systems.
+K:NA          sctp doesn't show all associations/endpoints in /proc.
+K:NA          Fix sctp_cookie alignment in the packet.
+K:NA          Fix potential race condition between sctp_close() and sctp_rcv().
+K,T:NA        Add support for SCTP_DELAYED_ACK_TIME socket option.
+K,T:NA        Update SCTP_PEER_ADDR_PARAMS socket option to the latest api.
+              draft11.
+
 lksctp-2.6.15-1.0.5: Tue Jan  3 15:49:27 PST 2006
 K:NA           Fix SCTP to not return erroneous POLLOUT events.
 K:NA           Fix getsockname for sctp when an ipv6 socket accepts a
