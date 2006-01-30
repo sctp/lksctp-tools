@@ -82,12 +82,12 @@ main(int argc, char *argv[])
 
 	/* Walk through the startup sequence.  */
 
-        /* We should have an INIT sitting on the Internet. */
+	/* We should have an INIT sitting on the Internet. */
 	if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
 		DUMP_CORE;
 	}
 
-	/* Next we do NOT expect an INIT ACK, since there is no peer.  */
+	/* Next we do NOT expect an INIT ACK, since there is no peer. */
 	if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK0) > 0) {
 		DUMP_CORE;
 	}
@@ -96,29 +96,31 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
 		DUMP_CORE;
 	}
-
+	/* run timeout */
 	jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
 	test_run_timeout();
+	for (i = 0; i < sctp_max_retrans_init; i++) {
 
-	/* We should again have an INIT sitting on the Internet. */
-	if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
-		DUMP_CORE;
+		/* We should have an INIT sitting on the Internet. */
+		if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
+			DUMP_CORE;
+		}
+
+		/* Next we do NOT expect an INIT ACK, since there is no peer. */
+		if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK0) > 0) {
+			DUMP_CORE;
+		}
+
+		/* We should NOT_ have an INIT sitting on the Internet. */
+		if (test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
+			DUMP_CORE;
+		}
+
+		/* run timeout */
+		jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
+		test_run_timeout();
 	}
-
-        /* Next we do NOT expect an INIT ACK, since there is no peer.  
-	 * Note: this also gets our INIT off the network. 
-	 */
-	if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK0) > 0) {
-		DUMP_CORE;
-	}
-
-
-	jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
-	test_run_timeout();
-
-	/* We should NOT have an INIT sitting on the Internet,
-	 * since we've exceeded the maximum INIT attempts. 
-	 */
+	/* We should NOT_ have an INIT sitting on the Internet. */
 	if (test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
 		DUMP_CORE;
 	}
@@ -184,7 +186,7 @@ main(int argc, char *argv[])
 	jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
 	test_run_timeout();
 
-	for (i = 1; i < sctp_max_retrans_init; i++) {
+	for (i = 0; i < sctp_max_retrans_init; i++) {
 		/* We should again have an INIT sitting on the Internet. */
 		if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
 			DUMP_CORE;
@@ -395,6 +397,22 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
 		DUMP_CORE;
 	}
+
+	jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
+	test_run_timeout();
+
+	/* We should again have an INIT sitting on the Internet. */
+	if (!test_for_chunk(SCTP_CID_INIT, TEST_NETWORK0)) {
+		DUMP_CORE;
+	}
+
+        /* Next we do NOT expect an INIT ACK, since there is no peer.  
+	 * Note: this also gets our INIT off the network. 
+	 */
+	if (test_step(SCTP_CID_INIT_ACK, TEST_NETWORK0) > 0) {
+		DUMP_CORE;
+	}
+
 
 	jiffies += asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_INIT] + 1;
 	test_run_timeout();
