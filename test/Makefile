@@ -169,7 +169,8 @@ PASSING_FRAME_TESTS = \
 	ft_frame_t4_timer \
 	ft_frame_prsctp \
 	ft_frame_invalid_length \
-	ft_frame_cookie_ports
+	ft_frame_cookie_ports \
+	ft_frame_hb_rtx
 
 PASSING_V6_FRAME_TESTS = \
 	ft_frame_basic_v6 \
@@ -793,6 +794,9 @@ ft_frame_invalid_length: ft_frame_invalid_length.o  ${FRAME_OBJECTS}
 	${CC} ${CFLAGS} -o $@ $^
 
 ft_frame_cookie_ports: ft_frame_cookie_ports.o  ${FRAME_OBJECTS}
+	${CC} ${CFLAGS} -o $@ $^
+
+ft_frame_hb_rtx: ft_frame_hb_rtx.o  ${FRAME_OBJECTS}
 	${CC} ${CFLAGS} -o $@ $^
 
 test_inqueue.o: test_inqueue.c ${SCTP_HEADERS}
