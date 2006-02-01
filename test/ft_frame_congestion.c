@@ -247,13 +247,7 @@ main(int argc, char *argv[])
 	/* Send the third message after the drop. */
         test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 	if (0 != test_run_network()) { DUMP_CORE; }
-	if (3 != chunk1->tsn_missing_report) { DUMP_CORE; }
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 1352);
-
-	/* Send the fourth message after the drop. */
-        test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	/* Once the tsn_missing_report reaches 4, the chunk should be marked 
+	/* Once the tsn_missing_report reaches 3, the chunk should be marked 
 	 * for fast_retransmit and retransmitted immediately.
 	 */
 
@@ -265,7 +259,6 @@ main(int argc, char *argv[])
 	 */
 	test_verify_congestion_parameters(t1, 6000, 6000, 0, 1352);
 
-        test_frame_get_message(sk2, msg_buf);
         test_frame_get_message(sk2, msg_buf);
         test_frame_get_message(sk2, msg_buf);
         test_frame_get_message(sk2, msg_buf);
