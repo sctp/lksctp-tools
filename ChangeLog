@@ -1,8 +1,12 @@
-Version 2.6.15-1.0.5 of the Developers' Release of the SCTP
+Version 2.6.16-1.0.6 of the Developers' Release of the SCTP
 Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+lksctp-2.6.16-1.0.6: Fri Feb  3 10:54:20 PST 2006
+K:NA          Fix 'fast retransmit' to send a TSN only once.       
+K:NA          Heartbeats exceed maximum retransmission limit.
+K:NA          Correct the number of INIT retransmissions.
 K:NA          Fix sctp_rcv_ootb() to handle the last chunk of a packet
               correctly.
 K:NA          Fix couple of races between sctp_peeloff() and sctp_rcv().
