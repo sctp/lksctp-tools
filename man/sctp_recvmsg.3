@@ -14,7 +14,7 @@ sctp_recvmsg \- Receive a message from a SCTP socket.
 .B #include <sys/socket.h>
 .B #include <netinet/sctp.h>
 .sp
-.BI "int sctp_recvmsg(int " sd ", void * " msg ", size_t * " len ,
+.BI "int sctp_recvmsg(int " sd ", void * " msg ", size_t " len ,
 .BI "                 struct sockaddr * " from ", socklen_t * " fromlen , 
 .BI "                 struct sctp_sndrcvinfo * " sinfo ", int * " msg_flags);
 .fi
