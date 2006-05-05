@@ -4,19 +4,19 @@
 
 Network Working Group                                         R. Stewart
 Internet-Draft                                                M. Ramalho
-Expires: May 26, 2006                                Cisco Systems, Inc.
+Expires: September 7, 2006                           Cisco Systems, Inc.
                                                                   Q. Xie
                                                           Motorola, Inc.
                                                                M. Tuexen
                                       Univ. of Applied Sciences Muenster
                                                                P. Conrad
                                                   University of Delaware
-                                                       November 22, 2005
+                                                           March 6, 2006
 
 
       Stream Control Transmission Protocol (SCTP) Dynamic Address
                             Reconfiguration
-                   draft-ietf-tsvwg-addip-sctp-13.txt
+                   draft-ietf-tsvwg-addip-sctp-14.txt
 
 Status of this Memo
 
@@ -41,11 +41,11 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on May 26, 2006.
+   This Internet-Draft will expire on September 7, 2006.
 
 Copyright Notice
 
-   Copyright (C) The Internet Society (2005).
+   Copyright (C) The Internet Society (2006).
 
 Abstract
 
@@ -53,9 +53,9 @@ Abstract
 
 
 
-Stewart, et al.           Expires May 26, 2006                  [Page 1]
+Stewart, et al.         Expires September 7, 2006               [Page 1]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
    Protocol (SCTP) [RFC2960] that provides a method to reconfigure IP
@@ -65,60 +65,57 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 Table of Contents
 
    1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  4
-   2.  Conventions  . . . . . . . . . . . . . . . . . . . . . . . . .  5
-   3.  Additional Chunks and Parameters . . . . . . . . . . . . . . .  6
-     3.1.  New Chunk Types  . . . . . . . . . . . . . . . . . . . . .  6
-       3.1.1.  Address Configuration Change Chunk (ASCONF)  . . . . .  6
+   2.  Conventions  . . . . . . . . . . . . . . . . . . . . . . . . .  4
+   3.  Additional Chunks and Parameters . . . . . . . . . . . . . . .  4
+     3.1.  New Chunk Types  . . . . . . . . . . . . . . . . . . . . .  5
+       3.1.1.  Address Configuration Change Chunk (ASCONF)  . . . . .  5
        3.1.2.  Address Configuration Acknowledgment Chunk
-               (ASCONF-ACK) . . . . . . . . . . . . . . . . . . . . .  7
-     3.2.  New Parameter Types  . . . . . . . . . . . . . . . . . . .  8
-       3.2.1.  Add IP Address . . . . . . . . . . . . . . . . . . . .  9
-       3.2.2.  Delete IP Address  . . . . . . . . . . . . . . . . . . 10
-       3.2.3.  Error Cause Indication . . . . . . . . . . . . . . . . 11
-       3.2.4.  Set Primary IP Address . . . . . . . . . . . . . . . . 12
-       3.2.5.  Success Indication . . . . . . . . . . . . . . . . . . 13
-       3.2.6.  Adaptation Layer Indication  . . . . . . . . . . . . . 14
-       3.2.7.  Supported Extensions Parameter . . . . . . . . . . . . 14
-     3.3.  New Error Causes . . . . . . . . . . . . . . . . . . . . . 15
+               (ASCONF-ACK) . . . . . . . . . . . . . . . . . . . . .  6
+     3.2.  New Parameter Types  . . . . . . . . . . . . . . . . . . .  7
+       3.2.1.  Add IP Address . . . . . . . . . . . . . . . . . . . .  8
+       3.2.2.  Delete IP Address  . . . . . . . . . . . . . . . . . .  9
+       3.2.3.  Error Cause Indication . . . . . . . . . . . . . . . . 10
+       3.2.4.  Set Primary IP Address . . . . . . . . . . . . . . . . 11
+       3.2.5.  Success Indication . . . . . . . . . . . . . . . . . . 12
+       3.2.6.  Adaptation Layer Indication  . . . . . . . . . . . . . 13
+       3.2.7.  Supported Extensions Parameter . . . . . . . . . . . . 13
+     3.3.  New Error Causes . . . . . . . . . . . . . . . . . . . . . 14
        3.3.1.  Error Cause: Request to Delete Last Remaining IP
-               Address  . . . . . . . . . . . . . . . . . . . . . . . 15
+               Address  . . . . . . . . . . . . . . . . . . . . . . . 14
        3.3.2.  Error Cause: Operation Refused Due to Resource
-               Shortage . . . . . . . . . . . . . . . . . . . . . . . 16
-       3.3.3.  Error Cause: Request to Delete Source IP Address . . . 17
+               Shortage . . . . . . . . . . . . . . . . . . . . . . . 15
+       3.3.3.  Error Cause: Request to Delete Source IP Address . . . 16
        3.3.4.  Error Cause: Association Aborted due to illegal
-               ASCONF-ACK . . . . . . . . . . . . . . . . . . . . . . 18
-       3.3.5.  Error Cause: Request refused - no authorization. . . . 18
-   4.  Procedures . . . . . . . . . . . . . . . . . . . . . . . . . . 20
-     4.1.  ASCONF Chunk Procedures  . . . . . . . . . . . . . . . . . 20
-       4.1.1.  Congestion Control of ASCONF Chunks  . . . . . . . . . 21
-     4.2.  Upon reception of an ASCONF Chunk. . . . . . . . . . . . . 22
-     4.3.  General rules for address manipulation . . . . . . . . . . 24
-       4.3.1.  A special case for OOTB ABORT chunks . . . . . . . . . 28
-       4.3.2.  A special case for changing an address.  . . . . . . . 28
-     4.4.  Setting of the primary address . . . . . . . . . . . . . . 29
-   5.  Security Considerations  . . . . . . . . . . . . . . . . . . . 30
-   6.  IANA considerations  . . . . . . . . . . . . . . . . . . . . . 31
-   7.  Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 32
-   8.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 32
-   Appendix A.  Abstract Address Handling . . . . . . . . . . . . . . 33
-     A.1.  General remarks  . . . . . . . . . . . . . . . . . . . . . 33
-     A.2.  Generalized endpoints  . . . . . . . . . . . . . . . . . . 33
-     A.3.  Associations . . . . . . . . . . . . . . . . . . . . . . . 34
-     A.4.  Relationship with RFC 2960 . . . . . . . . . . . . . . . . 35
-     A.5.  Rules for address manipulation . . . . . . . . . . . . . . 35
+               ASCONF-ACK . . . . . . . . . . . . . . . . . . . . . . 17
+       3.3.5.  Error Cause: Request refused - no authorization. . . . 17
+   4.  Procedures . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+     4.1.  ASCONF Chunk Procedures  . . . . . . . . . . . . . . . . . 18
+       4.1.1.  Congestion Control of ASCONF Chunks  . . . . . . . . . 19
+     4.2.  Upon reception of an ASCONF Chunk. . . . . . . . . . . . . 20
+     4.3.  General rules for address manipulation . . . . . . . . . . 22
+       4.3.1.  A special case for OOTB ABORT chunks . . . . . . . . . 25
+       4.3.2.  A special case for changing an address.  . . . . . . . 26
+     4.4.  Setting of the primary address . . . . . . . . . . . . . . 26
+   5.  Security Considerations  . . . . . . . . . . . . . . . . . . . 27
+   6.  IANA considerations  . . . . . . . . . . . . . . . . . . . . . 27
+   7.  Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 28
+   8.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 28
+   Appendix A.  Abstract Address Handling . . . . . . . . . . . . . . 28
+     A.1.  General remarks  . . . . . . . . . . . . . . . . . . . . . 29
+     A.2.  Generalized endpoints  . . . . . . . . . . . . . . . . . . 29
+     A.3.  Associations . . . . . . . . . . . . . . . . . . . . . . . 29
+     A.4.  Relationship with RFC 2960 . . . . . . . . . . . . . . . . 30
+     A.5.  Rules for address manipulation . . . . . . . . . . . . . . 31
 
 
 
-Stewart, et al.           Expires May 26, 2006                  [Page 2]
+Stewart, et al.         Expires September 7, 2006               [Page 2]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 36
-   Intellectual Property and Copyright Statements . . . . . . . . . . 38
-
-
-
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 32
+   Intellectual Property and Copyright Statements . . . . . . . . . . 34
 
 
 
@@ -165,9 +162,12 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-Stewart, et al.           Expires May 26, 2006                  [Page 3]
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 3]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
 1.  Introduction
@@ -177,9 +177,7 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    ability to:
 
    1.  reconfigure IP address information on an existing association.
-
    2.  set the remote primary path.
-
    3.  exchange adaptation layer information during association setup.
 
    These extensions enable SCTP to be utilized in the following
@@ -190,40 +188,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
        graceful method to add to the interfaces of an existing
        association.  For IPv6 this feature allows renumbering of
        existing associations.
-
    2.  This provides a method for an endpoint to request that its peer
        set its primary destination address.  This can be useful when an
        address is about to be deleted, or when an endpoint has some
        predetermined knowledge about which is the preferred address to
        receive SCTP packets upon.
-
    3.  This feature can be used to extend the usability of SCTP without
        modifying it by allowing endpoints to exchange some information
        during association setup.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                  [Page 4]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 2.  Conventions
@@ -231,55 +203,7 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    The keywords MUST, MUST NOT, REQUIRED, SHALL, SHALL NOT, SHOULD,
    SHOULD NOT, RECOMMENDED, NOT RECOMMENDED, MAY, and OPTIONAL, when
    they appear in this document, are to be interpreted as described in
-   RFC2119 [2].
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                  [Page 5]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+   RFC2119 [RFC2119].
 
 
 3.  Additional Chunks and Parameters
@@ -288,14 +212,19 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    parameters to allow:
 
    o  Dynamic addition of IP Addresses to an association.
-
    o  Dynamic deletion of IP Addresses from an association.
-
    o  A request to set the primary address the peer will use when
       sending to an endpoint.
 
    Additionally, this section describes three new error causes that
    support these new chunks and parameters.
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 4]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
 
 3.1.  New Chunk Types
 
@@ -313,12 +242,12 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    It should be noted that the ASCONF Chunk format requires the receiver
    to report to the sender if it does not understand the ASCONF Chunk.
    This is accomplished by setting the upper bits in the chunk type as
-   described in RFC2960 [6] section 3.2.  Note that the upper two bits
-   in the ASCONF Chunk are set to one.  As defined in RFC2960 [6]
-   section 3.2, setting these upper bits in this manner will cause the
-   receiver that does not understand this chunk to skip the chunk and
-   continue processing, but report in an Operation Error Chunk using the
-   'Unrecognized Chunk Type' cause of error.
+   described in RFC2960 [RFC2960] section 3.2.  Note that the upper two
+   bits in the ASCONF Chunk are set to one.  As defined in RFC2960
+   [RFC2960] section 3.2, setting these upper bits in this manner will
+   cause the receiver that does not understand this chunk to skip the
+   chunk and continue processing, but report in an Operation Error Chunk
+   using the 'Unrecognized Chunk Type' cause of error.
 
 3.1.1.  Address Configuration Change Chunk (ASCONF)
 
@@ -326,16 +255,31 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    configuration change requests that MUST be acknowledged.  The
    information carried in the ASCONF Chunk uses the form of a Type-
    Length-Value (TLV), as described in "3.2.1 Optional/Variable-length
-   Parameter Format" in RFC2960 [6], for all variable parameters.  This
-   chunk MUST be sent in an authenticated way by using the mechanism
-   defined in SCTP-AUTH [7].  If this chunk is received unauthenticated
-   it MUST be silently discarded as described in SCTP-AUTH [7].
+   Parameter Format" in RFC2960 [RFC2960], for all variable parameters.
+   This chunk MUST be sent in an authenticated way by using the
+   mechanism defined in SCTP-AUTH [I-D.ietf-tsvwg-sctp-auth].  If this
+   chunk is received unauthenticated it MUST be silently discarded as
+   described in SCTP-AUTH [I-D.ietf-tsvwg-sctp-auth].
 
 
 
-Stewart, et al.           Expires May 26, 2006                  [Page 6]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 5]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
         0                   1                   2                   3
@@ -365,10 +309,10 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    Address Parameter : 8 or 20 bytes (depending on type)
 
    This field contains an address parameter, either IPv6 or IPv4, from
-   RFC2960 [6].  The address is an address of the sender of the ASCONF
-   chunk, the address MUST be considered part of the association by the
-   peer endpoint (the receiver of the ASCONF chunk).  This field may be
-   used by the receiver of the ASCONF to help in finding the
+   RFC2960 [RFC2960].  The address is an address of the sender of the
+   ASCONF chunk, the address MUST be considered part of the association
+   by the peer endpoint (the receiver of the ASCONF chunk).  This field
+   may be used by the receiver of the ASCONF to help in finding the
    association.  If the address 0.0.0.0 or ::0 is provided the receiver
    MAY lookup the association by other information provided in the
    packet.  This parameter MUST be present in every ASCONF message i.e.
@@ -389,16 +333,17 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-Stewart, et al.           Expires May 26, 2006                  [Page 7]
+Stewart, et al.         Expires September 7, 2006               [Page 6]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
    the reception.  It carries zero or more results for any ASCONF
    Parameters that were processed by the receiver.  This chunk MUST be
    sent in an authenticated way by using the mechanism defined in SCTP-
-   AUTH [7].  If this chunk is received unauthenticated it MUST be
-   silently discarded as described in SCTP-AUTH [7].
+   AUTH [I-D.ietf-tsvwg-sctp-auth].  If this chunk is received
+   unauthenticated it MUST be silently discarded as described in SCTP-
+   AUTH [I-D.ietf-tsvwg-sctp-auth].
 
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -434,21 +379,26 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 3.2.  New Parameter Types
 
    The seven new parameters added follow the format defined in section
-   3.2.1 of RFC2960 [6].  Table 2, 3 and 4 describes the parameters.
+   3.2.1 of RFC2960 [RFC2960].  Table 2, 3 and 4 describes the
+   parameters.
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 7]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
 
         Address Configuration Parameters   Parameter Type
         -------------------------------------------------
         Set Primary Address                  0xC004
-        Adaption Layer Indication            0xC006
+        Adaptation Layer Indication          0xC006
         Supported Extensions                 0x8008
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                  [Page 8]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
 
         Table 2: Parameters that can be used in INIT/INIT-ACK chunk
 
@@ -492,24 +442,24 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    request parameter.  It is in host byte order and is only meaningful
    to the sender.  The receiver of the ASCONF Chunk will copy this 32
    bit value into the ASCONF Response Correlation ID field of the
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 8]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    ASCONF-ACK response parameter.  The sender of the ASCONF can use this
    same value in the ASCONF-ACK to find which request the response is
    for.
 
    Address Parameter: TLV
 
-
-
-
-Stewart, et al.           Expires May 26, 2006                  [Page 9]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    This field contains an IPv4 or IPv6 address parameter as described in
-   3.3.2.1 of RFC2960 [6].  The complete TLV is wrapped within this
-   parameter.  It informs the receiver that the address specified is to
-   be added to the existing association.  This parameter MUST NOT
+   3.3.2.1 of RFC2960 [RFC2960].  The complete TLV is wrapped within
+   this parameter.  It informs the receiver that the address specified
+   is to be added to the existing association.  This parameter MUST NOT
    contain a broadcast or multicast address.  If the address 0.0.0.0 or
    ::0 is provided, the source address of the packet MUST be added.
 
@@ -548,6 +498,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    This is an opaque integer assigned by the sender to identify each
    request parameter.  It is in host byte order and is only meaningful
    to the sender.  The receiver of the ASCONF Chunk will copy this 32
+
+
+
+Stewart, et al.         Expires September 7, 2006               [Page 9]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    bit value into the ASCONF Response Correlation ID field of the
    ASCONF-ACK response parameter.  The sender of the ASCONF can use this
    same value in the ASCONF-ACK to find which request the response is
@@ -555,19 +513,13 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
    Address Parameter: TLV
 
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 10]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    This field contains an IPv4 or IPv6 address parameter as described in
-   3.3.2.1 of RFC2960 [6].  The complete TLV is wrapped within this
-   parameter.  It informs the receiver that the address specified is to
-   be removed from the existing association.  This parameter MUST NOT
-   contain a broadcast or multicast address.  If the address 0.0.0.0 or
-   ::0 is provided, the source address of the packet MUST be deleted.
+   3.3.2.1 of RFC2960 [RFC2960].  The complete TLV is wrapped within
+   this parameter.  It informs the receiver that the address specified
+   is to be removed from the existing association.  This parameter MUST
+   NOT contain a broadcast or multicast address.  If the address 0.0.0.0
+   or ::0 is provided, all addresses of the peer except the source
+   address of the packet MUST be deleted.
 
    An example TLV deleting the IPv4 address 10.1.1.1 from an existing
    association would look as follows:
@@ -602,6 +554,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    ASCONF-Response Correlation ID: 32 bits
 
    This is an opaque integer assigned by the sender to identify each
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 10]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    request parameter.  The receiver of the ASCONF Chunk will copy this
    32 bit value from the ASCONF-Request Correlation ID into the ASCONF
    Response Correlation ID field so the peer can easily correlate the
@@ -610,18 +570,10 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    Error Cause(s): TLV(s)
 
    When reporting an error this response parameter is used to wrap one
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 11]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    or more standard error causes normally found within an SCTP
-   Operational Error or SCTP Abort (as defined in RFC2960 [6]).  The
-   Error Cause(s) follow the format defined in section 3.3.10 of RFC2960
-   [6].
+   Operational Error or SCTP Abort (as defined in RFC2960 [RFC2960]).
+   The Error Cause(s) follow the format defined in section 3.3.10 of
+   RFC2960 [RFC2960].
 
    Valid Chunk Appearance
 
@@ -653,26 +605,24 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    Address Parameter: TLV
 
    This field contains an IPv4 or IPv6 address parameter as described in
-   3.3.2.1 of RFC2960 [6].  The complete TLV is wrapped within this
-   parameter.  It requests the receiver to mark the specified address as
-   the primary address to send data to (see section 5.1.2 of RFC2960
-   [6]).  The receiver MAY mark this as its primary upon receiving this
-   request.  If the address 0.0.0.0 or ::0 is provided, the receiver MAY
-   mark the source address of the packet as its primary.
+   3.3.2.1 of RFC2960 [RFC2960].  The complete TLV is wrapped within
+   this parameter.  It requests the receiver to mark the specified
+   address as the primary address to send data to (see section 5.1.2 of
+   RFC2960 [RFC2960]).  The receiver MAY mark this as its primary upon
+   receiving this request.  If the address 0.0.0.0 or ::0 is provided,
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 11]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
+   the receiver MAY mark the source address of the packet as its
+   primary.
 
    An example TLV requesting that the IPv4 address 10.1.1.1 be made the
    primary destination address would look as follows:
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 12]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
 
            +--------------------------------+
            |  Type=0xC004   | Length = 16   |
@@ -716,20 +666,20 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    This is an opaque integer assigned by the sender to identify each
    request parameter.  The receiver of the ASCONF Chunk will copy this
    32 bit value from the ASCONF-Request Correlation ID into the ASCONF
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 12]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    Response Correlation ID field so the peer can easily correlate the
    request to this response.
 
    Valid Chunk Appearance
 
    The Success Indication parameter may only appear in the ASCONF-ACK
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 13]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    chunk type.
 
 3.2.6.  Adaptation Layer Indication
@@ -739,14 +689,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
        |        Type =0xC006           |    Length = 8                 |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-       |                     Adaption Code point                       |
+       |                   Adaptation Code point                       |
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
    This parameter is specified for the communication of peer upper layer
    protocols.  It is envisioned to be used for flow control and other
    adaptation layers that require an indication to be carried in the
    INIT and INIT-ACK.  Each adaptation layer that is defined that wishes
-   to use this parameter MUST specify a an adaption code point in an
+   to use this parameter MUST specify a an adaptation code point in an
    appropriate RFC defining its use and meaning.  This parameter SHOULD
    NOT be examined by the receiving SCTP implementation and should be
    passed opaquely to the upper layer protocol.
@@ -763,6 +713,23 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    extensions that the sender supports.
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 13]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -776,31 +743,18 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 14]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    Parameter Type This field holds the IANA defined parameter type for
       Supported Extensions Parameter.  The suggested value of this field
       for IANA is 0x8008.
-
    Parameter Type Length This field holds the length of the parameter,
       including the Parameter Type, Parameter Length and any addition
       supported extensions.  Note the length MUST NOT include any
       padding.
-
    CHUNK TYPE X This field(s) hold the chunk type of any SCTP
       extension(s) that are currently supported by the sending SCTP.
       Multiple chunk types may be defined listing each additional
       feature that the sender supports.  The sender MUST NOT include
       multiple Supported Extensions Parameter within any chunk.
-
    Parameter Appearence This parameter may appear in the INIT or INIT-
       ACK chunk.  This parameter MUST NOT appear in any other chunk.
 
@@ -824,23 +778,18 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
    Cause of error
 
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 14]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    Request to Delete Last Remaining IP address: The receiver of this
    error sent a request to delete the last IP address from its
    association with its peer.  This error indicates that the request is
    rejected.
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 15]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
 
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -879,6 +828,20 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    entire TLV that is refused is copied from the ASCONF into the error
    cause.
 
+
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 15]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
         0                   1                   2                   3
         0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -890,13 +853,6 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
    An example of a failed addition in an Error Cause TLV would look as
    follows in the response ASCONF-ACK message:
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 16]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
 
            +--------------------------------+
            | Type = 0xC003  | Length = 28   |
@@ -937,21 +893,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 17]
+Stewart, et al.         Expires September 7, 2006              [Page 16]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
            +--------------------------------+
@@ -1005,9 +949,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-Stewart, et al.           Expires May 26, 2006                 [Page 18]
+Stewart, et al.         Expires September 7, 2006              [Page 17]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
         0                   1                   2                   3
@@ -1018,52 +962,6 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
        \                     TLV-Copied-From-ASCONF                    /
        /                                                               \
        +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 19]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 4.  Procedures
@@ -1080,31 +978,25 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       should contain all of the TLV(s) of information necessary to be
       sent to the remote endpoint, and unique correlation identities for
       each request.
-
    A2) A serial number should be assigned to the Chunk.  The serial
       number should be a monotonically increasing number.  The serial
       number MUST be initialized at the start of the association to the
       same value as the Initial TSN and every time a new ASCONF chunk is
       created it is incremented by one after assigning the serial number
       to the newly created chunk .
-
    A3) If no ASCONF Chunk is outstanding (un-acknowledged) with the
       remote peer, send the chunk.
-
    A4) Start a T-4 RTO timer, using the RTO value of the selected
-      destination address (normally the primary path; see RFC2960 [6]
-      section 6.4 for details).
-
+      destination address (normally the primary path; see RFC2960
+      [RFC2960] section 6.4 for details).
    A5) When the ASCONF-ACK that acknowledges the serial number last sent
       arrives, stop the T-4 RTO timer, and clear the appropriate
       association and destination error counters as defined in RFC2960
-      [6] section 8.1 and 8.2.
-
+      [RFC2960] section 8.1 and 8.2.
    A6) Process all of the TLVs within the ASCONF-ACK to find out
       particular status information returned to the various requests
       that were sent.  Use the Correlation IDs to correlate the request
       and the responses.
-
    A7) If an error response is received for a TLV parameter, all TLVs
       with no response before the failed TLV are considered successful
       if not reported.  All TLVs after the failed response are
@@ -1113,19 +1005,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 20]
+Stewart, et al.         Expires September 7, 2006              [Page 18]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
    A8) If there is no response(s) to specific TLV parameter(s), and no
       failures are indicated, then all request(s) are considered
       successful.
-
    A9) If the peer responds to an ASCONF with an ERROR chunk reporting
       that it did not recognize the ASCONF chunk type, the sender of the
       ASCONF MUST NOT send any further ASCONF chunks and MUST stop its
@@ -1134,32 +1021,27 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    If the T-4 RTO timer expires the endpoint should do the following:
 
    B1) Increment the error counters and perform path failure detection
-      on the appropriate destination address as defined in RFC2960 [6]
-      section 8.1 and 8.2.
-
+      on the appropriate destination address as defined in RFC2960
+      [RFC2960] section 8.1 and 8.2.
    B2) Increment the association error counters and perform endpoint
-      failure detection on the association as defined in RFC2960 [6]
-      section 8.1 and 8.2.
-
+      failure detection on the association as defined in RFC2960
+      [RFC2960] section 8.1 and 8.2.
    B3) Back-off the destination address RTO value to which the ASCONF
       chunk was sent by doubling the RTO timer value.
-
       Note: The RTO value is used in the setting of all timer types for
       SCTP.  Each destination address has a single RTO estimate.
-
    B4) Re-transmit the ASCONF Chunk last sent and if possible choose an
-      alternate destination address (please refer to RFC2960 [6] section
-      6.4.1).  An endpoint MUST NOT add new parameters to this chunk, it
-      MUST be the same (including its serial number) as the last ASCONF
-      sent.
-
+      alternate destination address (please refer to RFC2960 [RFC2960]
+      section 6.4.1).  An endpoint MUST NOT add new parameters to this
+      chunk, it MUST be the same (including its serial number) as the
+      last ASCONF sent.
    B5) Restart the T-4 RTO timer.  Note that if a different destination
       is selected, then the RTO used will be that of the new destination
       address.
 
    Note: the total number of re-transmissions is limited by B2 above.
    If the maximum is reached, the association will fail and enter into
-   the CLOSED state (see RFC2960 [6] section 6.4.1 for details).
+   the CLOSED state (see RFC2960 [RFC2960] section 6.4.1 for details).
 
 4.1.1.  Congestion Control of ASCONF Chunks
 
@@ -1167,16 +1049,6 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    that these transfers MUST NOT cause congestion within the network.
    To achieve this, we place these restrictions on the transfer of
    ASCONF Chunks:
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 21]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
 
    R1) One and only one ASCONF Chunk MAY be in transit and
       unacknowledged at any one time.  If a sender, after sending an
@@ -1186,19 +1058,23 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       restriction binds each side, so at any time two ASCONF may be in-
       transit on any given association (one sent from each endpoint).
 
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 19]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    R2) An ASCONF may be bundled with any other chunk type (except other
       ASCONF Chunks).
-
    R3) An ASCONF-ACK may be bundled with any other chunk type except
       other ASCONF-ACKs.
-
    R4) Both ASCONF and ASCONF-ACK chunks MUST NOT be sent in any SCTP
       state except ESTABLISHED, SHUTDOWN-PENDING, SHUTDOWN-RECEIVED and
       SHUTDOWN-SENT.
-
    R5) An ASCONF MUST NOT be larger than the path MTU of the
       destination.
-
    R6) An ASCONF-ACK SHOULD not be larger than the path MTU.  In some
       circumstances an ASCONF-ACK may exceed the path MTU and in such a
       case IP fragmentation should be used to transmit the chunk.
@@ -1219,26 +1095,15 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
    L1) Use the source address and port number of the sender to attempt
       to identify the association (i.e. use the same method defined in
-      RFC2960 [6] used for all other SCTP chunks).  If found proceed to
-      rule L4.
-
+      RFC2960 [RFC2960] used for all other SCTP chunks).  If found
+      proceed to rule L4.
    L2) If the association is not found, use the address found in the
       Address Parameter TLV combined with the port number found in the
       SCTP common header.  If found proceed to rule L4.
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 22]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    L3) If neither L1 or L2 locates the association, treat the chunk as
-      an Out Of The Blue chunk as defined in RFC2960 [6].
-
+      an Out Of The Blue chunk as defined in RFC2960 [RFC2960].
    L4) Follow the normal rules to validate the SCTP verification tag
-      found in RFC2960 [6].
+      found in RFC2960 [RFC2960].
 
    After identification and verification of the association, the
    following should be performed to properly process the ASCONF Chunk:
@@ -1247,10 +1112,18 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       stored in a new association variable 'Peer-Serial-Number'.  This
       value MUST be initialized to the Initial TSN value minus 1.
 
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 20]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    C2) If the value found in the serial number is equal to the ('Peer-
       Serial-Number' + 1), the endpoint MUST:
-
-
 
       V1) Process the TLVs contained within the Chunk performing the
          appropriate actions as indicated by each TLV type.  The TLVs
@@ -1260,64 +1133,57 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
          first.  The next TLV in the chunk (the middle one) MUST be
          processed second and finally the last TLV in the Chunk MUST be
          processed last.
-
       V2) In processing the chunk, the receiver should build a response
          message with the appropriate error TLVs, as specified in the
          Parameter type bits for any ASCONF Parameter it does not
          understand.  To indicate an unrecognized parameter, cause type
-         8 as defined in the ERROR in 3.3.10.8 of RFC2960 [6] should be
-         used.  The endpoint may also use the response to carry
-         rejections for other reasons such as resource shortages etc,
-         using the Error Cause TLV and an appropriate error condition.
-
+         8 as defined in the ERROR in 3.3.10.8 of RFC2960 [RFC2960]
+         should be used.  The endpoint may also use the response to
+         carry rejections for other reasons such as resource shortages
+         etc, using the Error Cause TLV and an appropriate error
+         condition.
          Note: a positive response is implied if no error is indicated
          by the sender.
-
       V3) All responses MUST copy the ASCONF-Request Correlation ID
          field received in the ASCONF parameter, from the TLV being
          responded to, into the ASCONF-Request Correlation ID field in
          the response parameter.
-
       V4) After processing the entire Chunk, the receiver of the ASCONF
          MUST send all TLVs for both unrecognized parameters and any
          other status TLVs inside the ASCONF-ACK chunk that acknowledges
          the arrival and processing of the ASCONF Chunk.
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 23]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
       V5) Update the 'Peer-Serial-Number' to the value found in the
          serial number field.
-
    C3) If the value found in the serial number is equal to the value
       stored in the 'Peer-Serial-Number', the endpoint should:
-
-
 
       X1) Parse the ASCONF Chunk TLVs but the endpoint MUST NOT take any
          action on the TLVs parsed (since it has already performed these
          actions).
-
       X2) Build a response message with the appropriate response TLVs as
          specified in the ASCONF Parameter type bits, for any parameter
          it does not understand or could not process.
-
       X3) After parsing the entire Chunk, it MUST send any response TLV
          errors and status with an ASCONF-ACK chunk acknowledging the
          arrival and processing of the ASCONF Chunk.
 
-      X4) The endpoint MUST NOT update its 'Peer-Serial-Number'.
 
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 21]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
+      X4) The endpoint MUST NOT update its 'Peer-Serial-Number'.
       Note: the response to the retransmitted ASCONF MUST be the same as
       the original response.  This MAY mean an implementation must keep
       state in order to respond with the same exact answer (including
       resource considerations that may have made the implementation
       refuse a request).
-
       IMPLEMENTATION NOTE: As an optimization a receiver may wish to
       save the last ASCONF-ACK for some predetermined period of time and
       instead of re-processing the ASCONF (with the same serial number)
@@ -1325,11 +1191,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       arrival of a new serial number to discard the previously saved
       ASCONF-ACK or any other means it may choose to expire the saved
       ASCONF-ACK.
-
    C4) Otherwise, the ASCONF Chunk is discarded since it must be either
       a stale packet or from an attacker.  A receiver of such a packet
       MAY log the event for security purposes.
-
    C5) In both cases C2 and C3 the ASCONF-ACK MUST be sent back to the
       source address contained in the IP header of the ASCONF being
       responded to.
@@ -1339,43 +1203,42 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    When building TLV parameters for the ASCONF Chunk that will add or
    delete IP addresses the following rules should be applied:
 
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 24]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    D0) If an endpoint receives an ASCONF-ACK that is greater than or
       equal to the next serial number to be used but no ASCONF chunk is
       outstanding the endpoint MUST ABORT the association.  Note that a
       sequence number is greater than if it is no more than 2^^31-1
       larger than the current sequence number (using serial arithmetic).
-
    D1) When adding an IP address to an association, the IP address is
       NOT considered fully added to the association until the ASCONF-ACK
       arrives.  This means that until such time as the ASCONF containing
       the add is acknowledged the sender MUST NOT use the new IP address
       as a source for ANY SCTP packet except on carrying an ASCONF
       chunk.  The receiver of the add IP address request may use the
-      address as a destination immediately.
-
+      address as a destination immediately.  The receiver MUST use the
+      address verification procedure for the added address before using
+      that address.
    D2) After the ASCONF-ACK of an IP address add arrives, the endpoint
       MAY begin using the added IP address as a source address for any
       type of SCTP chunk.
-
    D3a) If an endpoint receives an Error Cause TLV indicating that the
       IP address Add or IP address Deletion parameters was not
       understood, the endpoint MUST consider the operation failed and
       MUST NOT attempt to send any subsequent Add or Delete requests to
       the peer.
 
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 22]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    D3b) If an endpoint receives an Error Cause TLV indicating that the
       IP address Set Primary IP Address parameter was not understood,
       the endpoint MUST consider the operation failed and MUST NOT
       attempt to send any subsequent Set Primary IP Address requests to
       the peer.
-
    D4) When deleting an IP address from an association, the IP address
       MUST be considered a valid destination address for the reception
       of SCTP packets until the ASCONF-ACK arrives and MUST NOT be used
@@ -1385,7 +1248,6 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       association.  One special consideration is that ABORT chunks
       arriving destined to the IP address being deleted MUST be ignored
       (see Section 4.3.1 for further details).
-
    D5) An endpoint MUST NOT delete its last remaining IP address from an
       association.  In other words if an endpoint is NOT multi-homed it
       MUST NOT use the delete IP address without an add IP address
@@ -1393,25 +1255,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       endpoint sends multiple requests to delete IP addresses it MUST
       NOT delete all of the IP addresses that the peer has listed for
       the requester.
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 25]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    D6) An endpoint MUST NOT set an IP header source address for an SCTP
       packet holding the ASCONF Chunk to be the same as an address being
       deleted by the ASCONF Chunk.
-
    D7) If a request is received to delete the last remaining IP address
       of a peer endpoint, the receiver MUST send an Error Cause TLV with
       the error cause set to the new error code 'Request to Delete Last
       Remaining IP Address'.  The requested delete MUST NOT be performed
       or acted upon, other than to send the ASCONF-ACK.
-
    D8) If a request is received to delete an IP address which is also
       the source address of the IP packet which contained the ASCONF
       chunk, the receiver MUST reject this request.  To reject the
@@ -1419,12 +1270,10 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       error code 'Request to Delete Source IP Address' (unless Rule D5
       has also been violated, in which case the error code 'Request to
       Delete Last Remaining IP Address' is sent).
-
    D9) If an endpoint receives an ADD IP address request and does not
       have the local resources to add this new address to the
       association, it MUST return an Error Cause TLV set to the new
       error code 'Operation Refused Due to Resource Shortage'.
-
    D10) If an endpoint receives an 'Out of Resource' error in response
       to its request to ADD an IP address to an association, it must
       either ABORT the association or not consider the address part of
@@ -1432,6 +1281,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       the association, it must consider the add attempt failed and NOT
       use this address since its peer will treat SCTP packets destined
       to the address as Out Of The Blue packets.
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 23]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
 
    D11) When an endpoint receiving an ASCONF to add an IP address sends
       an 'Out of Resource' in its response, it MUST also fail any
@@ -1441,25 +1298,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
       once a receiver begins failing any ADD or DELETE request, it must
       fail all subsequent ADD or DELETE requests contained in that
       single ASCONF.
-
    D12) When an endpoint receives a request to delete an IP address that
       is the current primary address, it is an implementation decision
       as to how that endpoint chooses the new primary address.
-
    D13) When an endpoint receives a valid request to DELETE an IP
       address the endpoint MUST consider the address no longer as part
       of the association.  It MUST NOT send SCTP packets for the
       association to that address and it MUST treat subsequent packets
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 26]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
       received from that address as Out Of The Blue.
-
       During the time interval between sending out the ASCONF and
       receiving the ASCONF-ACK it MAY be possible to receive DATA chunks
       out of order.  The following examples illustrate these problems:
@@ -1487,6 +1333,19 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    follows:
 
 
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 24]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
        Endpoint-A                                     Endpoint-Z
        ----------                                     ----------
                                     /------------New DATA:
@@ -1505,17 +1364,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    when awaiting the ASCONF-ACK.  The endpoint MUST NOT source data from
    this new address until the ASCONF-ACK arrives but it may receive out
    of order data as illustrated and MUST NOT treat this data as an OOTB
-   datagram (please see RFC2960 [6] section 8.4).  It MAY drop the data
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 27]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
-   silently or it MAY consider it part of the association but it MUST
-   NOT respond with an ABORT.
+   datagram (please see RFC2960 [RFC2960] section 8.4).  It MAY drop the
+   data silently or it MAY consider it part of the association but it
+   MUST NOT respond with an ABORT.
 
    For the DELETE case, an endpoint MAY respond to the late arriving
    DATA packet as an OOTB datagram or it MAY hold the deleting IP
@@ -1543,6 +1394,14 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
                                   \----/-----------> OOTB
        (Ignored <---------------------/-------------ABORT
         by rule D4)                  /
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 25]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
               <---------------------/
 
 
@@ -1562,14 +1421,6 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    without using the source address found in the IP header.
 
    The receiver of such a chunk MUST always first use the source address
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 28]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
    found in the IP header in looking up the association.  The receiver
    should attempt to use the address found in the Address Bytes field
    only if the lookup fails using the source address from the IP header.
@@ -1602,28 +1453,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 29]
+Stewart, et al.         Expires September 7, 2006              [Page 26]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
 5.  Security Considerations
@@ -1633,53 +1465,13 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    hijacked.
 
    This document requires the use of the authentication mechanism
-   defined in SCTP-AUTH [7] to limit the ability of an attacker to
-   hijack an association.  Hijacking an association by using ADD/DELETE
-   of an IP address is only possible for an attacker who is able to
-   intercept the association setup.  However, if a preconfigured shared
-   end-point pair key is used this is not possible.  For a more detailed
-   analysis see SCTP-AUTH [7].
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 30]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+   defined in SCTP-AUTH [I-D.ietf-tsvwg-sctp-auth] to limit the ability
+   of an attacker to hijack an association.  Hijacking an association by
+   using ADD/DELETE of an IP address is only possible for an attacker
+   who is able to intercept the association setup.  However, if a
+   preconfigured shared end-point pair key is used this is not possible.
+   For a more detailed analysis see SCTP-AUTH [I-D.ietf-tsvwg-sctp-
+   auth].
 
 
 6.  IANA considerations
@@ -1688,9 +1480,7 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    errors:
 
    o  Two new chunk types,
-
    o  Seven parameter types, and
-
    o  Five new SCTP error causes.
 
    One of the two new chunk types must come from the range of chunk
@@ -1715,34 +1505,24 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
    ranges of error codes.  Any other unassigned values are also
    acceptable.
 
-   This document also defines a Adaption code point.  The adaption code
-   point is a 32 bit integer that is assigned by IANA through an IETF
-   Consensus action as defined in RFC2434 [4].
+   This document also defines a Adaptation code point.  The adaptation
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 31]
+Stewart, et al.         Expires September 7, 2006              [Page 27]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
+   code point is a 32 bit integer that is assigned by IANA through an
+   IETF Consensus action as defined in RFC2434 [RFC2434].
 
 
 7.  Acknowledgments
 
    The authors wish to thank Jon Berger, Greg Kendall, Seok Koh, Peter
    Lei, John Loughney, Ivan Arias Rodriguez, Renee Revis, Marshall Rose,
-   and Chip Sharp for their invaluable comments.
+   Chip Sharp, and Irene Ruengeler for their invaluable comments.
 
    The authors would also like to give special mention to Maria-Carmen
    Belinchon and Ian Rytina for there early contributions to this
@@ -1750,51 +1530,45 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 8.  References
 
-   [1]  Bradner, S., "The Internet Standards Process -- Revision 3",
-        BCP 9, RFC 2026, October 1996.
+   [RFC2026]  Bradner, S., "The Internet Standards Process -- Revision
+              3", BCP 9, RFC 2026, October 1996.
 
-   [2]  Bradner, S., "Key words for use in RFCs to Indicate Requirement
-        Levels", BCP 14, RFC 2119, March 1997.
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
-   [3]  Kent, S. and R. Atkinson, "IP Authentication Header", RFC 2402,
-        November 1998.
+   [RFC2402]  Kent, S. and R. Atkinson, "IP Authentication Header",
+              RFC 2402, November 1998.
 
-   [4]  Narten, T. and H. Alvestrand, "Guidelines for Writing an IANA
-        Considerations Section in RFCs", BCP 26, RFC 2434, October 1998.
+   [RFC2434]  Narten, T. and H. Alvestrand, "Guidelines for Writing an
+              IANA Considerations Section in RFCs", BCP 26, RFC 2434,
+              October 1998.
 
-   [5]  Rose, M., "Writing I-Ds and RFCs using XML", RFC 2629,
-        June 1999.
+   [RFC2629]  Rose, M., "Writing I-Ds and RFCs using XML", RFC 2629,
+              June 1999.
 
-   [6]  Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
-        H., Taylor, T., Rytina, I., Kalla, M., Zhang, L., and V. Paxson,
-        "Stream Control Transmission Protocol", RFC 2960, October 2000.
+   [RFC2960]  Stewart, R., Xie, Q., Morneault, K., Sharp, C.,
+              Schwarzbauer, H., Taylor, T., Rytina, I., Kalla, M.,
+              Zhang, L., and V. Paxson, "Stream Control Transmission
+              Protocol", RFC 2960, October 2000.
 
-   [7]  Tuexen, M., Stewart, R., Lei, P., and E. Rescorla,
-        "Authenticated Chunks for Stream Control Transmission Protocol
-        (SCTP)", draft-tuexen-sctp-auth-chunk-03 (work in progress),
-        February 2005.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 32]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+   [I-D.ietf-tsvwg-sctp-auth]
+              Tuexen, M., "Authenticated Chunks for Stream Control
+              Transmission Protocol (SCTP)",
+              draft-ietf-tsvwg-sctp-auth-01 (work in progress),
+              October 2005.
 
 
 Appendix A.  Abstract Address Handling
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 28]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
 
 A.1.  General remarks
 
@@ -1841,18 +1615,17 @@ A.2.  Generalized endpoints
    port number Port(gE') = Port(gE'') the address sets Addr(gE')(t) and
    Addr(gE'')(t) must be disjoint at every point of time.
 
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 33]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
 A.3.  Associations
 
    Associations consists of two generalized endpoints and the two
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 29]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
+
    address sets known by the peer at any time.  The precise definition
    is as follows:
 
@@ -1879,41 +1652,35 @@ A.3.  Associations
    Association establishment between gE' and gE'' can be seen as:
 
    1.  gE' and gE'' do exist before the association.
-
    2.  If an INIT has to be send from gE' to gE'' address scoping rules
        and other limitations are applied to calculate the subset S' from
        Addr(gE').  The addresses of S' are included in the INIT chunk.
-
    3.  If an INIT-ACK has to be send from gE'' to gE' address scoping
        rules and other limitations are applied to calculate the subset
        S'' from Addr(gE'').  The addresses of S'' are included in the
        INIT-ACK chunk.
-
    4.  After the handshake the association A = (gE', S', gE'', S'') has
        been established.
-
    5.  Right after the association establishment Addr(A, gE') and
        Addr(A, gE'') are the addresses which have been seen on the wire
        during the handshake.
 
-
-
-
-
-
-Stewart, et al.           Expires May 26, 2006                 [Page 34]
-
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
-
-
 A.4.  Relationship with RFC 2960
 
-   RFC2960 [6] defines the notion of an endpoint.  This subsection will
-   show that these endpoints are also (special) generalized endpoints.
+   RFC2960 [RFC2960] defines the notion of an endpoint.  This subsection
+   will show that these endpoints are also (special) generalized
+   endpoints.
 
-   RFC2960 [6] has no notion of address scoping or other address
+   RFC2960 [RFC2960] has no notion of address scoping or other address
    handling limitations and provides no mechanism to change the
    addresses of an endpoint.
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 30]
+
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
+
 
    This means that an endpoint is simply a generalized endpoint which
    does not depend on the time.  Neither the Port nor the address list
@@ -1928,21 +1695,17 @@ A.4.  Relationship with RFC 2960
 A.5.  Rules for address manipulation
 
    The rules for address manipulation can now be stated in a simple way:
-
    1.  An address can be added to a generalized endpoint gE only if this
        address is not an address of a different generalized endpoint
        with the same port number.
-
    2.  An address can be added to an association A with generalized
        endpoint gE if it has been added to the generalized endpoint gE
        first.  This means that the address must be an element of
        Addr(gE) first and then it can become an element of Addr(A, gE).
        But this is not necessary.  If the association does not allow the
        reconfiguration of the addresses only Addr(gE) can be modified.
-
    3.  An address can be deleted from an association A with generalized
        endpoint gE as long as Addr(A, gE) stays non-empty.
-
    4.  An address can be deleted from an generalized endpoint gE only if
        it has been removed from all associations having gE as a
        generalized endpoint.
@@ -1957,9 +1720,22 @@ A.5.  Rules for address manipulation
 
 
 
-Stewart, et al.           Expires May 26, 2006                 [Page 35]
+
+
+
+
+
+
+
+
+
+
+
+
+
+Stewart, et al.         Expires September 7, 2006              [Page 31]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
 Authors' Addresses
@@ -1969,7 +1745,7 @@ Authors' Addresses
    4875 Forest Drive
    Suite 200
    Columbia, SC  29206
-   USA
+   US
 
    Phone:
    Email: rrs@cisco.com
@@ -2013,9 +1789,9 @@ Authors' Addresses
 
 
 
-Stewart, et al.           Expires May 26, 2006                 [Page 36]
+Stewart, et al.         Expires September 7, 2006              [Page 32]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
    Phillip T. Conrad
@@ -2069,9 +1845,9 @@ Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
 
 
 
-Stewart, et al.           Expires May 26, 2006                 [Page 37]
+Stewart, et al.         Expires September 7, 2006              [Page 33]
 
-Internet-Draft    SCTP Dynamic Address Reconfiguration     November 2005
+Internet-Draft    SCTP Dynamic Address Reconfiguration        March 2006
 
 
 Intellectual Property Statement
@@ -2112,7 +1888,7 @@ Disclaimer of Validity
 
 Copyright Statement
 
-   Copyright (C) The Internet Society (2005).  This document is subject
+   Copyright (C) The Internet Society (2006).  This document is subject
    to the rights, licenses and restrictions contained in BCP 78, and
    except as set forth therein, the authors retain all their rights.
 
@@ -2125,6 +1901,6 @@ Acknowledgment
 
 
 
-Stewart, et al.           Expires May 26, 2006                 [Page 38]
+Stewart, et al.         Expires September 7, 2006              [Page 34]
 
 

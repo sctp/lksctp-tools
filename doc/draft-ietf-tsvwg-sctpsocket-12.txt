@@ -4,21 +4,19 @@
 
 Network Working Group                                         R. Stewart
 Internet-Draft                                       Cisco Systems, Inc.
-Expires: March 11, 2006                                           Q. Xie
+Expires: August 21, 2006                                          Q. Xie
                                                           Motorola, Inc.
                                                               L. Yarroll
                                                             TimeSys Corp
-                                                                 J. Wood
-                                                         DoCoMo USA Labs
                                                                  K. Poon
                                                   Sun Microsystems, Inc.
                                                                M. Tuexen
                                       Univ. of Applied Sciences Muenster
-                                                       September 7, 2005
+                                                       February 17, 2006
 
 
  Sockets API Extensions for Stream Control Transmission Protocol (SCTP)
-                   draft-ietf-tsvwg-sctpsocket-11.txt
+                   draft-ietf-tsvwg-sctpsocket-12.txt
 
 Status of this Memo
 
@@ -43,158 +41,157 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on March 11, 2006.
+   This Internet-Draft will expire on August 21, 2006.
 
 Copyright Notice
 
-   Copyright (C) The Internet Society (2005).
+   Copyright (C) The Internet Society (2006).
 
 Abstract
 
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 1]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    This document describes a mapping of the Stream Control Transmission
-   Protocol SCTP RFC2960 [8] into a sockets API.  The benefits of this
-   mapping include compatibility for TCP applications, access to new
-   SCTP features and a consolidated error and event notification scheme.
+
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 1]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   Protocol SCTP RFC2960 [RFC2960] into a sockets API.  The benefits of
+   this mapping include compatibility for TCP applications, access to
+   new SCTP features and a consolidated error and event notification
+   scheme.
 
 
 Table of Contents
 
    1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  5
-   2.  Conventions  . . . . . . . . . . . . . . . . . . . . . . . . .  7
-     2.1.  Data Types . . . . . . . . . . . . . . . . . . . . . . . .  7
-   3.  one-to-many style Interface  . . . . . . . . . . . . . . . . .  8
-     3.1.  Basic Operation  . . . . . . . . . . . . . . . . . . . . .  8
-       3.1.1.  socket() - one-to-many style socket  . . . . . . . . .  9
-       3.1.2.  bind() - one-to-many style socket  . . . . . . . . . . 10
-       3.1.3.  listen() - One-to-many style socket  . . . . . . . . . 11
-       3.1.4.  sendmsg() and recvmsg() - one-to-many style socket . . 11
-       3.1.5.  close() - one-to-many style socket . . . . . . . . . . 13
-       3.1.6.  connect() - one-to-many style socket . . . . . . . . . 13
-     3.2.  Implicit Association Setup . . . . . . . . . . . . . . . . 14
-     3.3.  Non-blocking mode  . . . . . . . . . . . . . . . . . . . . 14
-     3.4.  Special considerations . . . . . . . . . . . . . . . . . . 15
-   4.  one-to-one style Interface . . . . . . . . . . . . . . . . . . 18
-     4.1.  Basic Operation  . . . . . . . . . . . . . . . . . . . . . 18
-       4.1.1.  socket() - one-to-one style socket . . . . . . . . . . 19
-       4.1.2.  bind() - one-to-one style socket . . . . . . . . . . . 19
-       4.1.3.  listen() - one-to-one style socket . . . . . . . . . . 20
-       4.1.4.  accept() - one-to-one style socket . . . . . . . . . . 21
-       4.1.5.  connect() - one-to-one style socket  . . . . . . . . . 21
-       4.1.6.  close() - one-to-one style socket  . . . . . . . . . . 22
-       4.1.7.  shutdown() - one-to-one style socket . . . . . . . . . 22
-       4.1.8.  sendmsg() and recvmsg() - one-to-one style socket  . . 23
-       4.1.9.  getpeername()  . . . . . . . . . . . . . . . . . . . . 24
-   5.  Data Structures  . . . . . . . . . . . . . . . . . . . . . . . 25
-     5.1.  The msghdr and cmsghdr Structures  . . . . . . . . . . . . 25
-     5.2.  SCTP msg_control Structures  . . . . . . . . . . . . . . . 26
-       5.2.1.  SCTP Initiation Structure (SCTP_INIT)  . . . . . . . . 27
-       5.2.2.  SCTP Header Information Structure (SCTP_SNDRCV)  . . . 28
-     5.3.  SCTP Events and Notifications  . . . . . . . . . . . . . . 31
-       5.3.1.  SCTP Notification Structure  . . . . . . . . . . . . . 31
-     5.4.  Ancillary Data Considerations and Semantics  . . . . . . . 42
-       5.4.1.  Multiple Items and Ordering  . . . . . . . . . . . . . 43
-       5.4.2.  Accessing and Manipulating Ancillary Data  . . . . . . 43
-       5.4.3.  Control Message Buffer Sizing  . . . . . . . . . . . . 43
-   6.  Common Operations for Both Styles  . . . . . . . . . . . . . . 45
-     6.1.  send(), recv(), sendto(), recvfrom() . . . . . . . . . . . 45
-     6.2.  setsockopt(), getsockopt() . . . . . . . . . . . . . . . . 46
-     6.3.  read() and write() . . . . . . . . . . . . . . . . . . . . 46
+   2.  Conventions  . . . . . . . . . . . . . . . . . . . . . . . . .  6
+     2.1.  Data Types . . . . . . . . . . . . . . . . . . . . . . . .  6
+   3.  one-to-many style Interface  . . . . . . . . . . . . . . . . .  6
+     3.1.  Basic Operation  . . . . . . . . . . . . . . . . . . . . .  6
+       3.1.1.  socket() - one-to-many style socket  . . . . . . . . .  7
+       3.1.2.  bind() - one-to-many style socket  . . . . . . . . . .  8
+       3.1.3.  listen() - One-to-many style socket  . . . . . . . . .  9
+       3.1.4.  sendmsg() and recvmsg() - one-to-many style socket . .  9
+       3.1.5.  close() - one-to-many style socket . . . . . . . . . . 11
+       3.1.6.  connect() - one-to-many style socket . . . . . . . . . 11
+     3.2.  Implicit Association Setup . . . . . . . . . . . . . . . . 12
+     3.3.  Non-blocking mode  . . . . . . . . . . . . . . . . . . . . 13
+     3.4.  Special considerations . . . . . . . . . . . . . . . . . . 13
+   4.  one-to-one style Interface . . . . . . . . . . . . . . . . . . 15
+     4.1.  Basic Operation  . . . . . . . . . . . . . . . . . . . . . 15
+       4.1.1.  socket() - one-to-one style socket . . . . . . . . . . 16
+       4.1.2.  bind() - one-to-one style socket . . . . . . . . . . . 16
+       4.1.3.  listen() - one-to-one style socket . . . . . . . . . . 17
+       4.1.4.  accept() - one-to-one style socket . . . . . . . . . . 18
+       4.1.5.  connect() - one-to-one style socket  . . . . . . . . . 18
+       4.1.6.  close() - one-to-one style socket  . . . . . . . . . . 19
+       4.1.7.  shutdown() - one-to-one style socket . . . . . . . . . 19
+       4.1.8.  sendmsg() and recvmsg() - one-to-one style socket  . . 20
+       4.1.9.  getpeername()  . . . . . . . . . . . . . . . . . . . . 20
+   5.  Data Structures  . . . . . . . . . . . . . . . . . . . . . . . 21
+     5.1.  The msghdr and cmsghdr Structures  . . . . . . . . . . . . 21
+     5.2.  SCTP msg_control Structures  . . . . . . . . . . . . . . . 22
+       5.2.1.  SCTP Initiation Structure (SCTP_INIT)  . . . . . . . . 23
+       5.2.2.  SCTP Header Information Structure (SCTP_SNDRCV)  . . . 24
+     5.3.  SCTP Events and Notifications  . . . . . . . . . . . . . . 27
+       5.3.1.  SCTP Notification Structure  . . . . . . . . . . . . . 27
+     5.4.  Ancillary Data Considerations and Semantics  . . . . . . . 38
+       5.4.1.  Multiple Items and Ordering  . . . . . . . . . . . . . 38
+       5.4.2.  Accessing and Manipulating Ancillary Data  . . . . . . 38
+       5.4.3.  Control Message Buffer Sizing  . . . . . . . . . . . . 39
+   6.  Common Operations for Both Styles  . . . . . . . . . . . . . . 40
+     6.1.  send(), recv(), sendto(), recvfrom() . . . . . . . . . . . 40
+     6.2.  setsockopt(), getsockopt() . . . . . . . . . . . . . . . . 41
+     6.3.  read() and write() . . . . . . . . . . . . . . . . . . . . 42
 
 
 
-Stewart, et al.          Expires March 11, 2006                 [Page 2]
+Stewart, et al.          Expires August 21, 2006                [Page 2]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-     6.4.  getsockname()  . . . . . . . . . . . . . . . . . . . . . . 46
-   7.  Socket Options . . . . . . . . . . . . . . . . . . . . . . . . 48
-     7.1.  Read / Write Options . . . . . . . . . . . . . . . . . . . 49
-       7.1.1.  Retransmission Timeout Parameters (SCTP_RTOINFO) . . . 49
-       7.1.2.  Association Parameters (SCTP_ASSOCINFO)  . . . . . . . 50
-       7.1.3.  Initialization Parameters (SCTP_INITMSG) . . . . . . . 52
-       7.1.4.  SO_LINGER  . . . . . . . . . . . . . . . . . . . . . . 52
-       7.1.5.  SCTP_NODELAY . . . . . . . . . . . . . . . . . . . . . 52
-       7.1.6.  SO_RCVBUF  . . . . . . . . . . . . . . . . . . . . . . 53
-       7.1.7.  SO_SNDBUF  . . . . . . . . . . . . . . . . . . . . . . 53
-       7.1.8.  Automatic Close of associations (SCTP_AUTOCLOSE) . . . 53
+     6.4.  getsockname()  . . . . . . . . . . . . . . . . . . . . . . 42
+   7.  Socket Options . . . . . . . . . . . . . . . . . . . . . . . . 42
+     7.1.  Read / Write Options . . . . . . . . . . . . . . . . . . . 44
+       7.1.1.  Retransmission Timeout Parameters (SCTP_RTOINFO) . . . 44
+       7.1.2.  Association Parameters (SCTP_ASSOCINFO)  . . . . . . . 45
+       7.1.3.  Initialization Parameters (SCTP_INITMSG) . . . . . . . 46
+       7.1.4.  SO_LINGER  . . . . . . . . . . . . . . . . . . . . . . 47
+       7.1.5.  SCTP_NODELAY . . . . . . . . . . . . . . . . . . . . . 47
+       7.1.6.  SO_RCVBUF  . . . . . . . . . . . . . . . . . . . . . . 47
+       7.1.7.  SO_SNDBUF  . . . . . . . . . . . . . . . . . . . . . . 47
+       7.1.8.  Automatic Close of associations (SCTP_AUTOCLOSE) . . . 48
        7.1.9.  Set Peer Primary Address
-               (SCTP_SET_PEER_PRIMARY_ADDR) . . . . . . . . . . . . . 53
-       7.1.10. Set Primary Address (SCTP_PRIMARY_ADDR)  . . . . . . . 54
-       7.1.11. Set Adaption Layer Indicator (SCTP_ADAPTION_LAYER) . . 54
+               (SCTP_SET_PEER_PRIMARY_ADDR) . . . . . . . . . . . . . 48
+       7.1.10. Set Primary Address (SCTP_PRIMARY_ADDR)  . . . . . . . 48
+       7.1.11. Set Adaptation Layer Indicator
+               (SCTP_ADAPTATION_LAYER)  . . . . . . . . . . . . . . . 49
        7.1.12. Enable/Disable message fragmentation
-               (SCTP_DISABLE_FRAGMENTS) . . . . . . . . . . . . . . . 55
-       7.1.13. Peer Address Parameters (SCTP_PEER_ADDR_PARAMS)  . . . 55
+               (SCTP_DISABLE_FRAGMENTS) . . . . . . . . . . . . . . . 49
+       7.1.13. Peer Address Parameters (SCTP_PEER_ADDR_PARAMS)  . . . 49
        7.1.14. Set default send parameters
-               (SCTP_DEFAULT_SEND_PARAM)  . . . . . . . . . . . . . . 57
-       7.1.15. Set notification and ancillary events (SCTP_EVENTS)  . 57
+               (SCTP_DEFAULT_SEND_PARAM)  . . . . . . . . . . . . . . 52
+       7.1.15. Set notification and ancillary events (SCTP_EVENTS)  . 52
        7.1.16. Set/clear IPv4 mapped addresses
-               (SCTP_I_WANT_MAPPED_V4_ADDR) . . . . . . . . . . . . . 57
-       7.1.17. Set the maximum fragmentation size (SCTP_MAXSEG) . . . 57
+               (SCTP_I_WANT_MAPPED_V4_ADDR) . . . . . . . . . . . . . 53
+       7.1.17. Set the maximum fragmentation size (SCTP_MAXSEG) . . . 53
        7.1.18. Add a chunk that must be authenticated
-               (SCTP_AUTH_CHUNK)  . . . . . . . . . . . . . . . . . . 58
-       7.1.19. Set the endpoint pair shared key (SCTP_AUTH_KEY) . . . 58
+               (SCTP_AUTH_CHUNK)  . . . . . . . . . . . . . . . . . . 53
+       7.1.19. Set the endpoint pair shared key (SCTP_AUTH_KEY) . . . 54
        7.1.20. Get the list of chunks the peer requires to be
-               authenticated  (SCTP_PEER_AUTH_CHUNKS) . . . . . . . . 59
+               authenticated  (SCTP_PEER_AUTH_CHUNKS) . . . . . . . . 54
        7.1.21. Get the list of chunks the local endpoint requires
-               to be authenticated  (SCTP_LOCAL_AUTH_CHUNKS)  . . . . 60
+               to be authenticated  (SCTP_LOCAL_AUTH_CHUNKS)  . . . . 55
        7.1.22. Set the list of supported HMAC Identifiers
-               (SCTP_HMAC_IDENT)  . . . . . . . . . . . . . . . . . . 60
+               (SCTP_HMAC_IDENT)  . . . . . . . . . . . . . . . . . . 55
        7.1.23. Get or set the active key
-               (SCTP_AUTH_SETKEY_ACTIVE)  . . . . . . . . . . . . . . 61
+               (SCTP_AUTH_SETKEY_ACTIVE)  . . . . . . . . . . . . . . 55
        7.1.24. Get or set delayed ack timer
-               (SCTP_DELAYED_ACK_TIME)  . . . . . . . . . . . . . . . 63
-     7.2.  Read-Only Options  . . . . . . . . . . . . . . . . . . . . 63
-       7.2.1.  Association Status (SCTP_STATUS) . . . . . . . . . . . 63
-       7.2.2.  Peer Address Information (SCTP_GET_PEER_ADDR_INFO) . . 65
-     7.3.  Ancillary Data and Notification Interest Options . . . . . 65
-   8.  New Interfaces . . . . . . . . . . . . . . . . . . . . . . . . 69
-     8.1.  sctp_bindx() . . . . . . . . . . . . . . . . . . . . . . . 69
-     8.2.  Branched-off Association . . . . . . . . . . . . . . . . . 70
-     8.3.  sctp_getpaddrs() . . . . . . . . . . . . . . . . . . . . . 71
-     8.4.  sctp_freepaddrs()  . . . . . . . . . . . . . . . . . . . . 71
-     8.5.  sctp_getladdrs() . . . . . . . . . . . . . . . . . . . . . 71
-     8.6.  sctp_freeladdrs()  . . . . . . . . . . . . . . . . . . . . 72
+               (SCTP_DELAYED_ACK_TIME)  . . . . . . . . . . . . . . . 56
+       7.1.25. Get or set fragmented interleave
+               (SCTP_FRAGMENT_INTERLEAVE) . . . . . . . . . . . . . . 57
+       7.1.26. Set or Get the sctp partial delivery point
+               (SCTP_PARTIAL_DELIVERY_POINT)  . . . . . . . . . . . . 57
+     7.2.  Read-Only Options  . . . . . . . . . . . . . . . . . . . . 58
+       7.2.1.  Association Status (SCTP_STATUS) . . . . . . . . . . . 58
+       7.2.2.  Peer Address Information (SCTP_GET_PEER_ADDR_INFO) . . 59
+     7.3.  Ancillary Data and Notification Interest Options . . . . . 60
+   8.  New Interfaces . . . . . . . . . . . . . . . . . . . . . . . . 62
+     8.1.  sctp_bindx() . . . . . . . . . . . . . . . . . . . . . . . 62
 
 
 
-Stewart, et al.          Expires March 11, 2006                 [Page 3]
+Stewart, et al.          Expires August 21, 2006                [Page 3]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-     8.7.  sctp_sendmsg() . . . . . . . . . . . . . . . . . . . . . . 72
-     8.8.  sctp_recvmsg() . . . . . . . . . . . . . . . . . . . . . . 73
-     8.9.  sctp_connectx()  . . . . . . . . . . . . . . . . . . . . . 74
-     8.10. sctp_send()  . . . . . . . . . . . . . . . . . . . . . . . 75
-     8.11. sctp_sendx() . . . . . . . . . . . . . . . . . . . . . . . 75
-   9.  Preprocessor Constants . . . . . . . . . . . . . . . . . . . . 77
-   10. Security Considerations  . . . . . . . . . . . . . . . . . . . 78
-   11. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 79
-   12. References . . . . . . . . . . . . . . . . . . . . . . . . . . 79
-   Appendix A.  one-to-one style Code Example . . . . . . . . . . . . 80
-   Appendix B.  one-to-many style Code Example  . . . . . . . . . . . 86
-   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 88
-   Intellectual Property and Copyright Statements . . . . . . . . . . 90
-
-
-
-
-
-
-
-
-
-
-
-
+     8.2.  Branched-off Association . . . . . . . . . . . . . . . . . 63
+     8.3.  sctp_getpaddrs() . . . . . . . . . . . . . . . . . . . . . 64
+     8.4.  sctp_freepaddrs()  . . . . . . . . . . . . . . . . . . . . 64
+     8.5.  sctp_getladdrs() . . . . . . . . . . . . . . . . . . . . . 65
+     8.6.  sctp_freeladdrs()  . . . . . . . . . . . . . . . . . . . . 65
+     8.7.  sctp_sendmsg() . . . . . . . . . . . . . . . . . . . . . . 66
+     8.8.  sctp_recvmsg() . . . . . . . . . . . . . . . . . . . . . . 66
+     8.9.  sctp_connectx()  . . . . . . . . . . . . . . . . . . . . . 67
+     8.10. sctp_send()  . . . . . . . . . . . . . . . . . . . . . . . 67
+     8.11. sctp_sendx() . . . . . . . . . . . . . . . . . . . . . . . 68
+     8.12. sctp_getaddrlen  . . . . . . . . . . . . . . . . . . . . . 69
+   9.  Preprocessor Constants . . . . . . . . . . . . . . . . . . . . 69
+   10. IANA considerations  . . . . . . . . . . . . . . . . . . . . . 70
+   11. Security Considerations  . . . . . . . . . . . . . . . . . . . 70
+   12. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 70
+   13. References . . . . . . . . . . . . . . . . . . . . . . . . . . 71
+     13.1. Normative references . . . . . . . . . . . . . . . . . . . 71
+     13.2. Informational References . . . . . . . . . . . . . . . . . 71
+   Appendix A.  one-to-one style Code Example . . . . . . . . . . . . 71
+   Appendix B.  one-to-many style Code Example  . . . . . . . . . . . 76
+   Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . . . 79
+   Intellectual Property and Copyright Statements . . . . . . . . . . 81
 
 
 
@@ -221,50 +218,46 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-Stewart, et al.          Expires March 11, 2006                 [Page 4]
+
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 4]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
 1.  Introduction
 
    The sockets API has provided a standard mapping of the Internet
-   Protocol suite to many operating systems.  Both TCP RFC793 [1] and
-   UDP RFC768 [2] have benefited from this standard representation and
-   access method across many diverse platforms.  SCTP is a new protocol
-   that provides many of the characteristics of TCP but also
-   incorporates semantics more akin to UDP.  This document defines a
-   method to map the existing sockets API for use with SCTP, providing
-   both a base for access to new features and compatibility so that most
-   existing TCP applications can be migrated to SCTP with few (if any)
-   changes.
+   Protocol suite to many operating systems.  Both TCP RFC793 [RFC0793]
+   and UDP RFC768 [RFC0768] have benefited from this standard
+   representation and access method across many diverse platforms.  SCTP
+   is a new protocol that provides many of the characteristics of TCP
+   but also incorporates semantics more akin to UDP.  This document
+   defines a method to map the existing sockets API for use with SCTP,
+   providing both a base for access to new features and compatibility so
+   that most existing TCP applications can be migrated to SCTP with few
+   (if any) changes.
 
    There are three basic design objectives:
 
    1)  Maintain consistency with existing sockets APIs:
-
       We define a sockets mapping for SCTP that is consistent with other
       sockets API protocol mappings (for instance, UDP, TCP, IPv4, and
       IPv6).
-
    2)  Support a one-to-many style interface
-
       This set of semantics is similar to that defined for connection-
       less protocols, such as UDP.  A one-to-many style SCTP socket
       should be able to control multiple SCTP associations.  This is
       similar to an UDP socket, which can communicate with many peer end
       points.  Each of these associations is assigned an association ID
       so that an applications can use the ID to differentiate them.
-
       Note that SCTP is connection-oriented in nature, and it does not
       support broadcast or multicast communications, as UDP does.
-
    3)  Support a one-to-one style interface
-
       This interface supports a similar semantics as sockets for
       connection-oriented protocols, such as TCP.  A one-to-one style
       SCTP socket should only control one SCTP association.
-
       One purpose of defining this interface is to allow existing
       applications built on other connection-oriented protocols be
       ported to use SCTP with very little effort.  And developers
@@ -272,16 +265,6 @@ Internet-Draft              SCTP sockets API              September 2005
       purpose is to make sure that existing mechanisms in most OSes to
       deal with socket, such as select(), should continue to work with
       this style of socket.
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 5]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
       Extensions are added to this mapping to provide mechanisms to
       exploit new features of SCTP.
 
@@ -291,6 +274,14 @@ Internet-Draft              SCTP sockets API              September 2005
    structures and operations, but will require the use of two different
    application programming styles.  Note that all new SCTP features can
    be used with both styles of socket.  The decision on which one to use
+
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 5]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    depends mainly on the nature of applications.
 
    A mechanism is defined to extract a one-to-many style SCTP
@@ -300,42 +291,6 @@ Internet-Draft              SCTP sockets API              September 2005
    socket interface.  In some cases, it is more desirable to have new
    interface instead of using existing socket calls.  Section 8 of this
    document describes those new interface.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 6]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 2.  Conventions
@@ -348,50 +303,6 @@ Internet-Draft              SCTP sockets API              September 2005
    1003.1g when possible (e.g., the final argument to setsockopt() is a
    size_t value).  Whenever buffer sizes are specified, the POSIX 1003.1
    size_t data type is used.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 7]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 3.  one-to-many style Interface
@@ -411,26 +322,25 @@ Internet-Draft              SCTP sockets API              September 2005
    sequence to prepare an endpoint for servicing requests:
 
    1.  socket()
-
    2.  bind()
-
    3.  listen()
-
    4.  recvmsg()
-
    5.  sendmsg()
-
    6.  close()
 
    A typical client uses the following calls in sequence to setup an
    association with a server to request services:
 
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 6]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    1.  socket()
-
    2.  sendmsg()
-
    3.  recvmsg()
-
    4.  close()
 
    In this style, by default, all the associations connected to the
@@ -442,14 +352,6 @@ Internet-Draft              SCTP sockets API              September 2005
    an implementation does not support using addresses to differentiate
    between different associations, the sendto() call can only be used to
    setup an association implicitly.  It cannot be used to send data to
-
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 8]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    an established association as the association ID cannot be specified.
 
    Once as association ID is assigned to an SCTP association, that ID
@@ -458,10 +360,10 @@ Internet-Draft              SCTP sockets API              September 2005
    freed until that happens.  This is similar to the close() operation
    on a normal socket.  The only exception is when the SCTP_AUTOCLOSE
    option (section 7.1.8) is set.  In this case, after the association
-   is terminated automatically, the association ID assigned to it can be
-   reused.  All applications using this option should be aware of this
-   to avoid the possible problem of sending data to an incorrect peer
-   end point.
+   is terminated gracefully automatically, the association ID assigned
+   to it can be reused.  All applications using this option should be
+   aware of this to avoid the possible problem of sending data to an
+   incorrect peer end point.
 
    If the server or client wishes to branch an existing association off
    to a separate socket, it is required to call sctp_peeloff() and in
@@ -485,6 +387,13 @@ Internet-Draft              SCTP sockets API              September 2005
    Applications use socket() to create a socket descriptor to represent
    an SCTP endpoint.
 
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 7]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    The syntax is,
 
    sd = socket(PF_INET, SOCK_SEQPACKET, IPPROTO_SCTP);
@@ -498,14 +407,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    The first form creates an endpoint which can use only IPv4 addresses,
    while, the second form creates an endpoint which can use both IPv6
-
-
-
-Stewart, et al.          Expires March 11, 2006                 [Page 9]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    and IPv4 addresses.
 
 3.1.2.  bind() - one-to-many style socket
@@ -520,7 +421,7 @@ Internet-Draft              SCTP sockets API              September 2005
    These addresses associated with a socket are the eligible transport
    addresses for the endpoint to send and receive data.  The endpoint
    will also present these addresses to its peers during the association
-   initialization process, see RFC2960 [8].
+   initialization process, see RFC2960 [RFC2960].
 
    After calling bind(), if the endpoint wishes to accept new
    associations on the socket, it must call listen() (see section
@@ -530,12 +431,10 @@ Internet-Draft              SCTP sockets API              September 2005
 
    ret = bind(int sd, struct sockaddr *addr, socklen_t addrlen);
 
-   sd: the socket descriptor returned by socket().
-
-   addr: the address structure (struct sockaddr_in or struct
-      sockaddr_in6 RFC2553 [7]).
-
-   addrlen: the size of the address structure.
+   sd - the socket descriptor returned by socket().
+   addr - the address structure (struct sockaddr_in or struct
+      sockaddr_in6 RFC2553 [RFC2553]).
+   addrlen - the size of the address structure.
 
    If sd is an IPv4 socket, the address passed must be an IPv4 address.
    If the sd is an IPv6 socket, the address passed can either be an IPv4
@@ -543,6 +442,14 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Applications cannot call bind() multiple times to associate multiple
    addresses to an endpoint.  After the first call to bind(), all
+
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 8]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    subsequent calls will return an error.
 
    If addr is specified as a wildcard (INADDR_ANY for an IPv4 address,
@@ -554,14 +461,6 @@ Internet-Draft              SCTP sockets API              September 2005
    new association, the system picks an ephemeral port and will choose
    an address set equivalent to binding with a wildcard address.  One of
    those addresses will be the primary address for the association.
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 10]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    This automatically enables the multi-homing capability of SCTP.
 
 3.1.3.  listen() - One-to-many style socket
@@ -570,10 +469,13 @@ Internet-Draft              SCTP sockets API              September 2005
    sockets.  An application uses listen() to mark a socket as being able
    to accept new associations.  The syntax is,
 
+
       int listen(int sd, int backlog);
-       sd      - the socket descriptor of the endpoint.
-       backlog - if backlog is non-zero, enable listening else
-                 disable listening.
+
+
+   sd - the socket descriptor of the endpoint.
+   backlog - if backlog is non-zero, enable listening else disable
+      listening.
 
    Note that one-to-many style socket consumers do not need to call
    accept to retrieve new associations.  Calling accept() on a one-to-
@@ -597,28 +499,22 @@ Internet-Draft              SCTP sockets API              September 2005
    An application uses sendmsg() and recvmsg() call to transmit data to
    and receive data from its peer.
 
+
+
+Stewart, et al.          Expires August 21, 2006                [Page 9]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    ssize_t sendmsg(int sd, const struct msghdr *message, int flags);
 
    ssize_t recvmsg(int sd, struct msghdr *message, int flags);
 
-   sd: the socket descriptor of the endpoint.
-
+   sd - the socket descriptor of the endpoint.
    message: pointer to the msghdr structure which contains a single user
       message and possibly some ancillary data.  See Section 5 for
       complete description of the data structures.
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 11]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
-   flags: No new flags are defined for SCTP at this level.  See Section
+   flags - No new flags are defined for SCTP at this level.  See Section
       5 for SCTP-specific flags used in the msghdr structure.
 
    As we will see in Section 5, along with the user data, the ancillary
@@ -658,21 +554,21 @@ Internet-Draft              SCTP sockets API              September 2005
 
    If the application does not provide enough buffer space to completely
    receive a data message, MSG_EOR will not be set in msg_flags.
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 10]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    Successive reads will consume more of the same message until the
    entire message has been delivered, and MSG_EOR will be set.
 
    If the SCTP stack is running low on buffers, it may partially deliver
    a message.  In this case, MSG_EOR will not be set, and more calls to
    recvmsg() will be necessary to completely consume the message.  Only
-   one message at a time can be partially delivered.
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 12]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   one message at a time per stream can be partially delivered.
 
    Note, if the socket is a branched-off socket that only represents one
    association (see Section 3.1), the msg_name field can be used to
@@ -681,14 +577,16 @@ Internet-Draft              SCTP sockets API              September 2005
 3.1.5.  close() - one-to-many style socket
 
    Applications use close() to perform graceful shutdown (as described
-   in Section 10.1 of RFC2960 [8]) on ALL the associations currently
-   represented by a one-to-many style socket.
+   in Section 10.1 of RFC2960 [RFC2960]) on ALL the associations
+   currently represented by a one-to-many style socket.
 
    The syntax is:
 
+
       ret = close(int sd);
 
-       sd      - the socket descriptor of the associations to be closed.
+
+   sd - the socket descriptor of the associations to be closed.
 
    To gracefully shutdown a specific association represented by the one-
    to-many style socket, an application should use the sendmsg() call,
@@ -710,25 +608,23 @@ Internet-Draft              SCTP sockets API              September 2005
 
    ret = connect(int sd, const struct sockaddr *nam, socklen_t len);
 
-   sd: the socket descriptor to have a new association added to.
 
-   nam: the address structure (either struct sockaddr_in or struct
-      sockaddr_in6 defined in RFC2553 [7]).
 
-   len: the size of the address.
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 11]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sd - the socket descriptor to have a new association added to.
+   nam - the address structure (either struct sockaddr_in or struct
+      sockaddr_in6 defined in RFC2553 [RFC2553]).
+   len - the size of the address.
       Multiple connect() calls can be made on the same socket to create
       multiple associations.  This is different from the semantics of
       connect() on a UDP socket.
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 13]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
 3.2.  Implicit Association Setup
 
@@ -752,7 +648,7 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Note, if the SCTP stack at the sender side supports bundling, the
    first user message may be bundled with the COOKIE ECHO message
-   RFC2960 [8].
+   RFC2960 [RFC2960].
 
    When the SCTP stack sets up a new association implicitly, it first
    consults the sctp_initmsg structure, which is passed along within the
@@ -769,6 +665,15 @@ Internet-Draft              SCTP sockets API              September 2005
    Implicit association setup cannot be initiated by send()/recv()
    calls.
 
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 12]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
 3.3.  Non-blocking mode
 
    Some SCTP users might want to avoid blocking when they call socket
@@ -778,14 +683,6 @@ Internet-Draft              SCTP sockets API              September 2005
    application must set the non-blocking option by a fcntl() (such as
    O_NONBLOCK).  After which the sendmsg() function returns immediately,
    and the success or failure of the data message (and possible
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 14]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    SCTP_INITMSG parameters) will be signaled by the SCTP_ASSOC_CHANGE
    event with SCTP_COMM_UP or CANT_START_ASSOC.  If user data could not
    be sent (due to a CANT_START_ASSOC), the sender will also receive a
@@ -825,6 +722,14 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP associations through a single socket descriptor has important
    implications for both application programmers and system programmers
    implementing this API.  A key issue is how buffer space inside the
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 13]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    sockets layer is managed.  Because this implementation detail
    directly affects how application programmers must write their code to
    ensure correct operation and portability, this section provides some
@@ -833,14 +738,6 @@ Internet-Draft              SCTP sockets API              September 2005
    An important feature that SCTP shares with TCP is flow control:
    specifically, a sender may not send data faster than the receiver can
    consume it.
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 15]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    For TCP, flow control is typically provided for in the sockets API as
    follows.  If the reader stops reading, the sender queues messages in
@@ -882,76 +779,25 @@ Internet-Draft              SCTP sockets API              September 2005
    non-stalled associations from being writable, application programmers
    should either:
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 14]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    (a) demand that the underlying implementation dedicates independent
       buffer space allotments to each association (as suggested above),
       or
-
    (b) verify that their application layer protocol does not permit
       large amounts of unread data at the receiver (this is true of some
       request-response protocols, for example), or
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 16]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    (c) use one-to-one style sockets for association which may
       potentially stall (either from the beginning, or by using
       sctp_peeloff before sending large amounts of data that may cause a
       stalled condition).
-
       An implemenation which dedicates independent buffer space for each
       association should define HAVE_SCTP_MULTIBUF to 1.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 17]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 4.  one-to-one style Interface
@@ -988,6 +834,14 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Then it calls
 
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 15]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    5. close()
 
    to terminate the association.
@@ -1001,14 +855,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    After returning from connect(), the client uses send() and recv()
    calls to send out requests and receive responses from the server.
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 18]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    The client calls
 
@@ -1045,32 +891,25 @@ Internet-Draft              SCTP sockets API              September 2005
    sctp_bindx() is introduced in Section 8.1 to help applications do the
    job of associating multiple addresses.
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 16]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    These addresses associated with a socket are the eligible transport
    addresses for the endpoint to send and receive data.  The endpoint
    will also present these addresses to its peers during the association
-   initialization process, see RFC2960 [8].
+   initialization process, see RFC2960 [RFC2960].
 
    The syntax is:
 
    int bind(int sd, struct sockaddr *addr, socklen_t addrlen);
 
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 19]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    sd: the socket descriptor returned by socket() call.
-
    addr: the address structure (either struct sockaddr_in or struct
-      sockaddr_in6 defined in RFC2553 [7]).
-
+      sockaddr_in6 defined in RFC2553 [RFC2553]).
    addrlen: the size of the address structure.
 
    If sd is an IPv4 socket, the address passed must be an IPv4 address.
@@ -1107,21 +946,20 @@ Internet-Draft              SCTP sockets API              September 2005
 
    int listen(int sd, int backlog);
 
-   sd: the socket descriptor of the SCTP endpoint.
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 17]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sd: the socket descriptor of the SCTP endpoint.
    backlog: this specifies the max number of outstanding associations
       allowed in the socket's accept queue.  These are the associations
       that have finished the four-way initiation handshake (see Section
-      5 of RFC2960 [8]) and are in the ESTABLISHED state.  Note, a
+      5 of RFC2960 [RFC2960]) and are in the ESTABLISHED state.  Note, a
       backlog of '0' indicates that the caller no longer wishes to
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 20]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
       receive new associations.
 
 4.1.4.  accept() - one-to-one style socket
@@ -1135,14 +973,11 @@ Internet-Draft              SCTP sockets API              September 2005
 
    new_sd = accept(int sd, struct sockaddr *addr, socklen_t *addrlen);
 
-   new_sd: the socket descriptor for the newly formed association.
-
-   sd the listening socket descriptor.
-
-   addr on return, will contain the primary address of the peer
+   new_sd - the socket descriptor for the newly formed association.
+   sd - the listening socket descriptor.
+   addr - on return, will contain the primary address of the peer
       endpoint.
-
-   addrlen on return, will contain the size of addr.
+   addrlen - on return, will contain the size of addr.
 
 4.1.5.  connect() - one-to-one style socket
 
@@ -1152,14 +987,12 @@ Internet-Draft              SCTP sockets API              September 2005
 
    int connect(int sd, const struct sockaddr *addr, socklen_t addrlen);
 
-   sd: the socket descriptor of the endpoint.
-
-   addr the peer's address.
-
-   addrlen the size of the address.
+   sd - the socket descriptor of the endpoint.
+   addr - the peer's address.
+   addrlen - the size of the address.
 
    This operation corresponds to the ASSOCIATE primitive described in
-   section 10.1 of RFC2960 [8].
+   section 10.1 of RFC2960 [RFC2960].
 
    By default, the new association created has only one outbound stream.
    The SCTP_INITMSG option described in Section 7.1.3 should be used
@@ -1169,35 +1002,35 @@ Internet-Draft              SCTP sockets API              September 2005
    picks an ephemeral port and will choose an address set equivalent to
    binding with INADDR_ANY and IN6ADDR_ANY for IPv4 and IPv6 socket
    respectively.  One of those addresses will be the primary address for
-   the association.  This automatically enables the multi-homing
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 21]
+Stewart, et al.          Expires August 21, 2006               [Page 18]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
+   the association.  This automatically enables the multi-homing
    capability of SCTP.
 
-   Note that SCTP allows data exchange, similar to T/TCP RFC1644 [3],
-   during the association set up phase.  If an application wants to do
-   this, it cannot use connect() call.  Instead, it should use sendto()
-   or sendmsg() to initiate an association.  If it uses sendto() and it
-   wants to change initialization behavior, it needs to use the
-   SCTP_INITMSG socket option before calling sendto().  Or it can use
-   SCTP_INIT type sendmsg() to initiate an association without doing the
-   setsockopt().  Note that some sockets implementations may not support
-   the sending of data to initiate an assocation with the one-to-one
-   style (implementations that do not support T/TCP normally have this
-   restriction).  Implementations which allow sending of data to
-   initiate an association without calling connect() define the
+   Note that SCTP allows data exchange, similar to T/TCP RFC1644
+   [RFC1644], during the association set up phase.  If an application
+   wants to do this, it cannot use connect() call.  Instead, it should
+   use sendto() or sendmsg() to initiate an association.  If it uses
+   sendto() and it wants to change initialization behavior, it needs to
+   use the SCTP_INITMSG socket option before calling sendto().  Or it
+   can use SCTP_INIT type sendmsg() to initiate an association without
+   doing the setsockopt().  Note that some sockets implementations may
+   not support the sending of data to initiate an assocation with the
+   one-to-one style (implementations that do not support T/TCP normally
+   have this restriction).  Implementations which allow sending of data
+   to initiate an association without calling connect() define the
    preprocessor constant HAVE_SCTP_NOCONNECT to 1.
 
    SCTP does not support half close semantics.  This means that unlike
-   T/TCP, SCTP_EOF should not be set in the flags parameter when calling
+   T/TCP, MSG_EOF should not be set in the flags parameter when calling
    sendto() or sendmsg() when the call is used to initiate a connection.
-   SCTP_EOF is not an acceptable flag with SCTP socket.
+   MSG_EOF is not an acceptable flag with SCTP socket.
 
 4.1.6.  close() - one-to-one style socket
 
@@ -1224,35 +1057,23 @@ Internet-Draft              SCTP sockets API              September 2005
 
    The syntax is:
 
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 22]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
       int shutdown(int sd, int how);
 
-       sd      - the socket descriptor of the association to be closed.
 
-       how     - Specifies the type of shutdown.  The  values  are
-                 as follows:
 
-                 SHUT_RD
-                       Disables further receive operations. No SCTP
-                       protocol action is taken.
+Stewart, et al.          Expires August 21, 2006               [Page 19]
+
+Internet-Draft              SCTP sockets API               February 2006
 
-                 SHUT_WR
-                       Disables further send operations, and initiates
-                       the SCTP shutdown sequence.
 
-                 SHUT_RDWR
-                       Disables further send  and  receive  operations
-                       and initiates the SCTP shutdown sequence.
-
+   sd -  the socket descriptor of the association to be closed.
+   how - Specifies the type of shutdown.  The values are as follows:
+      SHUT_RD - Disables further receive operations.  No SCTP protocol
+         action is taken.
+      SHUT_WR - Disables further send operations, and initiates the SCTP
+         shutdown sequence.
+      SHUT_RDWR - Disables further send and receive operations and
+         initiates the SCTP shutdown sequence.
 
    The major difference between SCTP and TCP shutdown() is that SCTP
    SHUT_WR initiates immediate and full protocol shutdown, whereas TCP
@@ -1262,9 +1083,9 @@ Internet-Draft              SCTP sockets API              September 2005
    so that the caller can receive back any data SCTP was unable to
    deliver (see Section 5.3.1.4 for more information).
 
-   To perform the ABORT operation described in RFC2960 [8] section 10.1,
-   an application can use the socket option SO_LINGER.  It is described
-   in Section 7.1.4.
+   To perform the ABORT operation described in RFC2960 [RFC2960] section
+   10.1, an application can use the socket option SO_LINGER.  It is
+   described in Section 7.1.4.
 
 4.1.8.  sendmsg() and recvmsg() - one-to-one style socket
 
@@ -1281,15 +1102,6 @@ Internet-Draft              SCTP sockets API              September 2005
    the data will not be sent and a SCTP_SEND_FAILED event will be
    delivered to the application if send failure events are enabled.
 
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 23]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
 4.1.9.  getpeername()
 
    Applications use getpeername() to retrieve the primary socket address
@@ -1302,48 +1114,24 @@ Internet-Draft              SCTP sockets API              September 2005
       int getpeername(int sd, struct sockaddr *address,
                       socklen_t *len);
 
-       sd      - the socket descriptor to be queried.
 
-       address - On return, the peer primary address is stored in
-                 this buffer. If the socket is an IPv4 socket, the
-                 address will be IPv4. If the socket is an IPv6 socket,
-                 the address will be either an IPv6 or IPv4
-                 address.
 
-       len     - The caller should set the length of address here.
-                 On return, this is set to the length of the returned
-                 address.
 
+Stewart, et al.          Expires August 21, 2006               [Page 20]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sd - the socket descriptor to be queried.
+   address - On return, the peer primary address is stored in this
+      buffer.  If the socket is an IPv4 socket, the address will be
+      IPv4.  If the socket is an IPv6 socket, the address will be either
+      an IPv6 or IPv4 address.
+   len - The caller should set the length of address here.  On return,
+      this is set to the length of the returned address.
 
    If the actual length of the address is greater than the length of the
    supplied sockaddr structure, the stored address will be truncated.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 24]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 5.  Data Structures
@@ -1361,8 +1149,8 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP endpoint.
 
    The msghdr and the related cmsghdr structures are defined and
-   discussed in details in RFC2292 [6].  Here we will cite their
-   definitions from RFC2292 [6].
+   discussed in details in RFC2292 [RFC2292].  Here we will cite their
+   definitions from RFC2292 [RFC2292].
 
    The msghdr structure:
 
@@ -1377,6 +1165,18 @@ Internet-Draft              SCTP sockets API              September 2005
    };
 
    The cmsghdr structure:
+
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 21]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
    struct cmsghdr {
      socklen_t  cmsg_len;   /* #bytes, including this header */
@@ -1393,14 +1193,6 @@ Internet-Draft              SCTP sockets API              September 2005
    chunks, for both sendmsg() and recvmsg().
 
    The msg_flags are not used when sending a message with sendmsg().
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 25]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    If a notification has arrived, recvmsg() will return the notification
    with the MSG_NOTIFICATION flag set in msg_flags.  If the
@@ -1434,30 +1226,30 @@ Internet-Draft              SCTP sockets API              September 2005
    and SCTP_ASSOC_CHANGE information.  Specific ancillary data items can
    be enabled with socket options defined for SCTP; see Section 7.3.
 
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 22]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    Note that all ancillary types are fixed length; see Section 5.4 for
    further discussion on this.  These data structures use struct
-   sockaddr_storage (defined in RFC2553 [7]) as a portable, fixed length
-   address format.
+   sockaddr_storage (defined in RFC2553 [RFC2553]) as a portable, fixed
+   length address format.
 
    Other protocols may also provide ancillary data to the socket layer
    consumer.  These ancillary data items from other protocols may
    intermingle with SCTP data.  For example, the IPv6 socket API
-   definitions (RFC2292 [6] and RFC2553 [7]) define a number of
-   ancillary data items.  If a socket API consumer enables delivery of
-   both SCTP and IPv6 ancillary data, they both may appear in the same
-   msg_control buffer in any order.  An application may thus need to
-   handle other types of ancillary data besides that passed by SCTP.
+   definitions (RFC2292 [RFC2292] and RFC2553 [RFC2553]) define a number
+   of ancillary data items.  If a socket API consumer enables delivery
+   of both SCTP and IPv6 ancillary data, they both may appear in the
+   same msg_control buffer in any order.  An application may thus need
+   to handle other types of ancillary data besides that passed by SCTP.
 
    The sockets application must provide a buffer large enough to
    accommodate all ancillary data provided via recvmsg().  If the buffer
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 26]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    is not large enough, the ancillary data will be truncated and the
    msghdr's msg_flags will include MSG_CTRUNC.
 
@@ -1490,6 +1282,14 @@ Internet-Draft              SCTP sockets API              September 2005
 
    sinit_max_instreams: 16 bits (unsigned integer)
 
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 23]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    This value represents the maximum number of inbound streams the
    application is prepared to support.  This value is bounded by the
    actual implementation.  In other words the user MAY be able to
@@ -1506,13 +1306,6 @@ Internet-Draft              SCTP sockets API              September 2005
    system's default 'Max.Init.Retransmit' value.
 
    sinit_max_init_timeo: 16 bits (unsigned integer)
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 27]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    This value represents the largest Time-Out or RTO value (in
    milliseconds) to use inattempting a INIT.  Normally the 'RTO.Max' is
@@ -1545,6 +1338,14 @@ Internet-Draft              SCTP sockets API              September 2005
       uint32_t sinfo_tsn;
       uint32_t sinfo_cumtsn;
       sctp_assoc_t sinfo_assoc_id;
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 24]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    };
 
 
@@ -1562,14 +1363,6 @@ Internet-Draft              SCTP sockets API              September 2005
    remote endpoint placed in the DATA chunk.  For fragmented messages
    this is the same number for all deliveries of the message (if more
    than one recvmsg() is needed to read the message).  The sendmsg()
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 28]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    call will ignore this parameter.
 
    sinfo_ppid: 32 bits (unsigned integer)
@@ -1596,6 +1389,7 @@ Internet-Draft              SCTP sockets API              September 2005
    This field may contain any of the following flags and is composed of
    a bitwise OR of these values.
 
+   recvmsg() flags:
 
 
 
@@ -1603,62 +1397,35 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 29]
+Stewart, et al.          Expires August 21, 2006               [Page 25]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-     recvmsg() flags:
+   SCTP_UNORDERED - This flag is present when the message was sent non-
+      ordered.
 
-       SCTP_UNORDERED - This flag is present when the message was sent
-                        non-ordered.
-
-     sendmsg() flags:
-
-      SCTP_UNORDERED - This flag requests the un-ordered delivery of the
-                       message.  If this flag is clear the datagram is
-                       considered an ordered send.
-
-      SCTP_ADDR_OVER - This flag, in the one-to-many style, requests the SCTP
-                       stack to override the primary destination address
-                       with the address found with the sendto/sendmsg
-                       call.
-
-      SCTP_ABORT     - Setting this flag causes the specified association
-                       to abort by sending an ABORT message to the peer
-                       (one-to-many style only). The ABORT chunk
-                       will contain an error cause 'User Initiated Abort'
-                       with cause code 12.The cause specific
-                       information of this error cause is provided in msg_iov.
-
-      SCTP_EOF       - Setting this flag invokes the SCTP graceful shutdown
-                       procedures on the specified association. Graceful
-                       shutdown assures that all data enqueued by both
-                       endpoints is successfully transmitted before closing
-                       the association (one-to-many style only).
-
-      SCTP_SENDALL   - This flag, if set, will cause a one-to-many model
-                       socket to send the message to all associations
-                       that are currently established on this socket. For
-                       the one-to-one socket, this flag has no effect.
+   sendmsg() flags:
+   SCTP_UNORDERED - This flag requests the un-ordered delivery of the
+      message.  If this flag is clear the datagram is considered an
+      ordered send.
+   SCTP_ADDR_OVER - This flag, in the one-to-many style, requests the
+      SCTP stack to override the primary destination address with the
+      address found with the sendto/sendmsg call.
+   SCTP_ABORT - Setting this flag causes the specified association to
+      abort by sending an ABORT message to the peer (one-to-many style
+      only).  The ABORT chunk will contain an error cause 'User
+      Initiated Abort' with cause code 12.  The cause specific
+      information of this error cause is provided in msg_iov.
+   SCTP_EOF - Setting this flag invokes the SCTP graceful shutdown
+      procedures on the specified association.  Graceful shutdown
+      assures that all data enqueued by both endpoints is successfully
+      transmitted before closing the association (one-to-many style
+      only).
+   SCTP_SENDALL - This flag, if set, will cause a one-to-many model
+      socket to send the message to all associations that are currently
+      established on this socket.  For the one-to-one socket, this flag
+      has no effect.
 
    sinfo_timetolive: 32 bit (unsigned integer)
 
@@ -1674,14 +1441,6 @@ Internet-Draft              SCTP sockets API              September 2005
    For the receiving side, this field holds a TSN that was assigned to
    one of the SCTP Data Chunks.
 
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 30]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    sinfo_cumtsn: 32 bit (unsigned integer)
 
    This field will hold the current cumulative TSN as known by the
@@ -1690,6 +1449,14 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP_UNORDERED.
 
    sinfo_assoc_id: sizeof (sctp_assoc_t)
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 26]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
    The association handle field, sinfo_assoc_id, holds the identifier
    for the association announced in the SCTP_COMM_UP notification.  All
@@ -1733,9 +1500,18 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 31]
+
+
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 27]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
     union sctp_notification {
@@ -1749,7 +1525,7 @@ Internet-Draft              SCTP sockets API              September 2005
        struct sctp_remote_error   sn_remote_error;
        struct sctp_send_failed    sn_send_failed;
        struct sctp_shutdown_event sn_shutdown_event;
-       struct sctp_adaption_event sn_adaption_event;
+       struct sctp_adaption_event sn_adaptation_event;
        struct sctp_pdapi_event    sn_pdapi_event;
        struct sctp_authkey_event  sn_auth_event;
     };
@@ -1762,42 +1538,37 @@ Internet-Draft              SCTP sockets API              September 2005
 
    SCTP_ASSOC_CHANGE: This tag indicates that an association has either
       been opened or closed.  Refer to Section 5.3.1.1 for details.
-
    SCTP_PEER_ADDR_CHANGE: This tag indicates that an address that is
       part of an existing association has experienced a change of state
       (e.g. a failure or return to service of the reachability of a
       endpoint via a specific transport address).  Please see
       Section 5.3.1.2 for data structure details.
-
    SCTP_REMOTE_ERROR: The attached error message is an Operational Error
       received from the remote peer.  It includes the complete TLV sent
       by the remote endpoint.  See Section 5.3.1.3 for the detailed
       format.
-
    SCTP_SEND_FAILED: The attached datagram could not be sent to the
       remote endpoint.  This structure includes the original
       SCTP_SNDRCVINFO that was used in sending this message i.e. this
       structure uses the sctp_sndrecvinfo per Section 5.3.1.4.
-
    SCTP_SHUTDOWN_EVENT: The peer has sent a SHUTDOWN.  No further data
       should be sent on this socket.
-
-   SCTP_ADAPTION_INDICATION: This notification holds the peers indicated
-      adaption layer.  Please see Section 5.3.1.6.
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 32]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
+   SCTP_ADAPTATION_INDICATION: This notification holds the peers
+      indicated adaptation layer.  Please see Section 5.3.1.6.
    SCTP_PARTIAL_DELIVERY_EVENT: This notification is used to tell a
       receiver that the partial delivery has been aborted.  This may
       indicate the association is about to be aborted.  Please see
       Section 5.3.1.7
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 28]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
    SCTP_AUTHENTICATION_EVENT: This notification is used to tell a
       receiver that either an error occured on authentication, or a new
@@ -1842,52 +1613,46 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Currently unused.
 
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 33]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    sac_length: 32 bits (unsigned integer)
 
    This field is the total length of the notification data, including
    the notification header.
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 29]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
    sac_state: 16 bits (signed integer)
 
    This field holds one of a number of values that communicate the event
    that happened to the association.  They include:
 
-     Event Name           Description
-     ----------------     ---------------
-     SCTP_COMM_UP         A new association is now ready
-                          and data may be exchanged with this
-                          peer.
+   Event Name Description
 
-     SCTP_COMM_LOST       The association has failed.  The association
-                          is now in the closed state.  If SEND FAILED
-                          notifications are turned on, a SCTP_COMM_LOST
-                          is followed by a series of SCTP_SEND_FAILED
-                          events, one for each outstanding message.
-
-     SCTP_RESTART         SCTP has detected that the peer has restarted.
-
-     SCTP_SHUTDOWN_COMP   The association has gracefully closed.
-
-     SCTP_CANT_STR_ASSOC  The association failed to setup. If non blocking
-                          mode is set and data was sent (in the udp mode),
-                          a SCTP_CANT_STR_ASSOC is followed by a series of
-                          SCTP_SEND_FAILED events, one for each outstanding
-                          message.
+   ---------------- ---------------
+   SCTP_COMM_UP - A new association is now ready and data may be
+      exchanged with this peer.
+   SCTP_COMM_LOST - The association has failed.  The association is now
+      in the closed state.  If SEND FAILED notifications are turned on,
+      a SCTP_COMM_LOST is followed by a series of SCTP_SEND_FAILED
+      events, one for each outstanding message.
+   SCTP_RESTART - SCTP has detected that the peer has restarted.
+   SCTP_SHUTDOWN_COMP - The association has gracefully closed.
+   SCTP_CANT_STR_ASSOC - The association failed to setup.  If non
+      blocking mode is set and data was sent (in the udp mode), a
+      SCTP_CANT_STR_ASSOC is followed by a series of SCTP_SEND_FAILED
+      events, one for each outstanding message.
 
    sac_error: 16 bits (signed integer)
 
    If the state was reached due to a error condition (e.g.
    SCTP_COMM_LOST) any relevant error information is available in this
    field.  This corresponds to the protocol error codes defined in
-   RFC2960 [8].
+   RFC2960 [RFC2960].
 
    sac_outbound_streams: 16 bits (unsigned integer)
 
@@ -1898,14 +1663,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    sac_assoc_id: sizeof (sctp_assoc_t)
 
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 34]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    The association id field, holds the identifier for the association.
    All notifications for a given association have the same association
    identifier.  For one-to-one style socket, this field is ignored.
@@ -1914,7 +1671,16 @@ Internet-Draft              SCTP sockets API              September 2005
 
    If the sac_state is SCTP_COMM_LOST and an ABORT chunk was received
    for this association, sac_info[] contains the complete ABORT chunk as
-   defined in the SCTP specification RFC2960 [8] section 3.3.7.
+   defined in the SCTP specification RFC2960 [RFC2960] section 3.3.7.
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 30]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
 5.3.1.2.  SCTP_PEER_ADDR_CHANGE
 
@@ -1928,8 +1694,8 @@ Internet-Draft              SCTP sockets API              September 2005
           uint16_t spc_flags;
           uint32_t spc_length;
           struct sockaddr_storage spc_aaddr;
-          int spc_state;
-          int spc_error;
+          uint32_t spc_state;
+          uint32_t spc_error;
           sctp_assoc_t spc_assoc_id;
         }
 
@@ -1954,36 +1720,31 @@ Internet-Draft              SCTP sockets API              September 2005
    spc_state: 32 bits (signed integer)
 
    This field holds one of a number of values that communicate the event
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 35]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    that happened to the address.  They include:
 
+   Event Name Description
 
-     Event Name             Description
-     ----------------       ---------------
-     SCTP_ADDR_AVAILABLE    This address is now reachable.
+   ---------------- ---------------
+   SCTP_ADDR_AVAILABLE - This address is now reachable.
 
-     SCTP_ADDR_UNREACHABLE  The address specified can no
-                            longer be reached.  Any data sent
-                            to this address is rerouted to an
-                            alternate until this address becomes
-                            reachable.
 
-     SCTP_ADDR_REMOVED      The address is no longer part of
-                            the association.
 
-     SCTP_ADDR_ADDED        The address is now part of the
-                            association.
 
-     SCTP_ADDR_MADE_PRIM    This address has now been made
-                            to be the primary destination address.
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 31]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   SCTP_ADDR_UNREACHABLE - The address specified can no longer be
+      reached.  Any data sent to this address is rerouted to an
+      alternate until this address becomes reachable.
+   SCTP_ADDR_REMOVED - The address is no longer part of the association.
+   SCTP_ADDR_ADDED - The address is now part of the association.
+   SCTP_ADDR_MADE_PRIM - This address has now been made to be the
+      primary destination address.
 
    spc_error: 32 bits (signed integer)
 
@@ -2003,19 +1764,8 @@ Internet-Draft              SCTP sockets API              September 2005
    This message indicates a variety of error conditions on an
    association.  The entire ERROR chunk as it appears on the wire is
    included in a SCTP_REMOTE_ERROR event.  Please refer to the SCTP
-   specification RFC2960 [8] and any extensions for a list of possible
-   error formats.  SCTP error notifications have the format:
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 36]
-
-Internet-Draft              SCTP sockets API              September 2005
+   specification RFC2960 [RFC2960] and any extensions for a list of
+   possible error formats.  SCTP error notifications have the format:
 
 
    struct sctp_remote_error {
@@ -2036,6 +1786,14 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Currently unused.
 
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 32]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    sre_length: 32 bits (unsigned integer)
 
    This field is the total length of the notification data, including
@@ -2055,23 +1813,12 @@ Internet-Draft              SCTP sockets API              September 2005
    sre_data: variable
 
    This contains the ERROR chunk as defined in the SCTP specification
-   RFC2960 [8] section 3.3.10.
+   RFC2960 [RFC2960] section 3.3.10.
 
 5.3.1.4.  SCTP_SEND_FAILED
 
    If SCTP cannot deliver a message it may return the message as a
    notification.
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 37]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
    struct sctp_send_failed {
@@ -2089,17 +1836,24 @@ Internet-Draft              SCTP sockets API              September 2005
 
    It should be SCTP_SEND_FAILED.
 
-   The flag value will take one of the following values
+   The flag value will take one of the following values:
 
 
 
-   SCTP_DATA_UNSENT  - Indicates that the data was never put on
-                       the wire.
 
-   SCTP_DATA_SENT    - Indicates that the data was put on the wire.
-                       Note that this does not necessarily mean that the
-                       data was (or was not) successfully delivered.
 
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 33]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   SCTP_DATA_UNSENT - Indicates that the data was never put on the wire.
+   SCTP_DATA_SENT - Indicates that the data was put on the wire.  Note
+      that this does not necessarily mean that the data was (or was not)
+      successfully delivered.
 
    ssf_length: 32 bits (unsigned integer)
 
@@ -2109,8 +1863,8 @@ Internet-Draft              SCTP sockets API              September 2005
    ssf_error: 16 bits (unsigned integer)
 
    This value represents the reason why the send failed, and if set,
-   will be a SCTP protocol error code as defined in RFC2960 [8] section
-   3.3.10.
+   will be a SCTP protocol error code as defined in RFC2960 [RFC2960]
+   section 3.3.10.
 
    ssf_info: sizeof (struct sctp_sndrcvinfo)
 
@@ -2122,14 +1876,6 @@ Internet-Draft              SCTP sockets API              September 2005
    The association id field, sf_assoc_id, holds the identifier for the
    association.  All notifications for a given association have the same
    association identifier.  For one-to-one style socket, this field is
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 38]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    ignored.
 
    ssf_data: variable length
@@ -2153,6 +1899,13 @@ Internet-Draft              SCTP sockets API              September 2005
 
    It should be SCTP_SHUTDOWN_EVENT
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 34]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    sse_flags: 16 bits (unsigned integer)
 
    Currently unused.
@@ -2173,30 +1926,23 @@ Internet-Draft              SCTP sockets API              September 2005
    All notifications for a given association have the same association
    identifier.  For one-to-one style socket, this field is ignored.
 
-5.3.1.6.  SCTP_ADAPTION_INDICATION
+5.3.1.6.  SCTP_ADAPTATION_INDICATION
 
-   When a peer sends a Adaption Layer Indication parameter , SCTP
+   When a peer sends a Adaptation Layer Indication parameter , SCTP
    delivers this notification to inform the application that of the
-   peers requested adaption layer.
+   peers requested adaptation layer.
 
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 39]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
-       struct sctp_adaption_event {
+       struct sctp_adaptation_event {
            uint16_t sai_type;
            uint16_t sai_flags;
            uint32_t sai_length;
-           uint32_t sai_adaption_ind;
+           uint32_t sai_adaptation_ind;
            sctp_assoc_t sai_assoc_id;
        };
 
    sai_type
 
-   It should be SCTP_ADAPTION_INDICATION
+   It should be SCTP_ADAPTATION_INDICATION
 
    sai_flags: 16 bits (unsigned integer)
 
@@ -2206,12 +1952,20 @@ Internet-Draft              SCTP sockets API              September 2005
 
    This field is the total length of the notification data, including
    the notification header.  It will generally be sizeof (struct
-   sctp_adaption_event).
+   sctp_adaptation_event).
 
-   sai_adaption_ind: 32 bits (unsigned integer)
 
-   This field holds the bit array sent by the peer in the adaption layer
-   indication parameter.  The bits are in network byte order.
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 35]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sai_adaptation_ind: 32 bits (unsigned integer)
+
+   This field holds the bit array sent by the peer in the adaptation
+   layer indication parameter.  The bits are in network byte order.
 
    sai_assoc_id: sizeof (sctp_assoc_t)
 
@@ -2233,14 +1987,6 @@ Internet-Draft              SCTP sockets API              September 2005
        };
 
    pdapi_type
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 40]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    It should be SCTP_PARTIAL_DELIVERY_EVENT
 
@@ -2264,6 +2010,14 @@ Internet-Draft              SCTP sockets API              September 2005
    pdapi_assoc_id: sizeof (sctp_assoc_t)
 
    The association id field, holds the identifier for the association.
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 36]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    All notifications for a given association have the same association
    identifier.  For one-to-one style socket, this field is ignored.
 
@@ -2290,14 +2044,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Currently unused.
 
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 41]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    auth_length: 32 bits (unsigned integer)
 
    This field is the total length of the notification data, including
@@ -2320,12 +2066,19 @@ Internet-Draft              SCTP sockets API              September 2005
    This field hold the error or indication being reported.  The
    following values are currently defined:
 
-   1) - SCTP_AUTH_NEWKEY, this report indicates that a new key has been
-      made active (used for the first time by the peer) and is now the
-      active key.  The auth_keynumber field holds the user specified key
-      number.
 
-   2) - SCTP_KEY_CONFLICT, this report indicates that an association was
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 37]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   SCTP_AUTH_NEWKEY - this report indicates that a new key has been made
+      active (used for the first time by the peer) and is now the active
+      key.  The auth_keynumber field holds the user specified key
+      number.
+   SCTP_KEY_CONFLICT - this report indicates that an association was
       attempting to be formed and that two seperate keys were discovered
       for the same peer endpoint.  In other words, two distinct keys
       would have been active for the same association due to multi-
@@ -2343,16 +2096,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Programming with ancillary socket data contains some subtleties and
    pitfalls, which are discussed below.
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 42]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
 5.4.1.  Multiple Items and Ordering
 
@@ -2377,8 +2120,16 @@ Internet-Draft              SCTP sockets API              September 2005
    Implementations may have different padding requirements for ancillary
    data, so portable applications should make use of the macros
    CMSG_FIRSTHDR, CMSG_NXTHDR, CMSG_DATA, CMSG_SPACE, and CMSG_LEN.  See
-   RFC2292 [6] and your SCTP implementation's documentation for more
-   information.  Following is an example, from RFC2292 [6],
+   RFC2292 [RFC2292] and your SCTP implementation's documentation for
+   more information.  Following is an example, from RFC2292 [RFC2292],
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 38]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    demonstrating the use of these macros to access ancillary data:
 
    struct msghdr   msg;
@@ -2402,14 +2153,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    The information conveyed via SCTP_SNDRCV events will often be
    fundamental to the correct and sane operation of the sockets
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 43]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    application.  This is particularly true of the one-to-many semantics,
    but also of the one-ton-one semantics.  For example, if an
    application needs to send and receive data on different SCTP streams,
@@ -2429,8 +2172,19 @@ Internet-Draft              SCTP sockets API              September 2005
    to calculate the maximum required buffer size might be to take the
    sum the sizes of all enabled ancillary data item structures, as
    calculated by CMSG_SPACE.  For example, if we enabled
-   SCTP_SNDRCV_INFO and IPV6_RECVPKTINFO RFC2292 [6], we would calculate
-   and allocate the buffer size as follows:
+   SCTP_SNDRCV_INFO and IPV6_RECVPKTINFO RFC2292 [RFC2292], we would
+   calculate and allocate the buffer size as follows:
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 39]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
    size_t total;
    void *buf;
@@ -2443,27 +2197,6 @@ Internet-Draft              SCTP sockets API              September 2005
    We could then use this buffer for msg_control on each call to
    recvmsg() and be assured that we would not lose any ancillary data to
    truncation.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 44]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 6.  Common Operations for Both Styles
@@ -2483,17 +2216,17 @@ Internet-Draft              SCTP sockets API              September 2005
    ssize_t recvfrom(int sd, void *buf, size_t len, int flags,
                     struct sockaddr *from, socklen_t *fromlen);
 
-     sd      - the socket descriptor of an SCTP endpoint.
-     msg     - the message to be sent.
-     len     - the size of the message or the size of buffer.
-     to      - one of the peer addresses of the association to be
-               used to send the message.
-     tolen   - the size of the address.
-     buf     - the buffer to store a received message.
-     from    - the buffer to store the peer address used to send the
-               received message.
-     fromlen - the size of the from address
-     flags   - (described below).
+   sd - the socket descriptor of an SCTP endpoint.
+   msg - the message to be sent.
+   len - the size of the message or the size of buffer.
+   to - one of the peer addresses of the association to be used to send
+      the message.
+   tolen - the size of the address.
+   buf - the buffer to store a received message.
+   from - the buffer to store the peer address used to send the received
+      message.
+   fromlen - the size of the from address
+   flags - (described below).
 
    These calls give access to only basic SCTP protocol features.  If
    either peer in the association uses multiple streams, or sends
@@ -2501,6 +2234,14 @@ Internet-Draft              SCTP sockets API              September 2005
    deliver the data in unpredictable ways.
 
    SCTP has the concept of multiple streams in one association.  The
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 40]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    above calls do not allow the caller to specify on which stream a
    message should be sent.  The system uses stream 0 as the default
    stream for send() and sendto(). recv() and recvfrom() return data
@@ -2514,14 +2255,6 @@ Internet-Draft              SCTP sockets API              September 2005
    wants to send a message which is composed by several buffers, the
    caller needs to combine them before calling send() or sendto().
    Alternately, the caller can use sendmsg() to do that without
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 45]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    combining them. recv() and recvfrom() cannot distinguish message
    boundaries.
 
@@ -2535,7 +2268,7 @@ Internet-Draft              SCTP sockets API              September 2005
    Note, if an application calls a send function with no user data and
    no ancillary data the SCTP implementation should reject the request
    with an appropriate error message.  An implementation is NOT allowed
-   to send a Data chunk with no user data RFC2960 [8].
+   to send a Data chunk with no user data RFC2960 [RFC2960].
 
 6.2.  setsockopt(), getsockopt()
 
@@ -2550,12 +2283,25 @@ Internet-Draft              SCTP sockets API              September 2005
    ret = setsockopt(int sd, int level, int optname, const void *optval,
                     socklen_t optlen);
 
-     sd      - the socket descript.
-     level   - set to IPPROTO_SCTP for all SCTP options.
-     optname - the option name.
-     optval  - the buffer to store the value of the option.
-     optlen  - the size of the buffer (or the length of  the option
-               returned).
+
+   sd - the socket descriptor.
+   level - set to IPPROTO_SCTP for all SCTP options.
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 41]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   optname - the option name.
+   optval - the buffer to store the value of the option.
+   optlen - the size of the buffer (or the length of the option
+      returned).
 
 6.3.  read() and write()
 
@@ -2570,14 +2316,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Applications use getsockname() to retrieve the locally-bound socket
    address of the specified socket.  This is especially useful if the
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 46]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    caller let SCTP chose a local port.  This call is for where the
    endpoint is not multi-homed.  It does not work well with multi-homed
    sockets.  See Section 8.5 for a multi-homed version of the call.
@@ -2587,18 +2325,13 @@ Internet-Draft              SCTP sockets API              September 2005
    int getsockname(int sd, struct sockaddr *address,
                    socklen_t *len);
 
-     sd      - the socket descriptor to be queried.
-
-     address - On return, one locally bound address (chosen by
-               the SCTP stack) is stored in this buffer. If the
-               socket is an IPv4 socket, the address will be IPv4.
-               If the socket is an IPv6 socket, the address will
-               be either an IPv6 or IPv4 address.
-
-     len     - The caller should set the length of address here.
-               On return, this is set to the length of the returned
-               address.
-
+   sd - the socket descriptor to be queried.
+   address - On return, one locally bound address (chosen by the SCTP
+      stack) is stored in this buffer.  If the socket is an IPv4 socket,
+      the address will be IPv4.  If the socket is an IPv6 socket, the
+      address will be either an IPv6 or IPv4 address.
+   len - The caller should set the length of address here.  On return,
+      this is set to the length of the returned address.
 
    If the actual length of the address is greater than the length of the
    supplied sockaddr structure, the stored address will be truncated.
@@ -2607,39 +2340,20 @@ Internet-Draft              SCTP sockets API              September 2005
    the object pointed to by address is unspecified.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 47]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
 7.  Socket Options
 
    The following sub-section describes various SCTP level socket options
    that are common to both styles.  SCTP associations can be multi-
    homed.  Therefore, certain option parameters include a
    sockaddr_storage structure to select which peer address the option
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 42]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    should be applied to.
 
    For the one-to-many style sockets, an sctp_assoc_t structure
@@ -2676,20 +2390,6 @@ Internet-Draft              SCTP sockets API              September 2005
    opt specifies which SCTP socket option to get.  It can get any socket
    option currently supported that requests information (either read/
    write options or read only) such as:
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 48]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    SCTP_RTOINFO
    SCTP_ASSOCINFO
    SCTP_DEFAULT_SEND_PARAM
@@ -2698,6 +2398,18 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP_PEER_ADDR_PARAMS
    SCTP_STATUS
    SCTP_AUTH_CHUNKS
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 43]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    SCTP_AUTH_SECRET
 
    arg is an option-specific structure buffer provided by the caller.
@@ -2717,7 +2429,6 @@ Internet-Draft              SCTP sockets API              September 2005
       in the structure, the address is used to lookup the association
       and the settings are applied to the specific address (if
       appropriate) or to the entire association.
-
    b) If an association identification is filled in but not a
       sockaddr_storage (if present), the association is found using the
       association identification and the settings should be applied to
@@ -2725,7 +2436,6 @@ Internet-Draft              SCTP sockets API              September 2005
       specified).  Note this also applies to options that hold an
       association identification in their structure but do not have a
       sockaddr_storage field.
-
    c) If neither the sockaddr_storage or association identification is
       set, i.e. the sockaddr_storage is set to all 0's (INADDR_ANY) and
       the association identification is 0, the settings are a default
@@ -2736,15 +2446,8 @@ Internet-Draft              SCTP sockets API              September 2005
 7.1.1.  Retransmission Timeout Parameters (SCTP_RTOINFO)
 
    The protocol parameters used to initialize and bound retransmission
-   timeout (RTO) are tunable.  See RFC2960 [8] for more information on
-   how these parameters are used in RTO calculation.
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 49]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   timeout (RTO) are tunable.  See RFC2960 [RFC2960] for more
+   information on how these parameters are used in RTO calculation.
 
    The following structure is used to access and modify these
    parameters:
@@ -2755,14 +2458,21 @@ Internet-Draft              SCTP sockets API              September 2005
        uint32_t              srto_max;
        uint32_t              srto_min;
    };
-     srto_initial    - This contains the initial RTO value.
-     srto_max and srto_min - These contain the maximum and minimum bounds
-                             for all RTOs.
-     srto_assoc_id   - (one-to-many style socket) This is filled in
-                       the application, and identifies the association
-                       for this query. If this parameter is '0'
-                       (on a one-to-many style socket), then the change
-                       effects the entire endpoint.
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 44]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   srto_initial - This contains the initial RTO value.
+   srto_max and srto_min - These contain the maximum and minimum bounds
+      for all RTOs.
+   srto_assoc_id - (one-to-many style socket) This is filled in the
+      application, and identifies the association for this query.  If
+      this parameter is '0' (on a one-to-many style socket), then the
+      change effects the entire endpoint.
 
    All parameters are time values, in milliseconds.  A value of 0, when
    modifying the parameters, indicates that the current value should not
@@ -2777,30 +2487,11 @@ Internet-Draft              SCTP sockets API              September 2005
    This option is used to both examine and set various association and
    endpoint parameters.
 
-   See RFC2960 [8] for more information on how this parameter is used.
-   The peer address parameter is ignored for one-to-one style socket.
+   See RFC2960 [RFC2960] for more information on how this parameter is
+   used.  The peer address parameter is ignored for one-to-one style
+   socket.
 
    The following structure is used to access and modify this parameters:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 50]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    struct sctp_assocparams {
       sctp_assoc_t    sasoc_assoc_id;
@@ -2810,21 +2501,31 @@ Internet-Draft              SCTP sockets API              September 2005
       uint32_t        sasoc_local_rwnd;
       uint32_t        sasoc_cookie_life;
    };
-     sasoc_asocmaxrxt - This contains the maximum retransmission attempts
-                        to make for the association.
 
-     sasoc_number_peer_destinations - This is the number of destination
-                                      addresses that the peer has.
-     sasoc_peer_rwnd - This holds the current value of the peers
-                       rwnd (reported in the last SACK) minus any
-                       outstanding data (i.e. data inflight).
-     sasoc_local_rwnd - This holds the last reported rwnd that was
-                        sent to the peer.
-     sasoc_cookie_life - This is the associations cookie life value
-                         used when issuing cookies.
-     sasoc_assoc_id   - (one-to-many style socket) This is filled in the
-                        application, and identifies the association
-                        for this query.
+   sasoc_asocmaxrxt - This contains the maximum retransmission attempts
+      to make for the association.
+   sasoc_number_peer_destinations - This is the number of destination
+      addresses that the peer has.
+   sasoc_peer_rwnd - This holds the current value of the peers rwnd
+      (reported in the last SACK) minus any outstanding data (i.e. data
+      inflight).
+   sasoc_local_rwnd - This holds the last reported rwnd that was sent to
+      the peer.
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 45]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sasoc_cookie_life - This is the associations cookie life value used
+      when issuing cookies.
+   sasoc_assoc_id - This is filled in the application, and identifies
+      the association for this query.
 
    This information may be examined for either the endpoint or a
    specific association.  To examine a endpoints default parameters the
@@ -2850,17 +2551,9 @@ Internet-Draft              SCTP sockets API              September 2005
    unreachable is also tunable, but is address-specific, so it is
    covered in a separate option.  If an application attempts to set the
    value of the association maximum retransmission parameter to more
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 51]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    than the sum of all maximum retransmission parameters, setsockopt()
-   shall return an error.  The reason for this, from RFC2960 [8] section
-   8.2:
+   shall return an error.  The reason for this, from RFC2960 [RFC2960]
+   section 8.2:
 
    Note: When configuring the SCTP endpoint, the user should avoid
    having the value of 'Association.Max.Retrans' larger than the
@@ -2877,6 +2570,14 @@ Internet-Draft              SCTP sockets API              September 2005
    argument to setsockopt() and getsockopt() is SCTP_INITMSG.
 
    Setting initialization parameters is effective only on an unconnected
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 46]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    socket (for one-to-many style sockets only future associations are
    effected by the change).  With one-to-one style sockets, this option
    is inherited by sockets derived from a listener socket.
@@ -2906,14 +2607,6 @@ Internet-Draft              SCTP sockets API              September 2005
 7.1.5.  SCTP_NODELAY
 
    Turn on/off any Nagle-like algorithm.  This means that packets are
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 52]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    generally sent as soon as possible and no unnecessary delays are
    introduced, at the cost of more packets in the network.  Expects an
    integer boolean flag.
@@ -2933,6 +2626,14 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Sets send buffer size.  For SCTP one-to-one style sockets, this
    controls the amount of data SCTP may have waiting in internal buffers
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 47]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    to be sent.  This option therefore bounds the maximum size of data
    that can be sent in a single send call.  For one-to-many style
    sockets, the effect is the same, except that it applies to one or all
@@ -2944,12 +2645,13 @@ Internet-Draft              SCTP sockets API              September 2005
 
    This socket option is applicable to the one-to-many style socket
    only.  When set it will cause associations that are idle for more
-   than the specified number of seconds to automatically close.  An
-   association being idle is defined as an association that has NOT sent
-   or received user data.  The special value of '0' indicates that no
-   automatic close of any associations should be performed, this is the
-   default value.  The option expects an integer defining the number of
-   seconds of idle time before an association is closed.
+   than the specified number of seconds to automatically close using the
+   graceful shutdown procedure.  An association being idle is defined as
+   an association that has NOT sent or received user data.  The special
+   value of '0' indicates that no automatic close of any associations
+   should be performed, this is the default value.  The option expects
+   an integer defining the number of seconds of idle time before an
+   association is closed.
 
    An application using this option should enable receiving the
    association change notification.  This is the only mechanism an
@@ -2962,14 +2664,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Requests that the peer mark the enclosed address as the association
    primary.  The enclosed address must be one of the association's
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 53]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    locally bound addresses.  The following structure is used to make a
    set primary request:
 
@@ -2978,10 +2672,9 @@ Internet-Draft              SCTP sockets API              September 2005
        struct sockaddr_storage sspp_addr;
    };
 
-     sspp_addr           The address to set as primary
-     sspp_assoc_id       (one-to-many style socket) This is filled in by the
-                         application, and identifies the association
-                         for this request.
+   sspp_addr - The address to set as primary
+   sspp_assoc_id - This is filled in by the application, and identifies
+      the association for this request.
 
    This functionality is optional.  Implementations that do not support
    this functionality should return EOPNOTSUPP.
@@ -2989,6 +2682,14 @@ Internet-Draft              SCTP sockets API              September 2005
 7.1.10.  Set Primary Address (SCTP_PRIMARY_ADDR)
 
    Requests that the local SCTP stack use the enclosed peer address as
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 48]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    the association primary.  The enclosed address must be one of the
    association peer's addresses.  The following structure is used to
    make a set peer primary request:
@@ -2997,34 +2698,24 @@ Internet-Draft              SCTP sockets API              September 2005
        sctp_assoc_t            ssp_assoc_id;
        struct sockaddr_storage ssp_addr;
    };
-     ssp_addr            The address to set as primary
-     ssp_assoc_id        (one-to-many style socket) This is filled in by the
-                         application, and identifies the association
-                         for this request.
 
-7.1.11.  Set Adaption Layer Indicator (SCTP_ADAPTION_LAYER)
+   ssp_addr - The address to set as primary
+   ssp_assoc_id - This is filled in by the application, and identifies
+      the association for this request.
 
-   Requests that the local endpoint set the specified Adaption Layer
+7.1.11.  Set Adaptation Layer Indicator (SCTP_ADAPTATION_LAYER)
+
+   Requests that the local endpoint set the specified Adaptation Layer
    Indication parameter for all future INIT and INIT-ACK exchanges.
 
-       struct sctp_setadaption {
-           uint32_t   ssb_adaption_ind;
+
+       struct sctp_setadaptation {
+           uint32_t   ssb_adaptation_ind;
        };
 
-       ssb_adaption_ind    The adaption layer indicator that will be included
-                           in any outgoing Adaption Layer Indication
-                           parameter.
 
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 54]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   ssb_adaptation_ind - The adaptation layer indicator that will be
+      included in any outgoing Adaptation Layer Indication parameter
 
 7.1.12.  Enable/Disable message fragmentation (SCTP_DISABLE_FRAGMENTS)
 
@@ -3043,6 +2734,18 @@ Internet-Draft              SCTP sockets API              September 2005
    unreachable.  The following structure is used to access and modify an
    address's parameters:
 
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 49]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    struct sctp_paddrparams {
        sctp_assoc_t            spp_assoc_id;
        struct sockaddr_storage spp_address;
@@ -3051,100 +2754,132 @@ Internet-Draft              SCTP sockets API              September 2005
        uint32_t                spp_pathmtu;
        uint32_t                spp_sackdelay;
        uint32_t                spp_flags;
+       uint32_t                spp_ipv6_flowlabel;
+       uint8_t                 spp_ipv4_tos;
    };
 
-     spp_assoc_id    - (one-to-many style socket) This is filled in the
-                       application, and identifies the association for
-                       this query.
-     spp_address     - This specifies which address is of interest.
-     spp_hbinterval  - This contains the value of the heartbeat interval,
-                       in milliseconds.  If a  value of zero
-                       is present in this field then no changes are to
-                       be made to this parameter.
-     spp_pathmaxrxt  - This contains the maximum number of
-                       retransmissions before this address shall be
-                       considered unreachable. If a  value of zero
-                       is present in this field then no changes are to
-                       be made to this parameter.
-     spp_pathmtu     - When Path MTU discovery is disabled the value
-                       specified here will be the "fixed" path mtu.
-                       Note that if the spp_address field is empty
-                       then all associations on this address will
-                       have this fixed path mtu set upon them.
+   spp_assoc_id -  (one-to-many style socket) This is filled in the
+      application, and identifies the association for this query.
+   spp_address - This specifies which address is of interest.
+   spp_hbinterval - This contains the value of the heartbeat interval,
+      in milliseconds.  Note that unless the spp_flag is set to
+      SPP_HB_ENABLE the value of this field is ignored.  Note also that
+      a value of zero indicates the current setting should be left
+      unchanged.  To set an actual value of zero the use of the flag
+      SPP_HB_TIME_IS_ZERO should be used.
+   spp_pathmaxrxt - This contains the maximum number of retransmissions
+      before this address shall be considered unreachable.  Note that
+      unless the spp_flag is set to SPP_PMTUD_ENABLE the value of this
+      field is ignored.  Note also that a value of zero indicates the
+      current setting should be left unchanged.
+   spp_pathmtu - When Path MTU discovery is disabled the value specified
+      here will be the "fixed" path mtu (i.e. the value of the spp_flags
+      field must include the flag SPP_PMTUD_DISABLE for this field to
+      have any effect).  Note that if the spp_address field is empty
+      then all associations on this address will have this fixed path
+      mtu set upon them.  If an address is specified, then only that
+      address will be effected.
+   spp_sackdelay - When delayed sack is enabled, this value specifies
+      the number of milliseconds that sacks will be delayed for.  This
+      value will apply to all addresses of an association if the
+      spp_address field is empty.  Note that unless the spp_flag is set
+      to SPP_SACKDELAY_ENABLE the value of this field is ignored.  Note
+      also that a value of zero indicates the current setting should be
+      left unchanged.
+   spp_ipv6_flowlabel- This field is used in conjunction with the
+      SPP_IPV4_FLOWLABEL flag.
+   spp_ipv4_tos- This field is used in conjunction with the SPP_IPV4_TOS
+      flag.
 
-     spp_sackdelay   - When delayed sack is enabled, this value specifies
-                       the number of milliseconds that sacks will be delayed
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 55]
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 50]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-                       for. This value will apply to all addresses of an
-                       association if the spp_address field is empty. Note
-                       also, that if delayed sack is enabled and this
-                       value is set to 0, no change is made to the last
-                       recorded delayed sack timer value.
+   spp_flags- These flags are used to control various features on an
+      association.  The flag field may contain zero or more of the
+      following options.
+
+      SPP_HB_ENABLE - Enable heartbeats on the specified address.  Note
+         that if the address field is empty all addresses for the
+         association have heartbeats enabled upon them.
+      SPP_HB_DISABLE - Disable heartbeats on the speicifed address.
+         Note that if the address field is empty all addresses for the
+         association will have their heartbeats disabled.  Note also
+         that SPP_HB_ENABLE and SPP_HB_DISABLE are mutually exclusive,
+         only one of these two should be specified.  Enabling both
+         fields will have undetermined results.
+      SPP_HB_DEMAND - Request a user initiated heartbeat to be made
+         immediately.
+      SPP_HB_TIME_IS_ZERO - Specify's that the time for heartbeat delay
+         is to be set to the value of 0 milliseconds.
+      SPP_PMTUD_ENABLE - This field will enable PMTU discovery upon the
+         specified address.  Note that if the address feild is empty
+         then all addresses on the association are effected.
+      SPP_PMTUD_DISABLE - This field will disable PMTU discovery upon
+         the specified address.  Note that if the address feild is empty
+         then all addresses on the association are effected.  Not also
+         that SPP_PMTUD_ENABLE and SPP_PMTUD_DISABLE are mutually
+         exclusive.  Enabling both will have undetermined results.
+      SPP_SACKDELAY_ENABLE - Setting this flag turns on delayed sack.
+         The time specified in spp_sackdelay is used to specify the sack
+         delay for this address.  Note that if spp_address is empty then
+         all addresses will enable delayed sack and take on the sack
+         delay value specified in spp_sackdelay.
+      SPP_SACKDELAY_DISABLE - Setting this flag turns off delayed sack.
+         If the spp_address field is blank then delayed sack is disabled
+         for the entire association.  Note also that this field is
+         mutually exclusive to SPP_SACKDELAY_ENABLE, setting both will
+         have undefined results.
+      SPP_IPV6_FLOWLABEL - Setting this flag enables setting of the IPV6
+         flowlabel value associated with either the association or the
+         specific address.  If the address field is filled in, then the
+         specific destination address has this value set upon it.  If
+         the association is specified, but not the address, then the
+         flowlabel value is set for any future destination addresses
+         that may be added.  The value is obtained in the
+         spp_ipv6_flowlabel field.
+
+         Upon retrieval, this flag will be set to indicate that the
+         spp_ipv6_flowlabel field has a valid value returned.  If a
+         specific destination addresses is set (in the spp_address
+         field) when called then the value returned is that of the
 
 
-     spp_flags       - These flags are used to control various features
-                       on an association. The flag field may contain
-                       zero or more of the following options.
 
-                       SPP_HB_ENABLE  - Enable heartbeats on the
-                       specified address. Note that if the address
-                       field is empty all addresses for the association
-                       have heartbeats enabled upon them.
-
-                       SPP_HB_DISABLE - Disable heartbeats on the
-                       speicifed address. Note that if the address
-                       field is empty all addresses for the association
-                       will have their heartbeats disabled. Note also
-                       that SPP_HB_ENABLE and SPP_HB_DISABLE are
-                       mutually exclusive, only one of these two should
-                       be specified. Enabling both fields will have
-                       undetermined results.
-
-                       SPP_HB_DEMAND - Request a user initiated heartbeat
-                       to be made immediately.
-
-                       SPP_PMTUD_ENABLE - This field will enable PMTU
-                       discovery upon the specified address. Note that
-                       if the address feild is empty then all addresses
-                       on the association are effected.
-
-                       SPP_PMTUD_DISABLE - This field will disable PMTU
-                       discovery upon the specified address. Note that
-                       if the address feild is empty then all addresses
-                       on the association are effected. Not also that
-                       SPP_PMTUD_ENABLE and SPP_PMTUD_DISABLE are mutually
-                       exclusive. Enabling both will have undetermined
-                       results.
-
-                       SPP_SACKDELAY_ENABLE - Setting this flag turns
-                       on delayed sack. The time specified in spp_sackdelay
-                       is used to specify the sack delay for this address. Note
-                       that if spp_address is empty then all addresses will
-                       enable delayed sack and take on the sack delay
-                       value specified in spp_sackdelay.
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 56]
+Stewart, et al.          Expires August 21, 2006               [Page 51]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-                       SPP_SACKDELAY_DISABLE - Setting this flag turns
-                       off delayed sack. If the spp_address field is blank then
-                       delayed sack is disabled for the entire association. Note
-                       also that this field is mutually exclusive to
-                       SPP_SACKDELAY_ENABLE, setting both will have undefined
-                       results.
+         address.  If just an assocaition is specified (and no address)
+         then the association default flowlabel is returned.  If neither
+         an association nor an destination is specified, then the
+         sockets default flowlabel is returned.  For non IPv6 sockets,
+         then this flag will be left cleared.
+      SPP_IPV4_TOS - Setting this flag enables setting of the IPV4 tos
+         value associated with either the association or specific
+         address.  If the address field is filled in, then the specific
+         destination address has this value set upon it.  If the
+         association is specified, but not the address, then the tos
+         value is set for any future destination addresses that may be
+         added.  The value is obtained in the spp_ipv4_tos field.
 
+         Upon retrieval, this flag will be set to indicate that the
+         spp_ipv4_tos field has a valid value returned.  If a specific
+         destination addresses is set when called (in the spp_address
+         field) then that specific destination addresses tos value is
+         returned.  If just an assocaition is specified then the
+         association default tos is returned.  If neither an association
+         nor an destination is specified, then the sockets default tos
+         is returned.  For non IPv4 sockets, then this flag will be left
+         cleared.
 
    To read or modify these parameters, the application should call
    sctp_opt_info() with the SCTP_PEER_ADDR_PARAMS option.
@@ -3169,6 +2904,16 @@ Internet-Draft              SCTP sockets API              September 2005
    ancillary data the user wishes to receive.  Please see Section 7.3)
    for a full description of this option and its usage.
 
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 52]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
 7.1.16.  Set/clear IPv4 mapped addresses (SCTP_I_WANT_MAPPED_V4_ADDR)
 
    This socket option is a boolean flag which turns on or off mapped V4
@@ -3186,14 +2931,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    This socket option specifies the maximum size to put in any outgoing
    SCTP DATA chunk.  If a message is larger than this size it will be
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 57]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    fragmented by SCTP into the specified size.  Note that the underlying
    SCTP implementation may fragment into smaller sized chunks when the
    PMTU of the underlying association is smaller than the value set by
@@ -3223,32 +2960,20 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP-AUTH in cases where it is not required by other means (for
    example the use of ADD-IP).
 
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 53]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
 7.1.19.  Set the endpoint pair shared key (SCTP_AUTH_KEY)
 
    This option will set the endpoint pair shared key which is used to
    build the association shared key.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 58]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
    struct sctp_authkey {
        sctp_assoc_t            sca_assoc_id;
@@ -3257,33 +2982,25 @@ Internet-Draft              SCTP sockets API              September 2005
        uint8_t                 sca_key[];
    };
 
-     sca_assoc_id  - This parameter, if non-zero, indicates what
-                     association that the shared key is being set
-                     upon. Note that if this element contains zero, then
-                     the secret is set upon the endpoint and all future
-                     associations will use this secret (if not changed by
-                     subsequent calls to SCTP_AUTH_KEY).
 
-     sca_address   - this parameter contains either a zero filled address,
-                     in which case it has no effect on the call. Or this
-                     parameter may contain an existing association.
-                     An address may also be specified for a future association
-                     including the IP layer address and the transport port, or
-                     just the IP layer address. Note that if multiple keys
-                     are defined for addresses of the same endpoint (for a
-                     multihomed endpoint) then an error will be returned and
-                     NO association will be formed on recipt of the INIT
-                     or INIT-ACK.
-
-     sca_keynumber - this parameter is the key index by which the application
-                     will refer to this key. If a key of the specified
-                     index already exists, then this new key will replace
-                     the old key.
-
-     sca_key       - This parameter contains an array of bytes
-                     that is to be used by the endpoint (or association)
-                     as the shared secret.
-
+   sca_assoc_id - This parameter, if non-zero, indicates what
+      association that the shared key is being set upon.  Note that if
+      this element contains zero, then the secret is set upon the
+      endpoint and all future associations will use this secret (if not
+      changed by subsequent calls to SCTP_AUTH_KEY).
+   sca_address - this parameter contains either a zero filled address,
+      in which case it has no effect on the call.  Or this parameter may
+      contain an existing association.  An address may also be specified
+      for a future association including the IP layer address and the
+      transport port, or just the IP layer address.  Note that if
+      multiple keys are defined for addresses of the same endpoint (for
+      a multihomed endpoint) then an error will be returned and NO
+      association will be formed on recipt of the INIT or INIT-ACK.
+   sca_keynumber - this parameter is the key index by which the
+      application will refer to this key.  If a key of the specified
+      index already exists, then this new key will replace the old key.
+   sca_key - This parameter contains an array of bytes that is to be
+      used by the endpoint (or association) as the shared secret.
 
 7.1.20.  Get the list of chunks the peer requires to be authenticated
          (SCTP_PEER_AUTH_CHUNKS)
@@ -3292,32 +3009,27 @@ Internet-Draft              SCTP sockets API              September 2005
    the peer requires to be received authenticated only.
 
 
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 59]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    struct sctp_authchunks {
        sctp_assoc_t            gauth_assoc_id;
        uint8_t                 gauth_chunks[];
    };
 
-     gauth_assoc_id  - This parameter, indicates for which association the
-                       user is requesting the list of peer authenticated
-                       chunks.
 
-     gauth_chunks    - This parameter contains an array of chunks
-                       that the peer is requesting to be authenticated.
 
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 54]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   gauth_assoc_id - This parameter, indicates for which association the
+      user is requesting the list of peer authenticated chunks.
+   gauth_chunks - This parameter contains an array of chunks that the
+      peer is requesting to be authenticated.
 
 7.1.21.  Get the list of chunks the local endpoint requires to be
          authenticated  (SCTP_LOCAL_AUTH_CHUNKS)
@@ -3325,42 +3037,34 @@ Internet-Draft              SCTP sockets API              September 2005
    This option gets a list of chunks for a specified association that
    the local endpoint requires to be received authenticated only.
 
+
    struct sctp_authchunks {
        sctp_assoc_t            gauth_assoc_id;
        uint8_t                 gauth_chunks[];
    };
 
-     gauth_assoc_id  - This parameter, indicates for which association the
-                       user is requesting the list of local authenticated
-                       chunks.
 
-     gauth_chunks    - This parameter contains an array of chunks
-                       that the local endpoint is requesting to be authenticated.
-
+   gauth_assoc_id - This parameter, indicates for which association the
+      user is requesting the list of local authenticated chunks.
+   gauth_chunks - This parameter contains an array of chunks that the
+      local endpoint is requesting to be authenticated.
 
 7.1.22.  Set the list of supported HMAC Identifiers  (SCTP_HMAC_IDENT)
 
    This option sets a list of algorithms for a specified association
    that the local endpoint requires the peer to use.
 
+
    struct sctp_hmacalgo {
        sctp_assoc_t            shmac_assoc_id;
        uint32_t                shmac_idents[];
    };
 
-     shmac_assoc_id  - This parameter, indicates for which association the
-                       user is setting the list of HMAC Identifiers.
 
-     shmac_idents    - This parameter contains an array of HMAC Identifiers
-                       that the local endpoint is requesting the peer to use.
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 60]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   shmac_assoc_id - This parameter, indicates for which association the
+      user is setting the list of HMAC Identifiers.
+   shmac_idents - This parameter contains an array of HMAC Identifiers
+      that the local endpoint is requesting the peer to use.
 
 7.1.23.  Get or set the active key  (SCTP_AUTH_SETKEY_ACTIVE)
 
@@ -3373,49 +3077,9 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 61]
+Stewart, et al.          Expires August 21, 2006               [Page 55]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
    struct sctp_authkey {
@@ -3428,51 +3092,33 @@ Internet-Draft              SCTP sockets API              September 2005
    };
 
 
-
-    scact_assoc_id -  This parameter, if non-zero, indicates what
-                      association that the shared key is being set
-                      upon. Note that if this element contains zero, then
-                      the secret activation applys to the endpoint and
-                      all future associations will use this secret (if not changed by
-                      subsequent calls).
-
-    scact_address  -  this parameter contains either a zero filled address,
-                      in which case it has no effect on the call. Or this
-                      parameter may contain an existing association address.
-                      An address may also be specified for a future association
-                      including the IP layer address and the transport port, or
-                      just the IP layer address. Note that if multiple keys
-                      are defined for addresses of the same endpoint (for a
-                      multihomed endpoint) then an error will be returned and
-                      NO association will be formed on recipt of the INIT
-                      or INIT-ACK.
-
-    scact_keynumber - this parameter is the key index by which the application
-                      will refer to this key. If a key of the specified
-                      index already exists, then this new key will replace
-                      the old key.
-
-    scact_sec_old     this parameter list the number of seconds for which
-                      both keys will be accepted. If this value is 0, then
-                      the new key is made active immediately and packets
-                      with the old key will be discarded. If this value
-                      is non-zero, then for the specified time in seconds
-                      both keys will be accepted.
-
-    scact_sec_new     this parameter indicates the number of seconds until
-                      the new key will start being used as the active key.
-                      If this value is '0' then the new key will start
-                      being used immediately. If this value is non-zero then
-                      the specified number of seconds will be delayed until
-                      new chunks being transmitted begin using the new
-                      key.
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 62]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   scact_assoc_id - This parameter, if non-zero, indicates what
+      association that the shared key is being set upon.  Note that if
+      this element contains zero, then the secret activation applys to
+      the endpoint and all future associations will use this secret (if
+      not changed by subsequent calls).
+   scact_address - this parameter contains either a zero filled address,
+      in which case it has no effect on the call.  Or this parameter may
+      contain an existing association address.  An address may also be
+      specified for a future association including the IP layer address
+      and the transport port, or just the IP layer address.  Note that
+      if multiple keys are defined for addresses of the same endpoint
+      (for a multihomed endpoint) then an error will be returned and NO
+      association will be formed on recipt of the INIT or INIT-ACK.
+   scact_keynumber - this parameter is the key index by which the
+      application will refer to this key.  If a key of the specified
+      index already exists, then this new key will replace the old key.
+   scact_sec_old - this parameter list the number of seconds for which
+      both keys will be accepted.  If this value is 0, then the new key
+      is made active immediately and packets with the old key will be
+      discarded.  If this value is non-zero, then for the specified time
+      in seconds both keys will be accepted.
+   scact_sec_new - this parameter indicates the number of seconds until
+      the new key will start being used as the active key.  If this
+      value is '0' then the new key will start being used immediately.
+      If this value is non-zero then the specified number of seconds
+      will be delayed until new chunks being transmitted begin using the
+      new key.
 
 7.1.24.  Get or set delayed ack timer  (SCTP_DELAYED_ACK_TIME)
 
@@ -3481,21 +3127,71 @@ Internet-Draft              SCTP sockets API              September 2005
    endpoints default delayed ack timer value.  If the assoc_id field is
    non-zero, then the set or get effects the specified association.
 
+
    struct sctp_assoc_value {
        sctp_assoc_t            assoc_id;
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 56]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
        uint32_t                assoc_value;
    };
 
-     assoc_id    - This parameter, indicates which association the
-                   user is preforming an action upon. Note that if
-                   this field's value is zero then the endpoints
-                   default value is changed (effecting future
-                   associations only).
 
-     assoc_value - This parameter contains the number of milliseconds
-                   that the user is requesting the delayed ACK timer
-                   be set to. Note that this value is defined in
-                   the standard to be between 200 and 500 milliseconds.
+   assoc_id - This parameter, indicates which association the user is
+      preforming an action upon.  Note that if this field's value is
+      zero then the endpoints default value is changed (effecting future
+      associations only).
+   assoc_value - This parameter contains the number of milliseconds that
+      the user is requesting the delayed ACK timer be set to.  Note that
+      this value is defined in the standard to be between 200 and 500
+      milliseconds.
+
+7.1.25.  Get or set fragmented interleave  (SCTP_FRAGMENT_INTERLEAVE)
+
+   This options will at a minimum specify if the implementation is doing
+   fragmented interleave.  Fragmented interleave, for a one to many
+   socket, is when subsequent calls to receive a message may return
+   parts of messages from different associations.  Some implementations
+   may allow you to turn this value on or off.  If so, when turned off,
+   no fragment interleave will occur (which will cause a head of line
+   blocking amongst multiple associations sharing the same one to many
+   socket).  When this option is turned on, then each receive call may
+   come from a different association (thus the user must receive data
+   with the extended calls (e.g. sctp_recvmsg) to keep track of which
+   association each receive belongs to.
+
+   This option takes a boolean value.  A non-zero value indicates that
+   fragmented interleave is on.  A value of zero indicates that
+   fragmented interleave is off.
+
+   Note that it is important that an implementation that allows this
+   option to be turned on, have it off by default.  Otherwise an unaware
+   application using the one to many model may become confused and act
+   incorrectly.
+
+7.1.26.  Set or Get the sctp partial delivery point
+         (SCTP_PARTIAL_DELIVERY_POINT)
+
+   This option will set or get the SCTP partial delivery point.  This
+   point is the size of a message where the partial delivery API will be
+   invoked to help free up rwnd space for the peer.  Setting this to a
+   lower value will cause partial delivery's to happen more often.  The
+   call's argument is an integer that sets or gets the partial delivery
+   point.
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 57]
+
+Internet-Draft              SCTP sockets API               February 2006
 
 
 7.2.  Read-Only Options
@@ -3507,27 +3203,6 @@ Internet-Draft              SCTP sockets API              September 2005
    number of unacked data chunks, and number of data chunks pending
    receipt.  This information is read-only.  The following structure is
    used to access this information:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 63]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
    struct sctp_status {
@@ -3542,49 +3217,45 @@ Internet-Draft              SCTP sockets API              September 2005
        struct sctp_paddrinfo sstat_primary;
    };
 
-     sstat_state    - This contains the association's current state one
-                      of the following values:
 
-                        SCTP_CLOSED
-                        SCTP_BOUND
-                        SCTP_LISTEN
-                        SCTP_COOKIE_WAIT
-                        SCTP_COOKIE_ECHOED
-                        SCTP_ESTABLISHED
-                        SCTP_SHUTDOWN_PENDING
-                        SCTP_SHUTDOWN_SENT
-                        SCTP_SHUTDOWN_RECEIVED
-                        SCTP_SHUTDOWN_ACK_SENT
-
-
-     sstat_rwnd     - This contains the association  peer's current
-                      receiver window size.
-     sstat_unackdata - This is the number of unacked data chunks.
-     sstat_penddata  - This is the number of data chunks pending receipt.
-     sstat_primary   - This is information on the current primary peer
-                       address.
-     sstat_assoc_id  - (one-to-many style socket) This holds the an
-                       identifier for the association.  All
-                       notifications for a given association
-                       have the same association identifier.
-
-     sstat_instrms   - The number of streams that the peer will
-                       be using inbound.
-
-     sstat_outstrms  - The number of streams that the endpoint is
-                       allowed to use outbound.
-
-     sstat_fragmentation_point - The size at which SCTP fragmentation
-                                 will occur.
+   sstat_state - This contains the association's current state one of
+      the following values:
+      SCTP_CLOSED
+      SCTP_BOUND
+      SCTP_LISTEN
+      SCTP_COOKIE_WAIT
+      SCTP_COOKIE_ECHOED
+      SCTP_ESTABLISHED
+      SCTP_SHUTDOWN_PENDING
+      SCTP_SHUTDOWN_SENT
+      SCTP_SHUTDOWN_RECEIVED
+      SCTP_SHUTDOWN_ACK_SENT
+   sstat_rwnd - This contains the association peer's current receiver
+      window size.
+   sstat_unackdata - This is the number of unacked data chunks.
+   sstat_penddata - This is the number of data chunks pending receipt.
+   sstat_primary - This is information on the current primary peer
+      address.
+   sstat_assoc_id - (one-to-many style socket) This holds the an
+      identifier for the association.  All notifications for a given
+      association have the same association identifier.
 
 
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 64]
+
+Stewart, et al.          Expires August 21, 2006               [Page 58]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
+
+   sstat_instrms - The number of streams that the peer will be using
+      inbound.
+   sstat_outstrms - The number of streams that the endpoint is allowed
+      to use outbound.
+   sstat_fragmentation_point - The size at which SCTP fragmentation will
+      occur.
 
    To access these status values, the application calls getsockopt()
    with the option name SCTP_STATUS.  The sstat_assoc_id parameter is
@@ -3608,25 +3279,35 @@ Internet-Draft              SCTP sockets API              September 2005
        uint32_t        spinfo_mtu;
    };
 
-     spinfo_address   - This is filled in the application, and contains
-                        the peer address of interest.
 
-    On return from getsockopt():
+   spinfo_address - This is filled in the application, and contains the
+      peer address of interest.
 
-     spinfo_state     - This contains the peer addresses's state (either
-                        SCTP_ACTIVE or SCTP_INACTIVE and possibly the modifer
-                        SCTP_UNCONFIRMED)
+   On return from getsockopt():
+   spinfo_state - This contains the peer addresses's state (either
+      SCTP_ACTIVE or SCTP_INACTIVE and possibly the modifer
+      SCTP_UNCONFIRMED)
+   spinfo_cwnd - This contains the peer addresses's current congestion
+      window.
+   spinfo_srtt - This contains the peer addresses's current smoothed
+      round-trip time calculation in milliseconds.
+   spinfo_rto - This contains the peer addresses's current
+      retransmission timeout value in milliseconds.
+   spinfo_mtu - The current P-MTU of this address.
 
-     spinfo_cwnd      - This contains the peer addresses's current congestion
-                        window.
-     spinfo_srtt      - This contains the peer addresses's current smoothed
-                        round-trip time calculation in milliseconds.
-     spinfo_rto       - This contains the peer addresses's current
-                        retransmission timeout value in milliseconds.
-     spinfo_mtu       - The current P-MTU of this address.
-     spinfo_assoc_id  - (one-to-many style socket) This is filled in
-                        the application, and identifies the
-                        association for this query.
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 59]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   spinfo_assoc_id - (one-to-many style socket) This is filled in the
+      application, and identifies the association for this query.
 
    To retrieve this information, use sctp_opt_info() with the
    SCTP_GET_PEER_ADDR_INFO options.
@@ -3634,42 +3315,26 @@ Internet-Draft              SCTP sockets API              September 2005
 7.3.  Ancillary Data and Notification Interest Options
 
    Applications can receive per-message ancillary information and
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 65]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    notifications of certain SCTP events with recvmsg().
 
    The following optional information is available to the application:
 
    1.  SCTP_SNDRCV (sctp_data_io_event): Per-message information (i.e.
        stream number, TSN, SSN, etc. described in Section 5.2.2)
-
    2.  SCTP_ASSOC_CHANGE (sctp_association_event): (described in
        Section 5.3.1.1)
-
    3.  SCTP_PEER_ADDR_CHANGE (sctp_address_event): (described in
        Section 5.3.1.2)
-
    4.  SCTP_SEND_FAILED (sctp_send_failure_event): (described in
        Section 5.3.1.4)
-
    5.  SCTP_REMOTE_ERROR (sctp_peer_error_event): (described in
        Section 5.3.1.3)
-
    6.  SCTP_SHUTDOWN_EVENT (sctp_shtudown_event): (described in
        Section 5.3.1.5)
-
    7.  SCTP_PARTIAL_DELIVERY_EVENT (sctp_partial_delivery_event):
        (described in Section 5.3.1.7)
-
-   8.  SCTP_ADAPTION_INDICATION (sctp_adaption_layer_event): (described
-       in Section 5.3.1.6)
-
+   8.  SCTP_ADAPTATION_INDICATION (sctp_adaptation_layer_event):
+       (described in Section 5.3.1.6)
    9.  SCTP_AUTHENTICATION_INDICATION (sctp_authentication_event):
        (described in Section 5.3.1.8)
 
@@ -3685,19 +3350,19 @@ Internet-Draft              SCTP sockets API              September 2005
        uint8_t sctp_peer_error_event;
        uint8_t sctp_shutdown_event;
        uint8_t sctp_partial_delivery_event;
-       uint8_t sctp_adaption_layer_event;
+       uint8_t sctp_adaptation_layer_event;
        uint8_t sctp_authentication_event;
    };
 
-   sctp_data_io_event - Setting this flag to 1 will cause the reception
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 66]
+Stewart, et al.          Expires August 21, 2006               [Page 60]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
+   sctp_data_io_event - Setting this flag to 1 will cause the reception
    of SCTP_SNDRCV information on a per message basis.  The application
    will need to use the recvmsg() interface so that it can receive the
    event information contained in the msg_control field.  Please see
@@ -3734,9 +3399,9 @@ Internet-Draft              SCTP sockets API              September 2005
    will disable partial delivery event notifications.  For more
    information on event notifications please see Section 5.3.
 
-   sctp_adaption_layer_event - Setting this flag to 1 will enable the
-   reception of adaption layer notifications.  Setting the flag to 0
-   will disable adaption layer event notifications.  For more
+   sctp_adaptation_layer_event - Setting this flag to 1 will enable the
+   reception of adaptation layer notifications.  Setting the flag to 0
+   will disable adaptation layer event notifications.  For more
    information on event notifications please see Section 5.3.
 
    sctp_authentication_event - Setting this flag to 1 will enable the
@@ -3745,14 +3410,15 @@ Internet-Draft              SCTP sockets API              September 2005
    information please see Section 5.3.
 
    An example where an application would like to receive data io events
-   and association events but no others would be as follows:
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 67]
+Stewart, et al.          Expires August 21, 2006               [Page 61]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
+
+   and association events but no others would be as follows:
 
    {
       struct sctp_event_subscribe event;
@@ -3773,41 +3439,6 @@ Internet-Draft              SCTP sockets API              September 2005
 
    By default both the one-to-one style and one-to-many style socket has
    all options off.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 68]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 8.  New Interfaces
@@ -3835,6 +3466,14 @@ Internet-Draft              SCTP sockets API              September 2005
    socket, an array of sockaddr_in would be returned.  The caller
    specifies the number of addresses in the array with addrcnt.  Note
    that the wildcard addresses cannot be used with this function, doing
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 62]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    so will result in an error.
 
    On success, sctp_bindx() returns 0.  On failure, sctp_bindx() returns
@@ -3858,14 +3497,6 @@ Internet-Draft              SCTP sockets API              September 2005
    will reject such an attempt with EINVAL.
 
    An application can use sctp_bindx(SCTP_BINDX_ADD_ADDR) to associate
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 69]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    additional addresses with an endpoint after calling bind().  Or use
    sctp_bindx(SCTP_BINDX_REM_ADDR) to remove some addresses a listening
    socket is associated with so that no new association accepted will be
@@ -3891,6 +3522,14 @@ Internet-Draft              SCTP sockets API              September 2005
    separate socket descriptors.
 
    The application uses sctp_peeloff() call to branch off an association
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 63]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    into a separate socket (Note the semantics are somewhat changed from
    the traditional one-to-one style accept() call).  Note that the new
    socket is a one-to-one style socket.  Thus it will be confined to
@@ -3902,25 +3541,12 @@ Internet-Draft              SCTP sockets API              September 2005
 
       the new socket descriptor representing the branched-off
       association.
-
       the original one-to-many style socket descriptor returned from the
       socket() system call (see Section 3.1.1).
-
       the specified identifier of the association that is to be branched
       off to a separate file descriptor (Note, in a traditional one-to-
       one style accept() call, this would be an out parameter, but for
       the one-to-many style call, this is an in parameter).
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 70]
-
-Internet-Draft              SCTP sockets API              September 2005
-
 
 8.3.  sctp_getpaddrs()
 
@@ -3951,12 +3577,21 @@ Internet-Draft              SCTP sockets API              September 2005
 
 8.4.  sctp_freepaddrs()
 
-       sctp_freepaddrs() frees all resources allocated by
-       sctp_getpaddrs(). Its syntax is,
 
-       void sctp_freepaddrs(struct sockaddr *addrs);
 
-       addrs is the array of peer addresses returned by sctp_getpaddrs().
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 64]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+    sctp_freepaddrs() frees all resources allocated by
+    sctp_getpaddrs(). Its syntax is,
+
+    void sctp_freepaddrs(struct sockaddr *addrs);
+    addrs is the array of peer addresses returned by sctp_getpaddrs().
+
 
 8.5.  sctp_getladdrs()
 
@@ -3970,14 +3605,6 @@ Internet-Draft              SCTP sockets API              September 2005
    On return, addrs will point to a dynamically allocated array of
    sockaddr structures of the appropriate type for the socket type.  The
    caller should use sctp_freeladdrs() to free the memory.  Note that
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 71]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    the in/out parameter addrs must not be NULL.
 
    If sd is an IPv4 socket, the addresses returned will be all IPv4
@@ -3997,41 +3624,28 @@ Internet-Draft              SCTP sockets API              September 2005
 
 8.6.  sctp_freeladdrs()
 
-       sctp_freeladdrs() frees all resources allocated by
-       sctp_getladdrs(). Its syntax is,
+     sctp_freeladdrs() frees all resources allocated by
+     sctp_getladdrs(). Its syntax is,
 
-       void sctp_freeladdrs(struct sockaddr *addrs);
+     void sctp_freeladdrs(struct sockaddr *addrs);
 
-       addrs is the array of peer addresses returned by sctp_getladdrs().
+     addrs is the array of peer addresses returned by sctp_getladdrs().
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 65]
+
+Internet-Draft              SCTP sockets API               February 2006
+
 
 8.7.  sctp_sendmsg()
 
    An implementation may provide a library function (or possibly system
    call) to assist the user with the advanced features of SCTP.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 72]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
        sctp_sendmsg(). Its syntax is,
@@ -4048,17 +3662,16 @@ Internet-Draft              SCTP sockets API              September 2005
                          uint32_t context)
 
 
-       sd         - is the socket descriptor
-       msg        - is the message to be sent.
-       len        - is the length of the message.
-       to         - is the destination address of the message.
-       tolen      - is the length of the destination address.
-       ppid       - is the same as sinfo_ppid (see section 5.2.2)
-       flags      - is the same as sinfo_flags (see section 5.2.2)
-       stream_no  - is the same as sinfo_stream (see section 5.2.2)
-       timetolive - is the same as sinfo_timetolive (see section 5.2.2)
-       context    - is the same as sinfo_context (see section 5.2.2)
-
+   sd - is the socket descriptor
+   msg - is the message to be sent.
+   len - is the length of the message.
+   to - is the destination address of the message.
+   tolen - is the length of the destination address.
+   ppid - is the same as sinfo_ppid (see section 5.2.2)
+   flags - is the same as sinfo_flags (see section 5.2.2)
+   stream_no - is the same as sinfo_stream (see section 5.2.2)
+   timetolive - is the same as sinfo_timetolive (see section 5.2.2)
+   context - is the same as sinfo_context (see section 5.2.2)
 
 8.8.  sctp_recvmsg()
 
@@ -4069,27 +3682,6 @@ Internet-Draft              SCTP sockets API              September 2005
    the SCTP_EVENTS option.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 73]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
        sctp_recvmsg(). Its syntax is,
 
        ssize_t sctp_recvmsg(int sd,
@@ -4098,19 +3690,27 @@ Internet-Draft              SCTP sockets API              September 2005
                         struct sockaddr *from,
                         socklen_t *fromlen
                         struct sctp_sndrcvinfo *sinfo
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 66]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
                         int *msg_flags)
 
 
-       sd         - is the socket descriptor
-       msg        - is a message buffer to be filled.
-       len        - is the length of the message buffer.
-       from       - is a pointer to a address to be filled with
-                    the sender of this messages address.
-       fromlen    - is the from length.
-       sinfo      - A pointer to a sctp_sndrcvinfo structure
-                    to be filled upon receipt of the message.
-       msg_flags  - A pointer to a integer to be filled with
-                    any message flags (e.g. MSG_NOTIFICATION).
+   sd - is the socket descriptor
+   msg - is a message buffer to be filled.
+   len - is the length of the message buffer.
+   from - is a pointer to a address to be filled with the sender of this
+      messages address.
+   fromlen - is the from length.
+   sinfo - A pointer to a sctp_sndrcvinfo structure to be filled upon
+      receipt of the message.
+   msg_flags - A pointer to a integer to be filled with any message
+      flags (e.g.  MSG_NOTIFICATION).
 
 8.9.  sctp_connectx()
 
@@ -4131,26 +3731,29 @@ Internet-Draft              SCTP sockets API              September 2005
 
        sctp_connectx(). Its syntax is,
 
+
        int sctp_connectx(int sd,
                          struct sockaddr *addrs,
                          int addrcnt)
 
-       sd         - is the socket descriptor
-       addrs      - is an array of addresses.
-       addrcnt    - is the number of addresses in the array.
 
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 74]
-
-Internet-Draft              SCTP sockets API              September 2005
-
+   sd - is the socket descriptor
+   addrs - is an array of addresses.
+   addrcnt - is the number of addresses in the array.
 
 8.10.  sctp_send()
 
    An implementation may provide another alternative function or system
    call to assist an application with the sending of data without the
    use of the CMSG header structures.  The function takes the following
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 67]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    form:
 
        sctp_send(). Its syntax is,
@@ -4161,13 +3764,14 @@ Internet-Draft              SCTP sockets API              September 2005
                      const struct sctp_sndrcvinfo *sinfo,
                      int flags);
 
-       sd         - is the socket descriptor
-       msg        - The message to be sent
-       len        - The length of the message
-       sinfo      - A pointer to a sctp_sndrcvinfo struture used
-                    as described in 5.2.2 for a sendmsg call.
-       flags      - is used in the same format as the sendmsg call
-                    flags (e.g. MSG_DONTROUTE).
+
+   sd - is the socket descriptor
+   msg - The message to be sent
+   len - The length of the message
+   sinfo - A pointer to a sctp_sndrcvinfo struture used as described in
+      5.2.2 for a sendmsg call.
+   flags - is used in the same format as the sendmsg call flags (e.g.
+      MSG_DONTROUTE).
 
    This function call may also be used to terminate an association using
    an association identification by setting the sinfo.sinfo_flags to
@@ -4185,23 +3789,6 @@ Internet-Draft              SCTP sockets API              September 2005
    Section 8.9).
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 75]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
        sctp_sendx(). Its syntax is,
 
        int sctp_sendx(int sd,
@@ -4212,15 +3799,26 @@ Internet-Draft              SCTP sockets API              September 2005
                       struct sctp_sndrcvinfo *sinfo,
                       int flags);
 
-       sd         - is the socket descriptor
-       msg        - The message to be sent
-       len        - The length of the message
-       addrs      - is an array of addresses.
-       addrcnt    - is the number of addresses in the array.
-       sinfo      - A pointer to a sctp_sndrcvinfo struture used
-                    as described in 5.2.2 for a sendmsg call.
-       flags      - is used in the same format as the sendmsg call
-                    flags (e.g. MSG_DONTROUTE).
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 68]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
+   sd - is the socket descriptor
+   msg - The message to be sent
+   len - The length of the message
+   addrs - is an array of addresses.
+   addrcnt - is the number of addresses in the array.
+   sinfo - A pointer to a sctp_sndrcvinfo struture used as described in
+      5.2.2 for a sendmsg call.
+   flags - is used in the same format as the sendmsg call flags (e.g.
+      MSG_DONTROUTE).
 
    Note that on return from this call the sinfo structure will have
    changed in that the sinfo_assoc_id will be filled in with the new
@@ -4231,31 +3829,16 @@ Internet-Draft              SCTP sockets API              September 2005
    SCTP_EOF and the sinfo.sinfo_associd to the association that needs to
    be terminated.  In such a case the len of the message would be zero.
 
+8.12.  sctp_getaddrlen
+
+   For application binary portability it is sometimes desireable to know
+   what the kernel thinks is the length of a socket address family.
+   This function, when called with a valid family type will return the
+   length that the operating system uses in the specified family's
+   socket address structure.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 76]
-
-Internet-Draft              SCTP sockets API              September 2005
+      int sctp_getaddrlen(sa_family_t family);
 
 
 9.  Preprocessor Constants
@@ -4264,57 +3847,50 @@ Internet-Draft              SCTP sockets API              September 2005
    constants for determination if sctp is present and supports various
    features.  The following pre-processor constants should be defined in
    a include file, sctp.h.
-
    HAVE_SCTP - If this constant is defined to 1, then an implementation
       of SCTP is available.
-
    HAVE_KERNEL_SCTP - If this constant is defined to 1, then a kernel
       SCTP implementation is available through the sockets interface.
-
    HAVE_SCTP_PRSCTP - If this constant is defined to 1, then the SCTP
       implementation supports the partial reliablility extension to
       SCTP.
 
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 69]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    HAVE_SCTP_ADDIP - If this constant is defined to 1, then the SCTP
       implementation supports the dynamic address extension to SCTP.
-
    HAVE_SCTP_CANSET_PRIMARY - If this constant is defined to 1, then the
       SCTP implementation supports the ability to request setting of the
       remote primary address.
-
    HAVE_SCTP_SAT_NETWORK_CAPABILITY - If this constant is defined to 1,
       then the SCTP implementation supports the satellite network
       extension to SCTP.
-
    HAVE_SCTP_MULTIBUF - If this constant is defined to 1, then the SCTP
       implementation dedicates separate buffer space to each association
       on a one-to-many socket.  If this constant is defined to 0, then
       the implementation provides a single block of shared buffer space
       for a one-to-many socket.
-
    HAVE_SCTP_NOCONNECT - If this constant is defined to 1, then the SCTP
       implementation supports initiating an association on a one-to-one
       style socket without the use of connect(), as outlined in
       Section 4.1.5.
 
 
+10.  IANA considerations
+
+   This document contains no IANA considerations.
 
 
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 77]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
-10.  Security Considerations
+11.  Security Considerations
 
    Many TCP and UDP implementations reserve port numbers below 1024 for
    privileged users.  If the target platform supports privileged users,
@@ -4334,96 +3910,59 @@ Internet-Draft              SCTP sockets API              September 2005
    associations.  This could be relevant for the r* family of protocols.
 
 
+12.  Acknowledgments
+
+   Special acknowledgment is given to Ken Fujita and Jonathan Woods who
+   helped extensively in the early formation of this document.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 78]
+Stewart, et al.          Expires August 21, 2006               [Page 70]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
-
-11.  Acknowledgments
-
-   Special acknowledgment is givne to Ken Fujita who helped extensively
-   in the early formation of this document.
 
    The authors also wish to thank Kavitha Baratakke, Mike Bartlett, Jon
-   Berger, Scott Kimble, Renee Revis, and many others on the TSVWG
-   mailing list for contributing valuable comments.
+   Berger, Mark Butler, Scott Kimble, Renee Revis, and many others on
+   the TSVWG mailing list for contributing valuable comments.
 
    A special thanks to Phillip Conrad, for his suggested text, quick and
    constructive insights, and most of all his persistent fighting to
    keep the interface to SCTP usable for the application programmer.
 
-12.  References
 
-   [1]  Postel, J., "Transmission Control Protocol", STD 7, RFC 793,
-        September 1981.
+13.  References
 
-   [2]  Postel, J., "User Datagram Protocol", STD 6, RFC 768,
-        August 1980.
+13.1.  Normative references
 
-   [3]  Braden, B., "T/TCP -- TCP Extensions for Transactions Functional
-        Specification", RFC 1644, July 1994.
+   [RFC0793]  Postel, J., "Transmission Control Protocol", STD 7,
+              RFC 793, September 1981.
 
-   [4]  Bradner, S., "The Internet Standards Process -- Revision 3",
-        BCP 9, RFC 2026, October 1996.
+   [RFC0768]  Postel, J., "User Datagram Protocol", STD 6, RFC 768,
+              August 1980.
 
-   [5]  Bradner, S., "Key words for use in RFCs to Indicate Requirement
-        Levels", BCP 14, RFC 2119, March 1997.
+   [RFC1644]  Braden, B., "T/TCP -- TCP Extensions for Transactions
+              Functional Specification", RFC 1644, July 1994.
 
-   [6]  Stevens, W. and M. Thomas, "Advanced Sockets API for IPv6",
-        RFC 2292, February 1998.
+   [RFC2026]  Bradner, S., "The Internet Standards Process -- Revision
+              3", BCP 9, RFC 2026, October 1996.
 
-   [7]  Gilligan, R., Thomson, S., Bound, J., and W. Stevens, "Basic
-        Socket Interface Extensions for IPv6", RFC 2553, March 1999.
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119, March 1997.
 
-   [8]  Stewart, R., Xie, Q., Morneault, K., Sharp, C., Schwarzbauer,
-        H., Taylor, T., Rytina, I., Kalla, M., Zhang, L., and V. Paxson,
-        "Stream Control Transmission Protocol", RFC 2960, October 2000.
+   [RFC2292]  Stevens, W. and M. Thomas, "Advanced Sockets API for
+              IPv6", RFC 2292, February 1998.
 
+   [RFC2553]  Gilligan, R., Thomson, S., Bound, J., and W. Stevens,
+              "Basic Socket Interface Extensions for IPv6", RFC 2553,
+              March 1999.
 
+   [RFC2960]  Stewart, R., Xie, Q., Morneault, K., Sharp, C.,
+              Schwarzbauer, H., Taylor, T., Rytina, I., Kalla, M.,
+              Zhang, L., and V. Paxson, "Stream Control Transmission
+              Protocol", RFC 2960, October 2000.
 
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 79]
-
-Internet-Draft              SCTP sockets API              September 2005
+13.2.  Informational References
 
 
 Appendix A.  one-to-one style Code Example
@@ -4432,18 +3971,19 @@ Appendix A.  one-to-one style Code Example
    SCTP.  The example shows how to use some features of one-to-one style
    IPv4 SCTP sockets, including:
 
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 71]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    o  Opening, binding, and listening for new associations on a socket;
-
    o  Enabling ancillary data
-
    o  Enabling notifications
-
    o  Using ancillary data with sendmsg() and recvmsg()
-
    o  Using MSG_EOR to determine if an entire message has been read
-
    o  Handling notifications
-
 
    #include <stdio.h>
    #include <sys/types.h>
@@ -4460,391 +4000,339 @@ Appendix A.  one-to-one style Code Example
    static void
    handle_event(void *buf)
    {
-           struct sctp_assoc_change *sac;
-           struct sctp_send_failed *ssf;
-           struct sctp_paddr_change *spc;
-           struct sctp_remote_error *sre;
-           union sctp_notification *snp;
-           char addrbuf[INET6_ADDRSTRLEN];
-           const char *ap;
-           struct sockaddr_in *sin;
-           struct sockaddr_in6 *sin6;
+       struct sctp_assoc_change *sac;
+       struct sctp_send_failed *ssf;
+       struct sctp_paddr_change *spc;
+       struct sctp_remote_error *sre;
+       union sctp_notification *snp;
+       char addrbuf[INET6_ADDRSTRLEN];
+       const char *ap;
+       struct sockaddr_in *sin;
+       struct sockaddr_in6 *sin6;
 
-           snp = buf;
+       snp = buf;
 
-           switch (snp->sn_header.sn_type) {
-           case SCTP_ASSOC_CHANGE:
+       switch (snp->sn_header.sn_type) {
+       case SCTP_ASSOC_CHANGE:
+             sac = &snp->sn_assoc_change;
+             printf("^^^ assoc_change: state=%hu, error=%hu, instr=%hu "
+                 "outstr=%hu\n", sac->sac_state, sac->sac_error,
+                 sac->sac_inbound_streams, sac->sac_outbound_streams);
+             break;
+       case SCTP_SEND_FAILED:
+             ssf = &snp->sn_send_failed;
+             printf("^^^ sendfailed: len=%hu err=%d\n", ssf->ssf_length,
+                 ssf->ssf_error);
+             break;
+
+       case SCTP_PEER_ADDR_CHANGE:
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 80]
+Stewart, et al.          Expires August 21, 2006               [Page 72]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-                   sac = &snp->sn_assoc_change;
-                   printf("^^^ assoc_change: state=%hu, error=%hu, instr=%hu "
-                       "outstr=%hu\n", sac->sac_state, sac->sac_error,
-                       sac->sac_inbound_streams, sac->sac_outbound_streams);
-                   break;
-           case SCTP_SEND_FAILED:
-                   ssf = &snp->sn_send_failed;
-                   printf("^^^ sendfailed: len=%hu err=%d\n", ssf->ssf_length,
-                       ssf->ssf_error);
-                   break;
-
-           case SCTP_PEER_ADDR_CHANGE:
-                   spc = &snp->sn_paddr_change;
-                   if (spc->spc_aaddr.ss_family == AF_INET) {
-                     sin = (struct sockaddr_in *)&spc->spc_aaddr;
-                     ap = inet_ntop(AF_INET, &sin->sin_addr,
-                                    addrbuf, INET6_ADDRSTRLEN);
-                   } else {
-                     sin6 = (struct sockaddr_in6 *)&spc->spc_aaddr;
-                     ap = inet_ntop(AF_INET6, &sin6->sin6_addr,
-                                    addrbuf, INET6_ADDRSTRLEN);
-                   }
-                   printf("^^^ intf_change: %s state=%d, error=%d\n", ap,
-                          spc->spc_state, spc->spc_error);
-                   break;
-           case SCTP_REMOTE_ERROR:
-                   sre = &snp->sn_remote_error;
-                   printf("^^^ remote_error: err=%hu len=%hu\n",
-                       ntohs(sre->sre_error), ntohs(sre->sre_length));
-                   break;
-           case SCTP_SHUTDOWN_EVENT:
-                   printf("^^^ shutdown event\n");
-                   break;
-           default:
-                   printf("unknown type: %hu\n", snp->sn_header.sn_type);
-                   break;
-           }
+             spc = &snp->sn_paddr_change;
+             if (spc->spc_aaddr.ss_family == AF_INET) {
+               sin = (struct sockaddr_in *)&spc->spc_aaddr;
+               ap = inet_ntop(AF_INET, &sin->sin_addr,
+                              addrbuf, INET6_ADDRSTRLEN);
+             } else {
+               sin6 = (struct sockaddr_in6 *)&spc->spc_aaddr;
+               ap = inet_ntop(AF_INET6, &sin6->sin6_addr,
+                              addrbuf, INET6_ADDRSTRLEN);
+             }
+             printf("^^^ intf_change: %s state=%d, error=%d\n", ap,
+                    spc->spc_state, spc->spc_error);
+             break;
+       case SCTP_REMOTE_ERROR:
+             sre = &snp->sn_remote_error;
+             printf("^^^ remote_error: err=%hu len=%hu\n",
+                 ntohs(sre->sre_error), ntohs(sre->sre_length));
+             break;
+       case SCTP_SHUTDOWN_EVENT:
+             printf("^^^ shutdown event\n");
+             break;
+       default:
+             printf("unknown type: %hu\n", snp->sn_header.sn_type);
+             break;
+       };
    }
 
    static void *
    mysctp_recvmsg(int fd, struct msghdr *msg, void *buf, size_t *buflen,
        ssize_t *nrp, size_t cmsglen)
    {
-           ssize_t nr = 0, nnr = 0;
-           struct iovec iov[1];
+       ssize_t nr = 0, nnr = 0;
+       struct iovec iov[1];
 
-           *nrp = 0;
-           iov->iov_base = buf;
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 81]
-
-Internet-Draft              SCTP sockets API              September 2005
+       *nrp = 0;
+       iov->iov_base = buf;
+       iov->iov_len = *buflen;
+       msg->msg_iov = iov;
+       msg->msg_iovlen = 1;
 
 
-           iov->iov_len = *buflen;
-           msg->msg_iov = iov;
-           msg->msg_iovlen = 1;
-
-
-           for (;;) {
+       for (;;) {
    #ifndef MSG_XPG4_2
    #define MSG_XPG4_2 0
    #endif
-                   msg->msg_flags = MSG_XPG4_2;
-                   msg->msg_controllen = cmsglen;
+               msg->msg_flags = MSG_XPG4_2;
+               msg->msg_controllen = cmsglen;
 
-                   nnr = recvmsg(fd, msg, 0);
-                   if (nnr <= 0) {
-                           /* EOF or error */
-                           *nrp = nr;
-                           return (NULL);
-                   }
-                   nr += nnr;
 
-                   if ((msg->msg_flags & MSG_EOR) != 0) {
-                           *nrp = nr;
-                           return (buf);
-                   }
 
-                   /* Realloc the buffer? */
-                   if (*buflen == (size_t)nr) {
-                           buf = realloc(buf, *buflen * 2);
-                           if (buf == 0) {
-                                   fprintf(stderr, "out of memory\n");
-                                   exit(1);
-                           }
-                           *buflen *= 2;
-                   }
 
-                   /* Set the next read offset */
-                   iov->iov_base = (char *)buf + nr;
-                   iov->iov_len = *buflen - nr;
+Stewart, et al.          Expires August 21, 2006               [Page 73]
+
+Internet-Draft              SCTP sockets API               February 2006
 
-           }
+
+               nnr = recvmsg(fd, msg, 0);
+               if (nnr <= 0) {
+                       /* EOF or error */
+                       *nrp = nr;
+                       return (NULL);
+               }
+               nr += nnr;
+
+               if ((msg->msg_flags & MSG_EOR) != 0) {
+                       *nrp = nr;
+                       return (buf);
+               }
+
+               /* Realloc the buffer? */
+               if (*buflen == (size_t)nr) {
+                       buf = realloc(buf, *buflen * 2);
+                       if (buf == 0) {
+                               fprintf(stderr, "out of memory\n");
+                               exit(1);
+                       }
+                       *buflen *= 2;
+               }
+               /* Set the next read offset */
+               iov->iov_base = (char *)buf + nr;
+               iov->iov_len = *buflen - nr;
+        }
    }
 
    static void
    echo(int fd, int socketModeone_to_many)
    {
-           ssize_t nr;
-           struct sctp_sndrcvinfo *sri;
-           struct msghdr msg[1];
+       ssize_t nr;
+       struct sctp_sndrcvinfo *sri;
+       struct msghdr msg[1];
+       struct cmsghdr *cmsg;
+       char cbuf[sizeof (*cmsg) + sizeof (*sri)];
+       char *buf;
+       size_t buflen;
+       struct iovec iov[1];
+       size_t cmsglen = sizeof (*cmsg) + sizeof (*sri);
+       /* Allocate the initial data buffer */
+       buflen = BUFLEN;
+       if (!(buf = malloc(BUFLEN))) {
+               fprintf(stderr, "out of memory\n");
+               exit(1);
+       }
+
+       /* Set up the msghdr structure for receiving */
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 82]
+Stewart, et al.          Expires August 21, 2006               [Page 74]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-           struct cmsghdr *cmsg;
-           char cbuf[sizeof (*cmsg) + sizeof (*sri)];
-           char *buf;
-           size_t buflen;
-           struct iovec iov[1];
-           size_t cmsglen = sizeof (*cmsg) + sizeof (*sri);
+       memset(msg, 0, sizeof (*msg));
+       msg->msg_control = cbuf;
+       msg->msg_controllen = cmsglen;
+       msg->msg_flags = 0;
+       cmsg = (struct cmsghdr *)cbuf;
+       sri = (struct sctp_sndrcvinfo *)(cmsg + 1);
 
-           /* Allocate the initial data buffer */
-           buflen = BUFLEN;
-           if (!(buf = malloc(BUFLEN))) {
-                   fprintf(stderr, "out of memory\n");
-                   exit(1);
-           }
+       /* Wait for something to echo */
+       while (buf = mysctp_recvmsg(fd, msg,
+                buf, &buflen, &nr, cmsglen)) {
 
-           /* Set up the msghdr structure for receiving */
-           memset(msg, 0, sizeof (*msg));
-           msg->msg_control = cbuf;
-           msg->msg_controllen = cmsglen;
-           msg->msg_flags = 0;
-           cmsg = (struct cmsghdr *)cbuf;
-           sri = (struct sctp_sndrcvinfo *)(cmsg + 1);
+               /* Intercept notifications here */
+               if (msg->msg_flags & MSG_NOTIFICATION) {
+                       handle_event(buf);
+                       continue;
+               }
 
-           /* Wait for something to echo */
-           while (buf = mysctp_recvmsg(fd, msg, buf, &buflen, &nr, cmsglen)) {
+               iov->iov_base = buf;
+               iov->iov_len = nr;
+               msg->msg_iov = iov;
+               msg->msg_iovlen = 1;
 
-                   /* Intercept notifications here */
-                   if (msg->msg_flags & MSG_NOTIFICATION) {
-                           handle_event(buf);
-                           continue;
-                   }
+               printf("got %u bytes on stream %hu:\n", nr,
+                   sri->sinfo_stream);
+               write(0, buf, nr);
 
-                   iov->iov_base = buf;
-                   iov->iov_len = nr;
-                   msg->msg_iov = iov;
-                   msg->msg_iovlen = 1;
+               /* Echo it back */
+               msg->msg_flags = MSG_XPG4_2;
+               if (sendmsg(fd, msg, 0) < 0) {
+                       perror("sendmsg");
+                       exit(1);
+               }
+       }
 
-                   printf("got %u bytes on stream %hu:\n", nr,
-                       sri->sinfo_stream);
-                   write(0, buf, nr);
-
-                   /* Echo it back */
-                   msg->msg_flags = MSG_XPG4_2;
-                   if (sendmsg(fd, msg, 0) < 0) {
-                           perror("sendmsg");
-                           exit(1);
-                   }
-           }
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 83]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
-           if (nr < 0) {
-                   perror("recvmsg");
-           }
-           if(socketModeone_to_many == 0)
-             close(fd);
+       if (nr < 0) {
+               perror("recvmsg");
+       }
+       if(socketModeone_to_many == 0)
+            close(fd);
    }
 
    int main()
    {
-           struct sctp_event_subscribe event;
-           int lfd, cfd;
-           int onoff = 1;
-           struct sockaddr_in sin[1];
-
-           if ((lfd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) == -1) {
-                   perror("socket");
-                   exit(1);
-           }
-
-           sin->sin_family = AF_INET;
-           sin->sin_port = htons(7);
-           sin->sin_addr.s_addr = INADDR_ANY;
-           if (bind(lfd, (struct sockaddr *)sin, sizeof (*sin)) == -1) {
-                   perror("bind");
-                   exit(1);
-           }
-
-           if (listen(lfd, 1) == -1) {
-                   perror("listen");
-                   exit(1);
-           }
-
-           /* Wait for new associations */
-           for (;;) {
-                   if ((cfd = accept(lfd, NULL, 0)) == -1) {
-                           perror("accept");
-                           exit(1);
-                   }
-
-                   /* Enable all events */
-                   event.sctp_data_io_event = 1;
-                   event.sctp_association_event = 1;
-                   event.sctp_address_event = 1;
-                   event.sctp_send_failure_event = 1;
-                   event.sctp_peer_error_event = 1;
-                   event.sctp_shutdown_event = 1;
-                   event.sctp_partial_delivery_event = 1;
-                   event.sctp_adaption_layer_event = 1;
+       struct sctp_event_subscribe event;
+       int lfd, cfd;
+       int onoff = 1;
+       struct sockaddr_in sin[1];
+       if ((lfd = socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP)) == -1) {
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 84]
+Stewart, et al.          Expires August 21, 2006               [Page 75]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-                   if (setsockopt(cfd, IPPROTO_SCTP,
-                       SCTP_EVENTS, &event,
-                       sizeof(event)) != 0) {
-                       perror("setevent failed");
+               perror("socket");
+               exit(1);
+       }
+
+       sin->sin_family = AF_INET;
+       sin->sin_port = htons(7);
+       sin->sin_addr.s_addr = INADDR_ANY;
+       if (bind(lfd, (struct sockaddr *)sin, sizeof (*sin)) == -1) {
+               perror("bind");
+               exit(1);
+       }
+
+       if (listen(lfd, 1) == -1) {
+               perror("listen");
+               exit(1);
+       }
+
+       /* Wait for new associations */
+       for (;;) {
+               if ((cfd = accept(lfd, NULL, 0)) == -1) {
+                       perror("accept");
                        exit(1);
-                   }
-                   /* Echo back any and all data */
-                   echo(cfd,0);
-           }
+               }
+
+               /* Enable all events */
+               event.sctp_data_io_event = 1;
+               event.sctp_association_event = 1;
+               event.sctp_address_event = 1;
+               event.sctp_send_failure_event = 1;
+               event.sctp_peer_error_event = 1;
+               event.sctp_shutdown_event = 1;
+               event.sctp_partial_delivery_event = 1;
+               event.sctp_adaptation_layer_event = 1;
+               if (setsockopt(cfd, IPPROTO_SCTP,
+                   SCTP_EVENTS, &event,
+                   sizeof(event)) != 0) {
+                   perror("setevent failed");
+                   exit(1);
+               }
+               /* Echo back any and all data */
+               echo(cfd,0);
+       }
    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 85]
-
-Internet-Draft              SCTP sockets API              September 2005
 
 
 Appendix B.  one-to-many style Code Example
 
    The following code is a simple implementation of an echo server over
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 76]
+
+Internet-Draft              SCTP sockets API               February 2006
+
+
    SCTP.  The example shows how to use some features of one-to-many
    style IPv4 SCTP sockets, including:
 
    o  Opening and binding of a socket;
-
    o  Enabling ancillary data
-
    o  Enabling notifications
-
    o  Using ancillary data with sendmsg() and recvmsg()
-
    o  Using MSG_EOR to determine if an entire message has been read
-
    o  Handling notifications
 
    Note most functions defined in Appendix A are reused in this example.
 
    int main()
    {
-           int fd;
-           int idleTime = 2;
-           struct sockaddr_in sin[1];
-           struct sctp_event_subscribe event;
+       int fd;
+       int idleTime = 2;
+       struct sockaddr_in sin[1];
+       struct sctp_event_subscribe event;
 
-           if ((fd = socket(AF_INET, SOCK_SEQPACKET, IPPROTO_SCTP)) == -1) {
-             perror("socket");
-             exit(1);
-           }
+       if ((fd = socket(AF_INET, SOCK_SEQPACKET, IPPROTO_SCTP)) == -1) {
+         perror("socket");
+         exit(1);
+       }
 
-           sin->sin_family = AF_INET;
-           sin->sin_port = htons(7);
-           sin->sin_addr.s_addr = INADDR_ANY;
-           if (bind(fd, (struct sockaddr *)sin, sizeof (*sin)) == -1) {
-             perror("bind");
-             exit(1);
-           }
+       sin->sin_family = AF_INET;
+       sin->sin_port = htons(7);
+       sin->sin_addr.s_addr = INADDR_ANY;
+       if (bind(fd, (struct sockaddr *)sin, sizeof (*sin)) == -1) {
+         perror("bind");
+         exit(1);
+       }
 
-           /* Enable all notifications and events */
-           event.sctp_data_io_event = 1;
-           event.sctp_association_event = 1;
-           event.sctp_address_event = 1;
-           event.sctp_send_failure_event = 1;
-           event.sctp_peer_error_event = 1;
-           event.sctp_shutdown_event = 1;
-           event.sctp_partial_delivery_event = 1;
+       /* Enable all notifications and events */
+       event.sctp_data_io_event = 1;
+       event.sctp_association_event = 1;
+       event.sctp_address_event = 1;
+       event.sctp_send_failure_event = 1;
+       event.sctp_peer_error_event = 1;
+       event.sctp_shutdown_event = 1;
+       event.sctp_partial_delivery_event = 1;
+       event.sctp_adaptation_layer_event = 1;
+       if (setsockopt(fd, IPPROTO_SCTP,
+           SCTP_EVENTS, &event,
+           sizeof(event)) != 0) {
+           perror("setevent failed");
+           exit(1);
+       }
+       /* Set associations to auto-close in 2 seconds of
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 86]
+Stewart, et al.          Expires August 21, 2006               [Page 77]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
-           event.sctp_adaption_layer_event = 1;
-           if (setsockopt(fd, IPPROTO_SCTP,
-               SCTP_EVENTS, &event,
-               sizeof(event)) != 0) {
-               perror("setevent failed");
-               exit(1);
-           }
-           /* Set associations to auto-close in 2 seconds of
-            * inactivity
-            */
-           if (setsockopt(fd, IPPROTO_SCTP, SCTP_AUTOCLOSE,
-                          &idleTime, 4) < 0) {
-             perror("setsockopt SCTP_AUTOCLOSE");
-             exit(1);
-           }
+        * inactivity
+        */
+       if (setsockopt(fd, IPPROTO_SCTP, SCTP_AUTOCLOSE,
+                         &idleTime, 4) < 0) {
+         perror("setsockopt SCTP_AUTOCLOSE");
+         exit(1);
+       }
 
-           /* Allow new associations to be accepted */
-           if (listen(fd, 1) < 0) {
-             perror("listen");
-             exit(1);
-           }
+       /* Allow new associations to be accepted */
+       if (listen(fd, 1) < 0) {
+         perror("listen");
+         exit(1);
+       }
 
-           /* Wait for new associations */
-           while(1){
-             /* Echo back any and all data */
-             echo(fd,1);
-           }
+       /* Wait for new associations */
+       while(1){
+         /* Echo back any and all data */
+         echo(fd,1);
+       }
    }
 
 
@@ -4869,9 +4357,17 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 87]
+
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 78]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
 Authors' Addresses
@@ -4907,29 +4403,6 @@ Authors' Addresses
    Email: piggy@acm.org
 
 
-   Jonathan Wood
-   DoCoMo USA Labs
-   181 Metro Drive, Suite 300
-   San Jose, CA  95110
-   USA
-
-   Phone:
-   Email: jonwood@speakeasy.net
-
-
-
-
-
-
-
-
-
-
-Stewart, et al.          Expires March 11, 2006                [Page 88]
-
-Internet-Draft              SCTP sockets API              September 2005
-
-
    Kacheong Poon
    Sun Microsystems, Inc.
    4150 Network Circle
@@ -4938,6 +4411,19 @@ Internet-Draft              SCTP sockets API              September 2005
 
    Phone:
    Email: kacheong.poon@sun.com
+
+
+
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 79]
+
+Internet-Draft              SCTP sockets API               February 2006
 
 
    Michael Tuexen
@@ -4981,9 +4467,19 @@ Internet-Draft              SCTP sockets API              September 2005
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 89]
+
+
+
+
+
+
+
+
+
+
+Stewart, et al.          Expires August 21, 2006               [Page 80]
 
-Internet-Draft              SCTP sockets API              September 2005
+Internet-Draft              SCTP sockets API               February 2006
 
 
 Intellectual Property Statement
@@ -5024,7 +4520,7 @@ Disclaimer of Validity
 
 Copyright Statement
 
-   Copyright (C) The Internet Society (2005).  This document is subject
+   Copyright (C) The Internet Society (2006).  This document is subject
    to the rights, licenses and restrictions contained in BCP 78, and
    except as set forth therein, the authors retain all their rights.
 
@@ -5037,6 +4533,6 @@ Acknowledgment
 
 
 
-Stewart, et al.          Expires March 11, 2006                [Page 90]
+Stewart, et al.          Expires August 21, 2006               [Page 81]
 
 
