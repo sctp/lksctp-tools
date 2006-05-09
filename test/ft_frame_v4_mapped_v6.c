@@ -73,6 +73,7 @@ main(int argc, char *argv[])
 	sk1 = sctp_socket(PF_INET6, SOCK_SEQPACKET);
 	sk2 = sctp_socket(PF_INET6, SOCK_SEQPACKET);
 
+	len = sizeof(mapped);
 	/* By default v4 addresses are mapped to v6 representation. Verify
 	 * that this option is turned on.
 	 */ 

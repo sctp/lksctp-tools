@@ -496,6 +496,24 @@ void kfree_skbmem(struct sk_buff *skb)
 	skb_release_data(skb);
 }
 
+/**
+ *      kfree_skb - free an sk_buff
+ *      @skb: buffer to free
+ *
+ *      Drop a reference to the buffer and free it if the usage count has
+ *      hit zero.
+ */
+void kfree_skb(struct sk_buff *skb)
+{
+	if (unlikely(!skb))
+		return;
+	if (likely(atomic_read(&skb->users) == 1))
+		smp_rmb();
+	else if (likely(!atomic_dec_and_test(&skb->users)))
+		return;
+	__kfree_skb(skb);
+}
+
 /* Free an skb.  */
 void
 __kfree_skb(struct sk_buff *skb)
@@ -3207,4 +3225,305 @@ int find_next_bit(const unsigned long *addr, int size, int offset)
 int capable(int cap)
 {
 	return 1;
+}
+
+int __first_cpu(const cpumask_t *srcp)
+{
+	return min_t(int, NR_CPUS, find_first_bit(srcp->bits, NR_CPUS));
+}
+
+int __next_cpu(int n, const cpumask_t *srcp)
+{
+	return min_t(int, NR_CPUS, find_next_bit(srcp->bits, NR_CPUS, n+1));
+}
+
+/**
+ *	__pskb_pull_tail - advance tail of skb header
+ *	@skb: buffer to reallocate
+ *	@delta: number of bytes to advance tail
+ *
+ *	The function makes a sense only on a fragmented &sk_buff,
+ *	it expands header moving its tail forward and copying necessary
+ *	data from fragmented part.
+ *
+ *	&sk_buff MUST have reference count of 1.
+ *
+ *	Returns %NULL (and &sk_buff does not change) if pull failed
+ *	or value of new tail of skb in the case of success.
+ *
+ *	All the pointers pointing into skb header may change and must be
+ *	reloaded after call to this function.
+ */
+
+/* Moves tail of skb head forward, copying data from fragmented part,
+ * when it is necessary.
+ * 1. It may fail due to malloc failure.
+ * 2. It may change skb pointers.
+ *
+ * It is pretty complicated. Luckily, it is called only in exceptional cases.
+ */
+unsigned char *__pskb_pull_tail(struct sk_buff *skb, int delta)
+{
+	/* If skb has not enough free space at tail, get new one
+	 * plus 128 bytes for future expansions. If we have enough
+	 * room at tail, reallocate without expansion only if skb is cloned.
+	 */
+	int i, k, eat = (skb->tail + delta) - skb->end;
+
+	if (eat > 0 || skb_cloned(skb)) {
+		if (pskb_expand_head(skb, 0, eat > 0 ? eat + 128 : 0,
+				     GFP_ATOMIC))
+			return NULL;
+	}
+
+	if (skb_copy_bits(skb, skb_headlen(skb), skb->tail, delta))
+		BUG();
+
+	/* Optimization: no fragments, no reasons to preestimate
+	 * size of pulled pages. Superb.
+	 */
+	if (!skb_shinfo(skb)->frag_list)
+		goto pull_pages;
+
+	/* Estimate size of pulled pages. */
+	eat = delta;
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		if (skb_shinfo(skb)->frags[i].size >= eat)
+			goto pull_pages;
+		eat -= skb_shinfo(skb)->frags[i].size;
+	}
+
+	/* If we need update frag list, we are in troubles.
+	 * Certainly, it possible to add an offset to skb data,
+	 * but taking into account that pulling is expected to
+	 * be very rare operation, it is worth to fight against
+	 * further bloating skb head and crucify ourselves here instead.
+	 * Pure masohism, indeed. 8)8)
+	 */
+	if (eat) {
+		struct sk_buff *list = skb_shinfo(skb)->frag_list;
+		struct sk_buff *clone = NULL;
+		struct sk_buff *insp = NULL;
+
+		do {
+			BUG_ON(!list);
+
+			if (list->len <= eat) {
+				/* Eaten as whole. */
+				eat -= list->len;
+				list = list->next;
+				insp = list;
+			} else {
+				/* Eaten partially. */
+
+				if (skb_shared(list)) {
+					/* Sucks! We need to fork list. :-( */
+					clone = skb_clone(list, GFP_ATOMIC);
+					if (!clone)
+						return NULL;
+					insp = list->next;
+					list = clone;
+				} else {
+					/* This may be pulled without
+					 * problems. */
+					insp = list;
+				}
+				if (!pskb_pull(list, eat)) {
+					if (clone)
+						kfree_skb(clone);
+					return NULL;
+				}
+				break;
+			}
+		} while (eat);
+
+		/* Free pulled out fragments. */
+		while ((list = skb_shinfo(skb)->frag_list) != insp) {
+			skb_shinfo(skb)->frag_list = list->next;
+			kfree_skb(list);
+		}
+		/* And insert new clone at head. */
+		if (clone) {
+			clone->next = list;
+			skb_shinfo(skb)->frag_list = clone;
+		}
+	}
+	/* Success! Now we may commit changes to skb data. */
+
+pull_pages:
+	eat = delta;
+	k = 0;
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		if (skb_shinfo(skb)->frags[i].size <= eat) {
+			put_page(skb_shinfo(skb)->frags[i].page);
+			eat -= skb_shinfo(skb)->frags[i].size;
+		} else {
+			skb_shinfo(skb)->frags[k] = skb_shinfo(skb)->frags[i];
+			if (eat) {
+				skb_shinfo(skb)->frags[k].page_offset += eat;
+				skb_shinfo(skb)->frags[k].size -= eat;
+				eat = 0;
+			}
+			k++;
+		}
+	}
+	skb_shinfo(skb)->nr_frags = k;
+
+	skb->tail     += delta;
+	skb->data_len -= delta;
+
+	return skb->tail;
+}
+
+/* Copy some data bits from skb to kernel buffer. */
+
+int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
+{
+	int i, copy;
+	int start = skb_headlen(skb);
+
+	if (offset > (int)skb->len - len)
+		goto fault;
+
+	/* Copy header. */
+	if ((copy = start - offset) > 0) {
+		if (copy > len)
+			copy = len;
+		memcpy(to, skb->data + offset, copy);
+		if ((len -= copy) == 0)
+			return 0;
+		offset += copy;
+		to     += copy;
+	}
+
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
+		int end;
+
+		BUG_TRAP(start <= offset + len);
+
+		end = start + skb_shinfo(skb)->frags[i].size;
+		if ((copy = end - offset) > 0) {
+			u8 *vaddr;
+
+			if (copy > len)
+				copy = len;
+
+			vaddr = kmap_skb_frag(&skb_shinfo(skb)->frags[i]);
+			memcpy(to,
+			       vaddr + skb_shinfo(skb)->frags[i].page_offset+
+			       offset - start, copy);
+			kunmap_skb_frag(vaddr);
+
+			if ((len -= copy) == 0)
+				return 0;
+			offset += copy;
+			to     += copy;
+		}
+		start = end;
+	}
+
+	if (skb_shinfo(skb)->frag_list) {
+		struct sk_buff *list = skb_shinfo(skb)->frag_list;
+
+		for (; list; list = list->next) {
+			int end;
+
+			BUG_TRAP(start <= offset + len);
+
+			end = start + list->len;
+			if ((copy = end - offset) > 0) {
+				if (copy > len)
+					copy = len;
+				if (skb_copy_bits(list, offset - start,
+						  to, copy))
+					goto fault;
+				if ((len -= copy) == 0)
+					return 0;
+				offset += copy;
+				to     += copy;
+			}
+			start = end;
+		}
+	}
+	if (!len)
+		return 0;
+
+fault:
+	return -EFAULT;
+}
+
+static void skb_clone_fraglist(struct sk_buff *skb)
+{
+	struct sk_buff *list;
+
+	for (list = skb_shinfo(skb)->frag_list; list; list = list->next)
+		skb_get(list);
+}
+
+/**
+ *	pskb_expand_head - reallocate header of &sk_buff
+ *	@skb: buffer to reallocate
+ *	@nhead: room to add at head
+ *	@ntail: room to add at tail
+ *	@gfp_mask: allocation priority
+ *
+ *	Expands (or creates identical copy, if &nhead and &ntail are zero)
+ *	header of skb. &sk_buff itself is not changed. &sk_buff MUST have
+ *	reference count of 1. Returns zero in the case of success or error,
+ *	if expansion failed. In the last case, &sk_buff is not changed.
+ *
+ *	All the pointers pointing into skb header may change and must be
+ *	reloaded after call to this function.
+ */
+
+int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
+		     gfp_t gfp_mask)
+{
+	int i;
+	u8 *data;
+	int size = nhead + (skb->end - skb->head) + ntail;
+	long off;
+
+	if (skb_shared(skb))
+		BUG();
+
+	size = SKB_DATA_ALIGN(size);
+
+	data = kmalloc(size + sizeof(struct skb_shared_info), gfp_mask);
+	if (!data)
+		goto nodata;
+
+	/* Copy only real data... and, alas, header. This should be
+	 * optimized for the cases when header is void. */
+	memcpy(data + nhead, skb->head, skb->tail - skb->head);
+	memcpy(data + size, skb->end, sizeof(struct skb_shared_info));
+
+	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++)
+		get_page(skb_shinfo(skb)->frags[i].page);
+
+	if (skb_shinfo(skb)->frag_list)
+		skb_clone_fraglist(skb);
+
+	skb_release_data(skb);
+
+	off = (data + nhead) - skb->head;
+
+	skb->head     = data;
+	skb->end      = data + size;
+	skb->data    += off;
+	skb->tail    += off;
+	skb->mac.raw += off;
+	skb->h.raw   += off;
+	skb->nh.raw  += off;
+	skb->cloned   = 0;
+	skb->nohdr    = 0;
+	atomic_set(&skb_shinfo(skb)->dataref, 1);
+	return 0;
+
+nodata:
+	return -ENOMEM;
+}
+
+void put_page(struct page *page)
+{
 }
