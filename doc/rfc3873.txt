@@ -2,122 +2,74 @@
 
 
 
+
+
 Network Working Group                                          J. Pastor
-INTERNET-DRAFT                                              M. Belinchon
-Expires: December 2003                                          Ericsson
-
-                                                              June, 2003
-
+Request for Comments: 3873                                  M. Belinchon
+Category: Standards Track                                       Ericsson
+                                                          September 2004
 
 
-                   Stream Control Transmission Protocol
-                       Management Information Base
-                   <draft-ietf-sigtran-sctp-mib-10.txt>
+              Stream Control Transmission Protocol (SCTP)
+                   Management Information Base (MIB)
 
+Status of this Memo
 
-Status of this memo
-
-   This document is an Internet-Draft and is in full conformance with
-   all provisions of Section 10 of RFC2026.
-
-   Internet-Drafts are working documents of the Internet Engineering
-   Task Force (IETF), its areas, and its working groups. Note that other
-   groups may also distribute working documents as Internet-Drafts.
-
-   Internet-Drafts are draft documents valid for a maximum of six months
-   and may be updated, replaced, or obsoleted by other documents at any
-   time. It is inappropriate to use Internet-Drafts as reference
-   material or cite them other than as "work in progress".
-
-   The list of current Internet-Drafts can be accessed at
-   http://www.ietf.org/ietf/lid-abstracts.txt
-
-   The list of Internet-Draft Shadow Directories can be accessed at
-   http://www.ietf.org/shadow.html
-
-   This document is an individual submission to the IETF. Comments
-   should be directed to the authors.
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
 
 Copyright Notice
-   Copyright (C) The Internet Society (2003).  All Rights Reserved.
+
+   Copyright (C) The Internet Society (2004).
+
 
 Abstract
 
    The Stream Control Transmission Protocol (SCTP) is a reliable
    transport protocol operating on top of a connectionless packet
-   network such as IP. It is designed to transport PSTN signaling
-   messages over the connectionless packet network, but is capable of
-   broader applications.
+   network such as IP.  It is designed to transport public switched
+   telephone network (PSTN) signaling messages over the connectionless
+   packet network, but is capable of broader applications.
 
    This memo defines the Management Information Base (MIB) module which
    describes the minimum set of objects needed to manage the
    implementation of the SCTP.
 
+Table of Contents
+
+   1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  2
+       1.1.  Abbreviations. . . . . . . . . . . . . . . . . . . . . .  2
+   2.  The Internet-Standard Management Framework . . . . . . . . . .  3
+   3.  MIB Structure. . . . . . . . . . . . . . . . . . . . . . . . .  3
+       3.1.  SCTP Objects . . . . . . . . . . . . . . . . . . . . . .  4
+             3.1.1.  SCTP Statistics. . . . . . . . . . . . . . . . .  4
+             3.1.2.  SCTP Parameters. . . . . . . . . . . . . . . . .  5
+             3.1.3.  MIB Tables . . . . . . . . . . . . . . . . . . .  5
+                     3.1.3.1.  Association Table. . . . . . . . . . .  5
+                     3.1.3.2.  Reverse Lookup Table . . . . . . . . .  8
+       3.2.  Conformance. . . . . . . . . . . . . . . . . . . . . . .  9
+   4.  Definitions. . . . . . . . . . . . . . . . . . . . . . . . . .  9
 
 
-Pastor, Belinchon                                               [Page 1]
+
+Pastor & Belinchon          Standards Track                     [Page 1]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
+   5.  Compiling Notes. . . . . . . . . . . . . . . . . . . . . . . . 42
+   6.  References . . . . . . . . . . . . . . . . . . . . . . . . . . 42
+       6.1.  Normative References . . . . . . . . . . . . . . . . . . 42
+       6.2.  Informative References . . . . . . . . . . . . . . . . . 43
+   7.  Security Considerations. . . . . . . . . . . . . . . . . . . . 44
+   8.  Acknowledgments. . . . . . . . . . . . . . . . . . . . . . . . 45
+   9.  Authors' Addresses . . . . . . . . . . . . . . . . . . . . . . 45
+   10. Full Copyright Statement . . . . . . . . . . . . . . . . . . . 46
 
-
-
-Open Issues
-
-      - Remove this section (i.e. Open Issues).
-
-      - Remove Revision History
-
-      - IANA: Decide under which object identifier branch of the SNMP
-         tree, SCTP should be placed. This value will be obtained when
-         submitted to the IETF queue.
-
-      - RFC Editor: Change "xxxx" occurrences to the value assigned by
-         IANA. Section 3.1.3 and  DESCRIPTION clause of the MODULE-
-         IDENTITY.
-
-      - RFC Editor: Change "YYYY" occurrences to the RFC number assigned
-         in DESCRIPTION clause of the MODULE-IDENTITY.
-
-
-
-TABLE OF CONTENTS
-
-   Open Issues.........................................................2
-   1. Introduction.....................................................2
-   1.1 Abbreviations...................................................3
-   2. The Internet-Standard Management Framework.......................3
-   3. MIB Structure....................................................4
-   3.1 SCTP Objets.....................................................5
-   3.1.1 SCTP Statistics...............................................5
-   3.1.2 SCTP Parameters...............................................5
-   3.1.3 MIB Tables....................................................6
-   3.1.3.1  Association Table..........................................6
-   3.1.3.2  Reverse Lookup Table.......................................9
-   3.2 Conformance....................................................10
-   4. Definitions.....................................................10
-   5. Compiling Notes.................................................40
-   6. References......................................................41
-   6.1 Normative References...........................................41
-   6.1 Informative References.........................................42
-   7. Security Considerations.........................................43
-   8. Acknowledgments.................................................44
-   9. Authors' Addresses..............................................44
-
-
-
-
-
-1. Introduction
-
-
-
-
-Pastor, Belinchon                                               [Page 2]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
+1.  Introduction
 
    This memo defines the Management Information Base (MIB) module which
    describes managed objects for implementations of the SCTP.
@@ -138,7 +90,7 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119].
 
-1.1 Abbreviations
+1.1.  Abbreviations
 
    DNS   - Domain Name System
    IANA  - Internet Assigned Numbers Authority
@@ -155,7 +107,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
 
 
-2. The Internet-Standard Management Framework
+
+
+
+
+Pastor & Belinchon          Standards Track                     [Page 2]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
+2.  The Internet-Standard Management Framework
 
    For a detailed overview of the documents that describe the current
    Internet-Standard Management Framework, please refer to section 7 of
@@ -165,30 +126,18 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    the Management Information Base or MIB.  MIB objects are generally
    accessed through the Simple Network Management Protocol (SNMP).
    Objects in the MIB are defined using the mechanisms defined in the
-   Structure of Management Information (SMI). This memo specifies a MIB
+   Structure of Management Information (SMI).  This memo specifies a MIB
    module that is compliant to the SMIv2, which is described in STD 58,
    RFC 2578 [RFC2578], STD 58, RFC 2579 [RFC2579] and STD 58, RFC 2580
    [RFC2580].
 
+3.  MIB Structure
 
-
-
-Pastor, Belinchon                                               [Page 3]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
-
-
-3. MIB Structure
-
-   This chapter explains the main objects this MIB defines. A detailed
+   This chapter explains the main objects this MIB defines.  A detailed
    view of the MIB structure with the OID values is below.
 
-
    MIB-2 {1 3 6 1 2 1}
-     +--(xxxx)sctpMIB
+     +--(104)sctpMIB
           |
           +--(1) sctpObjects
           |   |
@@ -215,6 +164,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           |   +--(9) sctpLookupRemPrimIPAddrTable
           |   |
           |   +--(10) sctpLookupRemIPAddrTable
+
+
+
+Pastor & Belinchon          Standards Track                     [Page 3]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           |
           |
           +--(2)sctpMibConformance
@@ -229,84 +186,67 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                   |
                   +--(2) sctpStatsGroup
                   |
-
-
-
-Pastor, Belinchon                                               [Page 4]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
                   +--(3) sctpPerAssocParamsGroup
                   |
                   +--(4) sctpInverseGroup
 
 
-
    The main groups are explained further in the MIB definition.
 
-
-3.1 SCTP Objets
+3.1.  SCTP Objects
 
    This branch contains the SCTP statistics and general parameters (both
    of them scalars) and the SCTP MIB tables.
 
-
-3.1.1 SCTP Statistics
+3.1.1.  SCTP Statistics
 
    The SCTP MIB includes both Counter32s and Counter64s to deal with
-   statistics. Counter64s are used for those counters, which are likely
+   statistics.  Counter64s are used for those counters, which are likely
    to wrap around in less than one hour, according to [RFC2863].
 
    In addition Gauge32 is also used.
 
-
-3.1.1.1 State-Related Statistics
+3.1.1.1.  State-Related Statistics
 
    These statistics are based on the TCP model, but adapted to the SCTP
-   states. They store the number of successful association attempts, how
-   many associations have been initiated by the local or the remote SCTP
-   layer, and the number of associations terminated in a graceful (by
-   means of SHUTDOWN procedure) or ungraceful way (by means of CLOSE
+   states.  They store the number of successful association attempts,
+   how many associations have been initiated by the local or the remote
+   SCTP layer, and the number of associations terminated in a graceful
+   (by means of SHUTDOWN procedure) or ungraceful way (by means of CLOSE
    procedure).
 
-
-3.1.1.2 Statistics for traffic Measurements
+3.1.1.2.  Statistics for traffic Measurements
 
    This set of objects specifies statistics related to the whole SCTP
-   layer. There are, e.g., statistics related to both SCTP packets and
+   layer.  There are, e.g., statistics related to both SCTP packets and
    SCTP chunks.
 
-   Statistics related to a specific association, or local/remote IP
-   addresses are defined inside its associated table.
 
 
-
-3.1.2 SCTP Parameters
-
-   This section of the MIB contains the general variables for the
-   SCTP protocol. Maximum, minimum, initial and default values are
-   listed here.
-
-
-
-
-Pastor, Belinchon                                               [Page 5]
+Pastor & Belinchon          Standards Track                     [Page 4]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
-   SCTP RTO mechanism definition is based on the TCP MIB [TCPMIB]. In
+   Statistics related to a specific association, or local/remote IP
+   addresses are defined inside their associated table.
+
+3.1.2.  SCTP Parameters
+
+   This section of the MIB contains the general variables for the SCTP
+   protocol.  Maximum, minimum, initial and default values are listed
+   here.
+
+   SCTP RTO mechanism definition is based on the TCP MIB [TCPMIB].  In
    SCTP, only options 'other' and 'vanj' are valid since SCTP defines
    Van Jacobson's algorithm (vanj) as the one to be used to calculate
    RTO. 'Other' is left for future use.
 
+3.1.3.  MIB Tables
 
-3.1.3 MIB Tables
-
-   There are several tables included in the SCTP MIB. The first group
+   There are several tables included in the SCTP MIB.  The first group
    deals with the SCTP association variables and is composed of a main
-   and two extended tables. The second group is a bunch of tables used
+   and two extended tables.  The second group is a bunch of tables used
    to perform reverse lookups.
 
    It is NOT possible to create rows in any table (sctpAssocTable,
@@ -316,46 +256,42 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    It is NOT possible to delete rows in any table using SNMP except in
    sctpAssocTable under the particular conditions explained below.
 
-
-3.1.3.1  Association Table
+3.1.3.1.  Association Table
 
    The sctpAssocTable  is the main MIB table, where all the association
-   related information is stored on a per association basis. It is
-   structured according to expanded tables. The main table is called
+   related information is stored on a per association basis.  It is
+   structured according to expanded tables.  The main table is called
    sctpAssocTable and is indexed by sctpAssocId (the association
-   identification). This is a value that uniquely identifies an
-   association. The MIB does not restrict what value must be written
+   identification).  This is a value that uniquely identifies an
+   association.  The MIB does not restrict what value must be written
    here, however it must be unique within the table.
 
    The sctpAssoc index is also shared by two more tables:
-      -  sctpAssocLocalAddrTable: to store the local IP address(-es).
+      -  sctpAssocLocalAddrTable: to store the local IP address(es).
       -  sctpAssocRemAddrTable: to store the remote addresses and the
          per-remote-address related information.
 
    Entries in the sctpAssocTable are created when trying to establish
    the association, i.e., when sending the COOKIE-ECHO message
-   (originating side) or the COOKIE-ACK message (server side). At this
+   (originating side) or the COOKIE-ACK message (server side).  At this
    point, i.e., at established state, all entry fields are filled in
    with valid values.
 
+
+
+Pastor & Belinchon          Standards Track                     [Page 5]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    Note: The following representation is a conceptual mode of describing
-   the relationship between the tables in this MIB. Note that the real
+   the relationship between the tables in this MIB.  Note that the real
    relationship of the tables is by sharing an index, so tables are not
-   truly within tables. Every entry is explained when defining the
+   truly within tables.  Every entry is explained when defining the
    corresponding objects in the MIB.
 
-
-
    mib-2 {1 3 6 1 2 1}
-
-
-
-Pastor, Belinchon                                               [Page 6]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-     +--(xxxx)sctpMIB
+     +--(104)sctpMIB
           |
           +--(1) sctpObjects
           |   |
@@ -396,6 +332,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
               |   |
               |   +--(16) sctpAssocStartTime
               |   |
+
+
+
+Pastor & Belinchon          Standards Track                     [Page 6]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
               |   +--(17) sctpAssocDiscontinuityTime
               |
               |
@@ -406,14 +350,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
               |   +--(1) sctpAssocLocalAddrType(index)
               |   |
               |   +--(2) sctpAssocLocalAddr (index)
-
-
-
-Pastor, Belinchon                                               [Page 7]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
               |   |
               |   +--(3) sctpAssocLocalAddrStartTime
               |
@@ -438,16 +374,10 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                   |
                   +--(8) sctpAssocRemAddrStartTime
 
-
-
-
-
-
-
    Both sctpAssocLocalAddrTable and sctpAssocRemAddrTable are indexed by
-   addresses. 'Addr' and 'AddrType' use the syntax InetAddress and
+   addresses.  'Addr' and 'AddrType' use the syntax InetAddress and
    InetAddressType defined in the Textual Conventions for Internet
-   Network Address (RFC3291). The InetAddressType TC has codepoints for
+   Network Address (RFC3291).  The InetAddressType TC has codepoints for
    unknown, IPv4, IPv6, non-global IPv4, non-global IPv6, and DNS
    addresses, but only the IPv4 and IPv6 address types are required to
    be supported by implementations of this MIB module.  Implementations
@@ -458,42 +388,40 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    always resolved to the on-the-wire form prior to connection setup,
    and the on-the-wire form is what appears in the MIB objects.
 
-   The sctpAssocLocalAddrTable table will have as many entries as local
-   IP addresses have been defined for the association. The
-   sctpAssocRemAddrTable table will contain as many entries as remote IP
-   addresses are known to reach the peer. For the multihoming concept
-   see reference RFC2960.
 
 
 
-
-
-Pastor, Belinchon                                               [Page 8]
+Pastor & Belinchon          Standards Track                     [Page 7]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
+
+   The sctpAssocLocalAddrTable table will have as many entries as local
+   IP addresses have been defined for the association.  The
+   sctpAssocRemAddrTable table will contain as many entries as remote IP
+   addresses are known to reach the peer.  For the multihoming concept
+   see reference RFC2960.
 
    To keep the name of the remote peer (when provided by the peer at
    initialization time), an entry has been created in the sctpAssocTable
-   called sctpAssocRemHostName. When no DNS name is provided by the
+   called sctpAssocRemHostName.  When no DNS name is provided by the
    remote endpoint, this value will be NULL (zero-length string).
    Otherwise, the received DNS name will be stored here.
 
    If it is necessary to abort an existing association, the value
-   deleteTCB(9) must be written in the variable sctpAssocState. That is
+   deleteTCB(9) must be written in the variable sctpAssocState.  That is
    the only way to delete rows in any of the mentioned tables.
 
-
-3.1.3.2  Reverse Lookup Table
+3.1.3.2.  Reverse Lookup Table
 
    There are five reverse lookup tables to help management applications
-   efficiently access conceptual rows in other tables. These tables
+   efficiently access conceptual rows in other tables.  These tables
    allow management applications to avoid expensive tree walks through
    large numbers of associations.
 
-   All of these tables are optional. If these tables are implemented, an
-   entry in them must be created after the entry in the main table
-   (sctpAssocTable) associated with it has been created. This ensures
+   All of these tables are optional.  If these tables are implemented,
+   an entry in them must be created after the entry in the main table
+   (sctpAssocTable) associated with it has been created.  This ensures
    that the field indexing the lookup table exists.
 
    The defined reverse lookup tables allow for performing a lookup using
@@ -515,8 +443,17 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    port.
 
 
+
+
+
+
+Pastor & Belinchon          Standards Track                     [Page 8]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    MIB-2 {1 3 6 1 2 1}
-     +--(xxx)sctpMIB
+     +--(104)sctpMIB
           |
           +--(1) sctpObjects
           |   |
@@ -524,14 +461,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           .   .
           |   |
           |   +--(6) sctpLookupLocalPortTable
-
-
-
-Pastor, Belinchon                                               [Page 9]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           |   |   |
           .   .   +--(-) sctpAssocLocalPort (shared index)
           .   .   |
@@ -539,43 +468,48 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                   |
                   +--(1) sctpLookupLocalPortStartTime
 
-
-
-
    It is not possible for the operator to either create or delete rows
-   in these tables. The rows in this table will dynamically appear and
+   in these tables.  The rows in this table will dynamically appear and
    be removed as the corresponding entries in sctpAssocTable are.
 
+3.2.  Conformance
 
-3.2 Conformance
-
-   The conformance section recommends as optional all the inverse lookup
-   tables in this MIB. General layer and per association parameters and
-   statistics are considered mandatory.
+   The conformance section recommends all the inverse lookup tables in
+   this MIB as optional.  General layer and per association parameters
+   and statistics are considered mandatory.
 
    IP addresses use the global IPv4 and global IPv6 address formats.
-   Unknown value and DNS name formats are not used. Names, if present,
+   Unknown value and DNS name formats are not used.  Names, if present,
    are stored in the sctpRemoteHostName variable.
 
-
-4. Definitions
+4.  Definitions
 
    SCTP-MIB DEFINITIONS ::= BEGIN
 
    IMPORTS
      MODULE-IDENTITY, OBJECT-TYPE, Integer32, Unsigned32, Gauge32,
      Counter32, Counter64, mib-2
-          FROM SNMPv2-SMI               -- RFC2578
+          FROM SNMPv2-SMI                        -- [RFC2578]
      TimeStamp, TruthValue
-          FROM SNMPv2-TC                -- RFC2579
+          FROM SNMPv2-TC                         -- [RFC2579]
      MODULE-COMPLIANCE, OBJECT-GROUP
-          FROM SNMPv2-CONF              -- RFC2580
+          FROM SNMPv2-CONF                       -- [RFC2580]
      InetAddressType, InetAddress, InetPortNumber
-          FROM INET-ADDRESS-MIB;        -- RFC3291
+          FROM INET-ADDRESS-MIB;                 -- [RFC3291]
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                     [Page 9]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpMIB MODULE-IDENTITY
-     LAST-UPDATED "200306040000Z"       -- 4th June 2003
+     LAST-UPDATED "200409020000Z"       -- 2nd September 2004
      ORGANIZATION "IETF SIGTRAN Working Group"
      CONTACT-INFO
           "
@@ -583,14 +517,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
            Web Page:
                  http://www.ietf.org/html.charters/sigtran-charter.html
-
-
-
-Pastor, Belinchon                                              [Page 10]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
            Chair:     Lyndon Ong
                       Ciena Corporation
@@ -615,25 +541,27 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                       Via de los Poblados, 13
                       28033 Madrid
                       Spain
-                      Tel:   +34 91 339 3819
+                      Tel:   +34 91 339 1397
                Email: J.Javier.Pastor@ericsson.com
           "
      DESCRIPTION
           "The MIB module for managing SCTP implementations.
 
-          Copyright (C) The Internet Society (2003). This version of
-          this MIB module is part of RFC YYYY; see the RFC itself for
+          Copyright (C) The Internet Society (2004).  This version of
+          this MIB module is part of RFC 3873; see the RFC itself for
           full legal notices. "
 
-     REVISION "200306040000Z"       -- 4th June 2003
+     REVISION "200409020000Z"       -- 2nd September 2004
 
-     DESCRIPTION " Initial version, published as RFC YYYY"
-       -- RFC Editor: to assign YYYY
+     DESCRIPTION " Initial version, published as RFC 3873"
 
-     ::= {  mib-2 xxxx }
+     ::= {  mib-2 104 }
 
-       -- IANA: to assign xxxx
-       -- RFC Editor: to change xxxx into the value assigned by IANA
+
+
+Pastor & Belinchon          Standards Track                    [Page 10]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    -- the SCTP base variables group
@@ -642,16 +570,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
    sctpStats   OBJECT IDENTIFIER ::= { sctpObjects 1 }
    sctpParams  OBJECT IDENTIFIER ::= { sctpObjects 2 }
-
-
-
-Pastor, Belinchon                                              [Page 11]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
-
 
    -- STATISTICS
    -- **********
@@ -688,6 +606,20 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      ::= { sctpStats  2 }
 
 
+
+
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 11]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    sctpPassiveEstabs OBJECT-TYPE
      SYNTAX         Counter32
      MAX-ACCESS     read-only
@@ -700,14 +632,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      REFERENCE
           "Section 4 in RFC2960 covers the SCTP   Association state
           diagram."
-
-
-
-
-Pastor, Belinchon                                              [Page 12]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
 
      ::= { sctpStats  3 }
 
@@ -744,6 +668,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      ::= { sctpStats  5 }
 
 
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 12]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    -- OTHER LAYER STATISTICS
 
    sctpOutOfBlues OBJECT-TYPE
@@ -760,14 +692,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
            (OOTB) packet definition and procedures."
 
      ::= { sctpStats  6 }
-
-
-
-Pastor, Belinchon                                              [Page 13]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
    sctpChecksumErrors OBJECT-TYPE
      SYNTAX         Counter32
@@ -794,9 +718,19 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      REFERENCE
           "Sections 1.3.5 and 1.4 in RFC2960 refer to control chunk as
           those chunks different from those that contain user
-          information, i.e. DATA chunks."
+          information, i.e., DATA chunks."
 
      ::= { sctpStats  8 }
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 13]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
    sctpOutOrderChunks OBJECT-TYPE
      SYNTAX         Counter64
@@ -820,14 +754,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      REFERENCE
           "Section 3.3.1 in RFC2960 defines the unordered data chunk."
 
-
-
-Pastor, Belinchon                                              [Page 14]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
      ::= { sctpStats  10 }
 
    sctpInCtrlChunks OBJECT-TYPE
@@ -840,7 +766,7 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      REFERENCE
           "Sections 1.3.5 and 1.4 in RFC2960 refer to control chunk as
           those chunks different from those that contain user
-          information, i.e. DATA chunks."
+          information, i.e., DATA chunks."
 
      ::= { sctpStats  11 }
 
@@ -852,6 +778,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      DESCRIPTION
           "The number of SCTP ordered data chunks received (no duplicate
           chunks included)."
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 14]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      REFERENCE
           "Section 3.3.1 in RFC2960 defines the ordered data chunk."
 
@@ -878,14 +814,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      STATUS         current
      DESCRIPTION
 
-
-
-
-Pastor, Belinchon                                              [Page 15]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           "The number of user messages that have to be fragmented
           because of the MTU."
 
@@ -904,6 +832,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           reassembly process."
 
      ::= { sctpStats  15 }
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 15]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpOutSCTPPacks OBJECT-TYPE
@@ -937,14 +875,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           discontinuity.  The relevant counters are the specific
           instances associated with this interface of any Counter32 or
           Counter64 object contained in the SCTP layer statistics
-
-
-
-Pastor, Belinchon                                              [Page 16]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           (defined below sctpStats branch).  If no such discontinuities
           have occurred since the last re-initialization of the local
           management subsystem, then this object contains a zero value."
@@ -962,6 +892,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                          other(1),      -- Other new one. Future use
                          vanj(2)        -- Van Jacobson's algorithm
                     }
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 16]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      MAX-ACCESS     read-only
      STATUS         current
      DESCRIPTION
@@ -995,15 +933,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpParams 2 }
 
-
-
-
-
-Pastor, Belinchon                                              [Page 17]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
    sctpRtoMax OBJECT-TYPE
      SYNTAX         Unsigned32
      UNITS          "milliseconds"
@@ -1017,6 +946,15 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
           A retransmission time value of zero means immediate re-
           transmission.
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 17]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
           The value of this object has to be greater than or equal to
           stcpRtoMin's value."
@@ -1056,13 +994,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      SYNTAX         Unsigned32
      UNITS          "milliseconds"
 
-
-
-Pastor, Belinchon                                              [Page 18]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      MAX-ACCESS     read-only
      STATUS         current
      DESCRIPTION
@@ -1073,6 +1004,12 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      DEFVAL {60000} -- milliseconds
 
      ::= { sctpParams 6 }
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 18]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpMaxInitRetr OBJECT-TYPE
@@ -1088,8 +1025,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      DEFVAL {8} -- number of attempts
 
      ::= { sctpParams 7 }
-
-
 
 
    -- TABLES
@@ -1115,13 +1050,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      SYNTAX         SctpAssocEntry
      MAX-ACCESS     not-accessible
 
-
-
-Pastor, Belinchon                                              [Page 19]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      STATUS         current
      DESCRIPTION
           "General common variables and statistics for the whole
@@ -1129,6 +1057,15 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      INDEX          { sctpAssocId }
 
      ::= { sctpAssocTable 1 }
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 19]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    SctpAssocEntry ::= SEQUENCE {
@@ -1169,24 +1106,23 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      STATUS         current
      DESCRIPTION
           "The peer's DNS name. This object needs to have the same
-          format as the encoding in the DNS protocol. This implies that
+          format as the encoding in the DNS protocol.  This implies that
           the domain name can be up to 255 octets long, each octet being
           0<=x<=255 as value with US-ASCII A-Z having a case insensitive
           matching.
-
-
-
-Pastor, Belinchon                                              [Page 20]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
           If no DNS domain name was received from the peer at init time
           (embedded in the INIT or INIT-ACK chunk), this object is
           meaningless. In such cases the object MUST contain a zero-
           length string value. Otherwise, it contains the remote host
           name received at init time."
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 20]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
      ::= { sctpAssocEntry 2 }
 
@@ -1233,15 +1169,15 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           INIT_ACK message. However, values will be filled in at
           established(4) state."
 
-
-
-Pastor, Belinchon                                              [Page 21]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
      ::= { sctpAssocEntry 6 }
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 21]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpAssocHeartBeatInterval OBJECT-TYPE
@@ -1290,14 +1226,17 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           sent from the managed node to the other SCTP endpoint as a
           result of setting the deleteTCB(9) value. The ABORT chunk
           implies an ungraceful association shutdown."
-     REFERENCE
 
 
 
-Pastor, Belinchon                                              [Page 22]
+
+
+Pastor & Belinchon          Standards Track                    [Page 22]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
+
+     REFERENCE
 
           "Section 4 in RFC2960 covers the SCTP Association state
           diagram."
@@ -1346,19 +1285,17 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           all the maximum number for all the paths
           (sctpAssocRemAddrMaxPathRtx).
 
+
+
+Pastor & Belinchon          Standards Track                    [Page 23]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           A value of zero value means no retransmissions."
      DEFVAL {10} -- number of attempts
 
      ::= { sctpAssocEntry 11 }
-
-
-
-Pastor, Belinchon                                              [Page 23]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
 
    sctpAssocPrimProcess OBJECT-TYPE
          SYNTAX      Unsigned32
@@ -1403,20 +1340,18 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    sctpAssocT2expireds OBJECT-TYPE
      SYNTAX         Counter32
      MAX-ACCESS     read-only
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 24]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      STATUS         current
      DESCRIPTION
           "The T2 timer determines how long to wait for an
           acknowledgement after sending a SHUTDOWN or SHUTDOWN-ACK
-
-
-
-
-
-Pastor, Belinchon                                              [Page 24]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           chunk. This object reflects the number of times that T2- timer
           expired.
 
@@ -1455,27 +1390,25 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      STATUS         current
      DESCRIPTION
           "The value of sysUpTime at the time that the association
-          represented by this row enters the ESTABLISHED state, i.e. the
-          sctpAssocState object is set to established(4). The value of
-          this object will be zero:
+          represented by this row enters the ESTABLISHED state, i.e.,
+          the sctpAssocState object is set to established(4). The
+          value of this object will be zero:
           - before the association enters the established(4)
             state, or
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 25]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           - if the established(4) state was entered prior to
             the last re-initialization of the local network management
             subsystem."
 
      ::= { sctpAssocEntry 16 }
-
-
-
-
-
-
-Pastor, Belinchon                                              [Page 25]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
    sctpAssocDiscontinuityTime OBJECT-TYPE
      SYNTAX         TimeStamp
@@ -1494,11 +1427,7 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      REFERENCE
           "The inclusion of this object is recommended by RFC2578."
 
-
-
      ::= { sctpAssocEntry 17 }
-
-
 
    -- Expanded tables: Including Multi-home feature
 
@@ -1523,18 +1452,18 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      DESCRIPTION
           "Local information about the available addresses. There will
           be an entry for every local IP address defined for this
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 26]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           association.
           Implementors need to be aware that if the size of
           sctpAssocLocalAddr exceeds 114 octets then OIDs of column
           instances in this table will have more than 128 sub-
-
-
-
-Pastor, Belinchon                                              [Page 26]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           identifiers and cannot be accessed using SNMPv1, SNMPv2c, or
           SNMPv3."
      INDEX     {    sctpAssocId,   -- shared index
@@ -1559,9 +1488,7 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           "Internet type of local IP address used for this association."
 
 
-
      ::= { sctpAssocLocalAddrEntry 1 }
-
 
    sctpAssocLocalAddr OBJECT-TYPE
      SYNTAX         InetAddress
@@ -1575,6 +1502,20 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      ::= { sctpAssocLocalAddrEntry 2 }
 
 
+
+
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 27]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    sctpAssocLocalAddrStartTime OBJECT-TYPE
      SYNTAX         TimeStamp
      MAX-ACCESS     read-only
@@ -1584,16 +1525,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           created."
 
      ::= { sctpAssocLocalAddrEntry 3 }
-
-
-
-
-
-Pastor, Belinchon                                              [Page 27]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
    -- Remote Addresses TABLE
    -- **********************
@@ -1631,6 +1562,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      ::= { sctpAssocRemAddrTable 1 }
 
 
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 28]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    SctpAssocRemAddrEntry ::= SEQUENCE {
      sctpAssocRemAddrType               InetAddressType,
      sctpAssocRemAddr                   InetAddress,
@@ -1645,14 +1586,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
    sctpAssocRemAddrType OBJECT-TYPE
      SYNTAX         InetAddressType
-
-
-
-Pastor, Belinchon                                              [Page 28]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      MAX-ACCESS     not-accessible
      STATUS         current
      DESCRIPTION
@@ -1685,6 +1618,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           understood as Active. Active means that the threshold of no
           answers received from this IP address has not been reached.
 
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 29]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           When the object is set to 'false' (2), the remote IP address
           is understood as Inactive. Inactive means that either no
           heartbeat or any other message was received from this address,
@@ -1702,16 +1645,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      MAX-ACCESS     read-only
      STATUS         current
      DESCRIPTION
-
-
-
-
-
-Pastor, Belinchon                                              [Page 29]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           "This object indicates whether the optional Heartbeat check
           associated to one destination transport address is activated
           or not (value equal to true or false, respectively). "
@@ -1742,6 +1675,15 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           "Maximum number of DATA chunks retransmissions allowed to a
           remote IP address before it is considered inactive, as defined
           in RFC2960."
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 30]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      REFERENCE
           "Section 8.2, 8.3 and 14 in RFC2960."
      DEFVAL {5} -- number of attempts
@@ -1763,14 +1705,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           was transmitted to this specific IP address before, will be
           included in this counter.
 
-
-
-
-Pastor, Belinchon                                              [Page 30]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
           Discontinuities in the value of this counter can occur at re-
           initialization of the management system, and at other times as
           indicated by the value of sctpAssocDiscontinuityTime."
@@ -1787,8 +1721,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpAssocRemAddrEntry 8 }
 
-
-
    -- ASSOCIATION INVERSE TABLE
    -- *************************
 
@@ -1800,6 +1732,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      STATUS         current
      DESCRIPTION
           "With the use of this table, a list of associations which are
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 31]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
           using the specified local port can be retrieved."
 
      ::= { sctpObjects  6 }
@@ -1822,14 +1762,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
    SctpLookupLocalPortEntry::= SEQUENCE {
      sctpLookupLocalPortStartTime            TimeStamp
-
-
-
-Pastor, Belinchon                                              [Page 31]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      }
 
 
@@ -1846,19 +1778,29 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpLookupLocalPortEntry 1 }
 
-
    -- BY REMOTE PORT
 
    sctpLookupRemPortTable OBJECT-TYPE
      SYNTAX         SEQUENCE OF SctpLookupRemPortEntry
      MAX-ACCESS     not-accessible
      STATUS         current
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 32]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      DESCRIPTION
           "With the use of this table, a list of associations which are
           using the specified remote port can be got"
 
      ::= { sctpObjects  7 }
-
 
    sctpLookupRemPortEntry OBJECT-TYPE
      SYNTAX         SctpLookupRemPortEntry
@@ -1874,21 +1816,12 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpLookupRemPortTable 1 }
 
-
    SctpLookupRemPortEntry::= SEQUENCE {
      sctpLookupRemPortStartTime              TimeStamp
      }
 
 
    sctpLookupRemPortStartTime OBJECT-TYPE
-
-
-
-Pastor, Belinchon                                              [Page 32]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      SYNTAX         TimeStamp
      MAX-ACCESS     read-only
      STATUS         current
@@ -1901,8 +1834,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpLookupRemPortEntry 1 }
 
-
-
    -- BY REMOTE HOST NAME
 
    sctpLookupRemHostNameTable OBJECT-TYPE
@@ -1912,6 +1843,14 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      DESCRIPTION
           "With the use of this table, a list of associations with that
           particular host can be retrieved."
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 33]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
      ::= { sctpObjects  8 }
 
@@ -1941,15 +1880,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      sctpLookupRemHostNameStartTime               TimeStamp
      }
 
-
-
-Pastor, Belinchon                                              [Page 33]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
-
    sctpLookupRemHostNameStartTime OBJECT-TYPE
      SYNTAX         TimeStamp
      MAX-ACCESS     read-only
@@ -1962,6 +1892,21 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
           object from the main table."
 
      ::= { sctpLookupRemHostNameEntry 1 }
+
+
+
+
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 34]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
    -- BY REMOTE PRIMARY IP ADDRESS
 
@@ -1998,15 +1943,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      ::= { sctpLookupRemPrimIPAddrTable 1 }
 
-
-
-
-
-Pastor, Belinchon                                              [Page 34]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
    SctpLookupRemPrimIPAddrEntry::= SEQUENCE {
      sctpLookupRemPrimIPAddrStartTime             TimeStamp
      }
@@ -2016,6 +1952,18 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      SYNTAX         TimeStamp
      MAX-ACCESS     read-only
      STATUS         current
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 35]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
      DESCRIPTION
           "The value of SysUpTime at the time that this row was created.
 
@@ -2059,15 +2007,17 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
    SctpLookupRemIPAddrEntry::= SEQUENCE {
 
-
-
-Pastor, Belinchon                                              [Page 35]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
      sctpLookupRemIPAddrStartTime            TimeStamp
      }
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 36]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpLookupRemIPAddrStartTime OBJECT-TYPE
@@ -2084,7 +2034,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
      ::= { sctpLookupRemIPAddrEntry 1 }
 
 
-
    -- 4.1 Conformance Information
 
    sctpMibConformance    OBJECT IDENTIFIER ::= { sctpMIB 2 }
@@ -2098,7 +2047,6 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    -- MODULE GROUPS
    --
 
-
    sctpLayerParamsGroup OBJECT-GROUP
      OBJECTS   { sctpRtoAlgorithm,
                  sctpRtoMin,
@@ -2111,7 +2059,7 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
      STATUS    current
      DESCRIPTION
-          "Common parameters for the SCTP layer, i.e. for all the
+          "Common parameters for the SCTP layer, i.e., for all the
           associations. They can usually be referred to as configuration
           parameters."
 
@@ -2120,10 +2068,12 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
 
 
-Pastor, Belinchon                                              [Page 36]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
+
+
+Pastor & Belinchon          Standards Track                    [Page 37]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
    sctpStatsGroup OBJECT-GROUP
@@ -2174,16 +2124,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                  sctpAssocPrimProcess,
                  sctpAssocStartTime,
                  sctpAssocDiscontinuityTime,
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 38]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
                  sctpAssocLocalAddrStartTime,
                  sctpAssocRemAddrActive,
-
-
-
-Pastor, Belinchon                                              [Page 37]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
                  sctpAssocRemAddrHBActive,
                  sctpAssocRemAddrRTO,
                  sctpAssocRemAddrMaxPathRtx,
@@ -2229,20 +2179,20 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
 
 
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 39]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
    -- 4.1.2 Compliance Statements
 
    --
    -- MODULE COMPLIANCES
    --
-
-
-
-
-Pastor, Belinchon                                              [Page 38]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
 
    sctpMibCompliance MODULE-COMPLIANCE
      STATUS  current
@@ -2285,24 +2235,20 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    --
           "  -- closes DESCRIPTION clause of MODULE-COMPLIANCE
 
-
-
      MODULE  -- this module
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 40]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
           MANDATORY-GROUPS    {  sctpLayerParamsGroup,
                                  sctpPerAssocParamsGroup,
                                  sctpStatsGroup,
                                  sctpPerAssocStatsGroup
                               }
-
-
-
-Pastor, Belinchon                                              [Page 39]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-
 
           OBJECT  sctpAssocRemPrimAddrType
           SYNTAX  InetAddressType { ipv4(1),
@@ -2336,37 +2282,39 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
                implemented, at the discretion of the implementers, for
                easier lookups in the association tables"
 
-
-
      ::= { sctpMibCompliances 1 }
-
 
    END
 
 
-5. Compiling Notes
+
+
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 41]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
+
+5.  Compiling Notes
 
    When compiling the MIB module warnings similar to the following may
    occur:
 
-      - warning: index of row `sctpAssocLocalAddrEntry' can exceed OID
-        size limit by 141 subidentifier(s)
-      - warning: index of row `sctpAssocRemAddrEntry' can exceed OID
-        size limit by 141 subidentifier(s)
-
-
-
-Pastor, Belinchon                                              [Page 40]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
-
-      - warning: index of row `sctpLookupRemHostNameEntry' can exceed
-        OID size limit by 140 subidentifier(s)
-      - warning: index of row `sctpLookupRemPrimIPAddrEntry' can exceed
-        OID size limit by 141 subidentifier(s)
-      - warning: index of row `sctpLookupRemIPAddrEntry' can exceed OID
-        size limit by 141 subidentifier(s)
+      -  warning: index of row `sctpAssocLocalAddrEntry' can exceed OID
+         size limit by 141 subidentifier(s)
+      -  warning: index of row `sctpAssocRemAddrEntry' can exceed OID
+         size limit by 141 subidentifier(s)
+      -  warning: index of row `sctpLookupRemHostNameEntry' can exceed
+         OID size limit by 140 subidentifier(s)
+      -  warning: index of row `sctpLookupRemPrimIPAddrEntry' can exceed
+         OID size limit by 141 subidentifier(s)
+      -  warning: index of row `sctpLookupRemIPAddrEntry' can exceed OID
+         size limit by 141 subidentifier(s)
 
    These warnings are due to the fact that the row objects have index
    objects of type InetAddress or OCTET STRING whose size limit is 255
@@ -2377,128 +2325,127 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    clauses.  For the InetAddress index objects these size limits will
    not be reached with any of the address types in current use.
 
+6.  References
 
-6. References
+6.1.  Normative References
 
-6.1 Normative References
+   [RFC2578]    McCloghrie, K., Perkins, D., and J. Schoenwaelder,
+                "Structure of Management Information Version 2 (SMIv2)",
+                STD 58, RFC 2578, April 1999.
 
-   [RFC2578] McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
-         Rose, M., and S. Waldbusser, "Structure of Management
-         Information Version 2 (SMIv2)", STD 58, RFC 2578, April 1999.
+   [RFC2579]    McCloghrie, K., Perkins, D., and J. Schoenwaelder,
+                "Textual Conventions for SMIv2", STD 58, RFC 2579, April
+                1999.
 
-   [RFC2579] McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
-         Rose, M., and S. Waldbusser, "Textual Conventions for SMIv2",
-         STD 58, RFC 2579, April 1999.
+   [RFC2580]    McCloghrie, K., Perkins, D., and J. Schoenwaelder,
+                "Conformance Statements for SMIv2", STD 58, RFC 2580,
+                April 1999.
 
-   [RFC2580] McCloghrie, K., Perkins, D., Schoenwaelder, J., Case, J.,
-         Rose, M., and S. Waldbusser, "Conformance Statements for
-         SMIv2", STD 58, RFC 2580, April 1999.
-
-   [RFC2960] R. Stewart, Q. Xie, K. Morneault, C. Sharp, H. J.
-         Schwarzbauer, T. Taylor, I. Rytina, M. Kalla, L. Zhang, V.
-         Paxson, "Stream Control Transmission Protocol", October 2000.
-
-   [RFC3291] M. Daniele, B. Haberman, S. Routhier, J. Schoenwaelder,
-         "Textual Conventions for Internet Network Addresses", May 2002.
-
-   [RFC3309] R. Stewart, J. Stone, D. Otis, " Stream Control
-         Transmission Protocol (SCTP) Checksum Change", September 2002.
-
-   [sctpImplem] R. Stewart, L. Ong, I. Arias-Rodriguez, A. Caro, M.
-         Tuexen, "Stream Control Transmission Protocol (SCTP)
-         Implementers Guide", January 18, 2002, draft-ietf-tsvwg-
-         sctpimpguide-07.txt, work in progress
+   [RFC2960]    Stewart, R., Xie, Q., Morneault, K., Sharp, C.,
+                Schwarzbauer, H., Taylor, T., Rytina, I., Kalla, M.,
+                Zhang, L., and V. Paxson, "Stream Control Transmission
+                Protocol", RFC 2960, October 2000.
 
 
 
 
 
 
-
-Pastor, Belinchon                                              [Page 41]
+Pastor & Belinchon          Standards Track                    [Page 42]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
-6.1 Informative References
+   [RFC3291]    Daniele, M., Haberman, B., Routhier, S., and J.
+                Schoenwaelder, "Textual Conventions for Internet Network
+                Addresses", RFC 3291, May 2002.
 
+   [RFC3309]    Stone, J., Stewart, R., and D. Otis, "Stream Control
+                Transmission Protocol (SCTP) Checksum Change", RFC 3309,
+                September 2002.
 
-   [RFC1213] Rose, M. and K. McCloghrie, "Management Information Base
-         for Network Management of TCP/IP-based internets", RFC
-         1213,March 1991.
+6.2.  Informative References
 
-   [RFC2012] K. McCloghrie, "SNMPv2 Management Information Base for the
-         Transmission Control Protocol using SMIv2", RFC 2012, November
-         1996.
+   [RFC1213]    McCloghrie, K. and M. Rose, "Management Information Base
+                for Network Management of TCP/IP-based internets:MIB-
+                II", STD 17, RFC 1213, March 1991.
 
-   [RFC3410] Case, J., Mundy, R., Partain, D. and B. Stewart,
-         "Introduction and Applicability Statements for Internet-
-         Standard Management Framework", RFC 3410, December 2002.
+   [RFC2012]    McCloghrie, K., "SNMPv2 Management Information Base for
+                the Transmission Control Protocol using SMIv2", RFC
+                2012, November 1996.
 
-   [VANJ] Jacobson, V., "Congestion Avoidance and Control", SIGCOMM
-         1988, Stanford, California.
+   [RFC3410]    Case, J., Mundy, R., Partain, D., and B. Stewart,
+                "Introduction and Applicability Statements for
+                Internet-Standard Management Framework", RFC 3410,
+                December 2002.
 
-   [IPv6ARCH] Deering, S., Haberman, B., Jinmei, T., Nordmark, E., Onoe,
-         A.  and B. Zill, "IPv6 Scoped Address Architecture", draft-
-         ietf-ipngwg-scoping-arch-04.txt, December 2002. Work in
-         progress.
+   [VANJ]       Jacobson, V., "Congestion Avoidance and Control",
+                SIGCOMM 1988, Stanford, California.
 
-   [TCPMIB] Bill Fenner, Keith McCloghrie, Rajiv Raghunarayan, Juergen
-         Schoenwalder, "Management Information Base for the Transmission
-         Control Protocol (TCP) ", draft-ietf-ipv6-rfc2012-update-01.txt
-         , November 2002. Work in progress.
+   [IPv6ARCH]   Deering, S., Haberman, B., Jinmei, T., Nordmark, E.,
+                Onoe, A., and B. Zill, "IPv6 Scoped Address
+                Architecture", Work in Progress, December 2002.
 
-   [UDPMIB] Bill Fenner, "Management Information Base for User Datagram
-         Protocol (UDP), draft-ietf-ipv6-rfc2013-update-00.txt, June
-         2002. Work in progress.
+   [sctpImplem] Stewart, R., Ong, L., Arias-Rodriguez, I., Caro, A., and
+                M. Tuexen, "Stream Control Transmission Protocol (SCTP)
+                Implementers Guide", Work in Progress, January 2002.
 
-   [MIBGUIDE] Heard, "Guidelines for MIB Authors and Reviewers", draft-
-         ietf-ops-mib-review-guidelines-01.txt, February 2003. Work in
-         progress
+   [TCPMIB]     Fenner, B., McCloghrie, K., Raghunarayan, R., and J.
+                Schoenwalder, "Management Information Base for the
+                Transmission Control Protocol (TCP)", Work in Progress,
+                November 2002.
 
+   [UDPMIB]     Fenner, B., "Management Information Base for User
+                Datagram Protocol (UDP)", Work in Progress, June 2002.
 
-
-7. Security Considerations
-
-   There are management objects defined in this MIB that have a
-   MAX-ACCESS clause of read-write and/or read-create.  Such objects may
-   be considered sensitive or vulnerable in some network environments.
-   The support for SET operations in a non-secure environment without
-   proper protection can have a negative effect on network operations.
-   These are the tables and objects and their sensitivity/vulnerability:
-
-   o The sctpAssocState object has a MAX-ACCESS clause of read-write,
-   which allows termination of an arbitrary connection. Unauthorized
-   access could cause a denial of service.
+   [MIBGUIDE]   Heard, C.M., "Guidelines for MIB Authors and Reviewers",
+                Work in Progress, February 2003.
 
 
 
 
-Pastor, Belinchon                                              [Page 42]
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 43]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
+
+7.  Security Considerations
+
+   There are management objects defined in this MIB that have a MAX-
+   ACCESS clause of read-write and/or read-create.  Such objects may be
+   considered sensitive or vulnerable in some network environments.  The
+   support for SET operations in a non-secure environment without proper
+   protection can have a negative effect on network operations.  These
+   are the tables and objects and their sensitivity/vulnerability:
+
+   o  The sctpAssocState object has a MAX-ACCESS clause of read-write,
+      which allows termination of an arbitrary connection.  Unauthorized
+      access could cause a denial of service.
 
    Some of the readable objects in this MIB module (i.e., objects with a
    MAX-ACCESS other than not-accessible) may be considered sensitive or
-   vulnerable in some network environments.  It is thus important to
+   vulnerable in some network environments.  Thus, it is important to
    control even GET and/or NOTIFY access to these objects and possibly
    to even encrypt the values of these objects when sending them over
    the network via SNMP.  These are the tables and objects and their
    sensitivity/vulnerability:
 
-   o The sctpAssocTable, sctpAssocLocalAddressTable,
-   sctpAssocRemAddressTable and the lookup tables contain objects
-   providing information on the active associations on the device, local
-   and peer's IP addresses, the status of these associations and the
-   associated processes. This information may be used by an attacker to
-   launch attacks against known/unknown weakness in certain protocols /
-   applications.
+   o  The sctpAssocTable, sctpAssocLocalAddressTable,
+      sctpAssocRemAddressTable and the lookup tables contain objects
+      providing information on the active associations on the device,
+      local and peer's IP addresses, the status of these associations
+      and the associated processes.  This information may be used by an
+      attacker to launch attacks against known/unknown weakness in
+      certain protocols/applications.
 
-   o The sctpAssocTable contains objects providing information on local
-   and remote ports objects, that can be used to identify what ports are
-   open on the machine and can thus suggest what attacks are likely to
-   succeed, without the attacker having to run a port scanner.
+   o  The sctpAssocTable contains objects providing information on local
+      and remote ports objects, that can be used to identify what ports
+      are open on the machine and can thus suggest what attacks are
+      likely to succeed, without the attacker having to run a port
+      scanner.
 
    SNMP versions prior to SNMPv3 did not include adequate security.
    Even if the network itself is secure (for example by using IPSec),
@@ -2510,6 +2457,16 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    provided by the SNMPv3 framework (see [RFC3410], section 8),
    including full support for the SNMPv3 cryptographic mechanisms (for
    authentication and privacy).
+
+
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 44]
+
+RFC 3873                  SCTP MIB using SMIv2            September 2004
+
 
    Further, deployment of SNMP versions prior to SNMPv3 is NOT
    RECOMMENDED.  Instead, it is RECOMMENDED to deploy SNMPv3 and to
@@ -2524,41 +2481,34 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
    perspective of preventing traffic analysis, and also to protect
    individual privacy.
 
-
-
-
-8. Acknowledgments
-
-
-
-
-
-Pastor, Belinchon                                              [Page 43]
-
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
-
+8.  Acknowledgments
 
    The authors wish to thank Juergen Schoenwaelder, David Partain, Shawn
    A. Routhier, Ed Yarwood, John Linton, Shyamal Prasad, Juan-Francisco
    Martin, Dave Thaler, and Bert Wijnen for their invaluable comments.
 
+9.  Authors' Addresses
 
-9. Authors' Addresses
-
-   Javier Pastor-Balbas            Tel: +34-91-339-3819
-   Ericsson Espana S.A.            eMail: J.Javier.Pastor@ericsson.com
+   Javier Pastor-Balbas
+   Ericsson Espana S.A.
    Network Signaling System Management
    Via de los Poblados 13
    Madrid, 28033
    Spain
 
-   Maria-Carmen Belinchon          Tel: +34-91-339-3535
-   Ericsson Espana S.A.            eMail: Maria.C.Belinchon@ericsson.com
+   Phone: +34-91-339-1397
+   EMail: J.Javier.Pastor@ericsson.com
+
+
+   Maria-Carmen Belinchon
+   Ericsson Espana S.A.
    Network Signaling System Management
    Via de los Poblados 13
    Madrid, 28033
    Spain
 
+   Phone: +34-91-339-3535
+   EMail: maria.carmen.belinchon@ericsson.com
 
 
 
@@ -2569,83 +2519,61 @@ INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Pastor, Belinchon                                              [Page 44]
+Pastor & Belinchon          Standards Track                    [Page 45]
 
-INTERNET-DRAFT            SCTP MIB using SMIv2                June, 2003
+RFC 3873                  SCTP MIB using SMIv2            September 2004
 
 
-Full Copyright Statement
+10.  Full Copyright Statement
 
-Copyright (C) The Internet Society (2003).  All Rights Reserved.
+   Copyright (C) The Internet Society (2004).
 
-This document and translations of it may be copied and furnished to
-others, and derivative works that comment on or otherwise explain it or
-assist in its implementation may be prepared, copied, published and
-distributed, in whole or in part, without restriction of any kind,
-provided that the above copyright notice and this paragraph are included
-on all such copies and derivative works. However, this document itself
-may not be modified in any way, such as by removing the copyright notice
-or references to the Internet Society or other Internet organizations,
-except as needed for the purpose of developing Internet standards in
-which case the procedures for copyrights defined in the Internet
-Standards process must be followed, or as required to translate it into
-languages other than English.
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
 
-The limited permissions granted above are perpetual and will not be
-revoked by the Internet Society or its successors or assigns.
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/S HE
+   REPRESENTS OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE
+   INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 
-This document and the information contained herein is provided on an "AS
-IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING TASK
-FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT
-LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION HEREIN WILL NOT
-INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF MERCHANTABILITY OR
-FITNESS FOR A PARTICULAR PURPOSE.
+Intellectual Property
 
+   The IETF takes no position regarding the validity or scope of any
+   Intellectual Property Rights or other rights that might be claimed to
+   pertain to the implementation or use of the technology described in
+   this document or the extent to which any license under such rights
+   might or might not be available; nor does it represent that it has
+   made any independent effort to identify any such rights.  Information
+   on the IETF's procedures with respect to rights in IETF Documents can
+   be found in BCP 78 and BCP 79.
 
+   Copies of IPR disclosures made to the IETF Secretariat and any
+   assurances of licenses to be made available, or the result of an
+   attempt made to obtain a general license or permission for the use of
+   such proprietary rights by implementers or users of this
+   specification can be obtained from the IETF on-line IPR repository at
+   http://www.ietf.org/ipr.
 
+   The IETF invites any interested party to bring to its attention any
+   copyrights, patents or patent applications, or other proprietary
+   rights that may cover technology that may be required to implement
+   this standard.  Please address the information to the IETF at ietf-
+   ipr@ietf.org.
 
+Acknowledgement
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+   Funding for the RFC Editor function is currently provided by the
+   Internet Society.
 
 
 
-Pastor, Belinchon                                              [Page 45]
+
+
+
+
+Pastor & Belinchon          Standards Track                    [Page 46]
 
