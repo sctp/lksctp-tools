@@ -2552,7 +2552,7 @@ __tasklet_hi_schedule(struct tasklet_struct *t)
 {
 }
 
-int ___pskb_trim(struct sk_buff *skb, unsigned int len, int realloc)
+int ___pskb_trim(struct sk_buff *skb, unsigned int len)
 {
 	return 0;
 }
