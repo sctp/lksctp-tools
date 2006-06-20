@@ -3,6 +3,19 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+T:NA          updates to linux 2.6.17
+K:NA          Allow linger to abort 1-N style sockets.
+K:NA          Validate the parameter length in HB-ACK chunk.
+K:NA          A better solution to fix the race between sctp_peeloff() and
+              sctp_rcv().
+K:NA          Set sk_err so that poll wakes up after a non-blocking connect
+              failure.
+K:NA          Fix state table entries for chunks received in CLOSED state.
+K:NA          Fix panic's when receiving fragmented SCTP control chunks.
+K:NA          Prevent possible infinite recursion with multiple bundled DATA.
+K:NA          Allow spillover of receive buffer to avoid deadlock.
+T:NA          Fix the type of 'len' argument in sctp_recvmsg() man page.
+
 lksctp-2.6.16-1.0.6: Fri Feb  3 10:54:20 PST 2006
 K:NA          Fix 'fast retransmit' to send a TSN only once.       
 K:NA          Heartbeats exceed maximum retransmission limit.
