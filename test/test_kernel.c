@@ -1992,6 +1992,7 @@ int ip_route_output_key(struct rtable **rp, struct flowi *flp)
 	rt->u.dst.path = &rt->u.dst;
 	rt->u.dst.metrics[RTAX_MTU-1] = ip_mtu;
 	rt->u.dst.obsolete = 0;
+	rt->rt_flags = 0;
 	atomic_set(&rt->u.dst.__refcnt, 1);
 
 	switch(flp->fl4_dst) {
