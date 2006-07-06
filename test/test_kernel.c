@@ -51,6 +51,7 @@
 #include <linux/crypto.h>
 #include <net/if_inet6.h>
 #include <linux/slab.h>
+#include <linux/proc_fs.h>
 /* undefs were here */
 #include <net/protocol.h>
 #include <net/sock.h>
@@ -3527,4 +3528,17 @@ nodata:
 
 void put_page(struct page *page)
 {
+}
+
+static struct proc_dir_entry p;
+
+struct proc_dir_entry *create_proc_entry(const char *name, mode_t mode,
+					 struct proc_dir_entry *parent)
+{
+	return &p;
+}
+
+void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
+{
+	return;
 }

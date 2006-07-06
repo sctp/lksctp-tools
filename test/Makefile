@@ -14,7 +14,8 @@ USER_INCLUDES=-I. -I${INCLUDE_USR}
 WARNINGS=-Wall -Wstrict-prototypes -Wimplicit-function-declaration
 
 CFLAGS=-g ${INCLUDES} ${WARNINGS} -DTEST_FRAME=1 \
-		-D__KERNEL__=1 -DSCTP_DEBUG=1 -DSCTP_STATIC= -DKBUILD_BASENAME=
+	-D__KERNEL__=1 -DSCTP_DEBUG=1 -DSCTP_STATIC= -DKBUILD_BASENAME= \
+	-imacros ${INCLUDE_LINUX}/autoconf.h
 
 V6FLAGS=-DCONFIG_IPV6=1 -DTEST_V6=1 
 
@@ -52,6 +53,7 @@ COMMON_OBJECTS= \
 	\
 	debug.o \
 	proc.o \
+	objcnt.o \
 
 ifdef CONFIG_IPV6	
 COMMON_OBJECTS += ipv6.o
