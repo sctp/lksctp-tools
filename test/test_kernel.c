@@ -3542,3 +3542,9 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 {
 	return;
 }
+
+void init_waitqueue_head(wait_queue_head_t *q)
+{
+        spin_lock_init(&q->lock);
+        INIT_LIST_HEAD(&q->task_list);
+}
