@@ -131,7 +131,13 @@ main(int argc, char *argv[])
 	ep2 = sctp_sk(sk2)->ep;
 	asoc2 = test_ep_first_asoc(ep2);
 	asoc2_t1 = asoc2->peer.primary_path;
-	asoc2_t2 = asoc2->peer.retran_path;
+
+	/* Make sure that heartbeats are sent and all the paths are 
+	 * confirmed.
+	 */ 
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
 
 	/*** Real test starts from here. ***/
 
@@ -151,6 +157,8 @@ main(int argc, char *argv[])
 	test_kill_next_packet(SCTP_CID_DATA);
 	if (0 != test_run_timeout()) { DUMP_CORE; }
 	if (test_run_network()) DUMP_CORE;
+
+	asoc2_t2 = asoc2->peer.retran_path;
 
 	/* The chunk should now have moved to the retransmit path transmitted
 	   list.

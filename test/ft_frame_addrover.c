@@ -197,6 +197,13 @@ int main(int argc, char *argv[])
         /* Get the first message which was sent.  */
         test_frame_get_message(svr_sk, message);
 
+	/* Make sure that heartbeats are sent and all the paths are
+	 * confirmed.
+	 */
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
 	/* We have two established associations.  Let's extract some
 	 * useful details.
 	 */

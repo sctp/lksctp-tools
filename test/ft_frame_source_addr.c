@@ -310,6 +310,13 @@ main(int argc, char *argv[])
 	/* Get the first message which was sent.  */
 	test_frame_get_message(sk1, message);
 
+	/* Make sure that heartbeats are sent and all the paths are
+	 * confirmed.
+	 */
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
         asoc1 = test_ep_first_asoc(sctp_sk(sk1)->ep);
 	asoc2 = test_ep_first_asoc(sctp_sk(sk2)->ep);
 
@@ -405,7 +412,6 @@ main(int argc, char *argv[])
 	addr3.v4.sin_addr.s_addr = SCTP_ADDR_LO;
 	addr3.v4.sin_port = htons(SCTP_TESTPORT_1);
 #endif /* TEST_V6 */
-
 	/* Create the two endpoints which will talk to each other.  */
 	sk1 = sctp_socket(pf_class, SOCK_SEQPACKET);
 	sk2 = sctp_socket(pf_class, SOCK_SEQPACKET);
@@ -441,6 +447,16 @@ main(int argc, char *argv[])
 
         asoc1 = test_ep_first_asoc(sctp_sk(sk1)->ep);
 	asoc2 = test_ep_first_asoc(sctp_sk(sk2)->ep);
+
+	list_for_each(pos, &asoc2->peer.transport_addr_list) {
+		transport = list_entry(pos, struct sctp_transport, transports);
+	}
+	/* Make sure that heartbeats are sent and all the paths are
+	 * confirmed.
+	 */
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
 
 	/* Send a message from sk2 to sk1 using all the available destination
 	 * addresses and verify the source address used.

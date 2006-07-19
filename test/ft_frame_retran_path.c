@@ -119,6 +119,13 @@ main(int argc, char *argv[])
         /* Get the first message which was sent. */
         test_frame_get_message(sk2, message);
 
+	/* Make sure that heartbeats are sent and all the paths are
+	 * confirmed.
+	 */
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
 	ep1 = sctp_sk(sk1)->ep;
 	asoc1 = test_ep_first_asoc(ep1);
 	ep2 = sctp_sk(sk2)->ep;

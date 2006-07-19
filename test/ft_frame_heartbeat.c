@@ -262,6 +262,33 @@ main(int argc, char *argv[])
 	if (error)
 		DUMP_CORE;
 
+	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_hbinterval = HB_INTERVAL_2;
+	params.spp_flags      = SPP_HB_ENABLE;
+
+	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+				(char *)&params, sizeof(struct sctp_paddrparams));
+	if (error)
+		DUMP_CORE;
+
+	/* Validate that the first transports are in ACTIVE state. */
+	if ((t1[0]->state != SCTP_ACTIVE) || (t2[0]->state != SCTP_ACTIVE))
+		DUMP_CORE;
+
+	/* Validate that the remaining transports are in UNCONFIRMED state. */ 
+	if ((t1[1]->state != SCTP_UNCONFIRMED) ||
+	    (t1[2]->state != SCTP_UNCONFIRMED) ||
+	    (t2[1]->state != SCTP_UNCONFIRMED) ||
+	    (t2[2]->state != SCTP_UNCONFIRMED))
+		DUMP_CORE;
+
+	/* Make sure that heartbeats are sent and all the paths are 
+	 * confirmed.
+	 */ 
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_MIN) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
 	/* Reset all the timers so all heartbeats occur at the same time. */
 	sctp_transport_reset_timers(t1[0]);
 	sctp_transport_reset_timers(t1[1]);
@@ -284,7 +311,7 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_HEARTBEAT, TEST_NETWORK_ETH2))
 		DUMP_CORE;
 
-	jiffies += SCTP_RTO_MIN + 2;
+	jiffies += 2 * SCTP_RTO_MIN + 2;
 	test_run_timeout();
 
 	/* We should have a HEARTBEAT sitting on the Internet. */
@@ -437,8 +464,6 @@ main(int argc, char *argv[])
 	if (0 == error) {
 		printk("\n\n%s passed\n\n\n", argv[0]);
 	}
-
-	printf("Sizeof struct sctp_paddrparams %d\n", sizeof(struct sctp_paddrparams));
 
 	/* Indicate successful completion.  */
 	exit(error);

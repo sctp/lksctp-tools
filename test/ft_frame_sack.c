@@ -244,7 +244,14 @@ main(int argc, char *argv[])
 
         /* Get the first message which we sent.  */
         test_frame_get_message(sk2, messages[0]);
-        
+       
+	/* Make sure that heartbeats are sent and all the paths are 
+	 * confirmed.
+	 */ 
+        jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
         /* Now the real testing begins... */
 
 	/* Send a single message.  */

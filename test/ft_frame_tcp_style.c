@@ -299,6 +299,13 @@ main(int argc, char *argv[])
 					msg_buf);
 	if (0 != test_run_network()) { DUMP_CORE; }
 
+	/* Make sure that heartbeats are sent and all the paths are
+	 * confirmed.
+	 */
+	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_INITIAL) + 1);
+	if (test_run_network())
+		DUMP_CORE;
+
 	accept2_sk = sctp_accept(listen_sk, 0, &error);
 	if (!accept2_sk)
 		DUMP_CORE;
