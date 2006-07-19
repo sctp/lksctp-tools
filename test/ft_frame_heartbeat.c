@@ -285,7 +285,7 @@ main(int argc, char *argv[])
 	/* Make sure that heartbeats are sent and all the paths are 
 	 * confirmed.
 	 */ 
-	jiffies += (1.5 * msecs_to_jiffies(SCTP_RTO_MIN) + 1);
+	jiffies += (1.5 * SCTP_RTO_MIN + 1);
 	if (test_run_network())
 		DUMP_CORE;
 
