@@ -3548,3 +3548,21 @@ void init_waitqueue_head(wait_queue_head_t *q)
         spin_lock_init(&q->lock);
         INIT_LIST_HEAD(&q->task_list);
 }
+
+#ifdef CONFIG_HIGHMEM
+void *kmap_atomic(struct page *page, enum km_type type)
+{
+}
+
+void kunmap_atomic(void *kvaddr, enum km_type type)
+{
+}
+
+void local_bh_enable(void)
+{
+}
+
+void local_bh_disable(void)
+{
+}
+#endif
