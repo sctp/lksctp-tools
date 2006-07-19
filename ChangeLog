@@ -3,6 +3,17 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA          ADDIP: Don't use an address as source until it is ASCONF-ACKed.
+K:NA          Set chunk->data_accepted only if we are going to accept it.
+K:NA          Verify all the paths to a peer via heartbeat before using them.
+K:NA          Unhash the endpoint in sctp_endpoint_free().
+K:NA          Check for NULL input to sctp_bucket_destroy().
+K:NA          Fix persistent slowdown in sctp when a gap ack consumes rx buffer.
+K:NA          Send only 1 window update SACK per message.
+K:NA          Don't do CRC32C checksum over loopback.
+K:NA          Reset rtt_in_progress for the chunk when processing its sack.
+K:NA          Reject sctp packets with broadcast addresses.
+K:NA          Limit association max_retrans setting in ASSOCINFO setsockopt.
 T:NA          updates to linux 2.6.17
 K:NA          Allow linger to abort 1-N style sockets.
 K:NA          Validate the parameter length in HB-ACK chunk.
