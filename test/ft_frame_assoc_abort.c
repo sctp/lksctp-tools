@@ -164,6 +164,8 @@ main(int argc, char *argv[])
         		DUMP_CORE;
 		}
 
+		outmsg1.msg_iov->iov_base = message;
+		outmsg1.msg_iov->iov_len = strlen(message) + 1;
 		/* Call sendmsg() to abort the association.  */
 		bytes_sent = sctp_sendmsg(NULL, svr_sk, &outmsg1,
 					  strlen(message)+1);
@@ -255,9 +257,11 @@ main(int argc, char *argv[])
         		DUMP_CORE;
 		}
 		
+		outmsg1.msg_iov->iov_base = message;
+		outmsg1.msg_iov->iov_len = strlen(message) + 1;
 		/* Call sendmsg() to abort the client's association */
 		bytes_sent = sctp_sendmsg(NULL, clt_sk[i], &outmsg1, 
-					  sizeof(outmsg1));
+					  strlen(message)+1);
 		if (bytes_sent != 0) {
 			printf("the result of client sctp_sendmsg() is %d\n",
 				bytes_sent);
@@ -281,9 +285,11 @@ main(int argc, char *argv[])
 		/* Set SCTP_ABORT flag in the sndrcvinfo.  */
 		sinfo1->sinfo_assoc_id = sctp_assoc2id(svr_asoc[i]);
 
+		outmsg1.msg_iov->iov_base = message;
+		outmsg1.msg_iov->iov_len = strlen(message) + 1;
 		/* Call sendmsg() to abort the server's association */
 		bytes_sent = sctp_sendmsg(NULL, svr_sk, &outmsg1, 
-					  sizeof(outmsg1));
+					  strlen(message)+1);
 		if (bytes_sent != 0) { DUMP_CORE; }
 
 	        /* Get the communication lost message on the server sockets. */
