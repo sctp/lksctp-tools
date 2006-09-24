@@ -3,7 +3,10 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
-K:NA          ADDIP: Don't use an address as source until it is ASCONF-ACKed.
+K:NA          Fix sctp_primitive_ABORT() call in sctp_close().
+K:NA          Fix sctp_make_abort_user() to avoid use of buggy 
+              get_user_iov_size().
+K:Bug 1502698 ADDIP: Don't use an address as source until it is ASCONF-ACKed.
 K:NA          Set chunk->data_accepted only if we are going to accept it.
 K:NA          Verify all the paths to a peer via heartbeat before using them.
 K:NA          Unhash the endpoint in sctp_endpoint_free().
@@ -19,7 +22,7 @@ K:NA          Allow linger to abort 1-N style sockets.
 K:NA          Validate the parameter length in HB-ACK chunk.
 K:NA          A better solution to fix the race between sctp_peeloff() and
               sctp_rcv().
-K:NA          Set sk_err so that poll wakes up after a non-blocking connect
+K:Bug 1439226 Set sk_err so that poll wakes up after a non-blocking connect
               failure.
 K:NA          Fix state table entries for chunks received in CLOSED state.
 K:NA          Fix panic's when receiving fragmented SCTP control chunks.
