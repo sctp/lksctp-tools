@@ -2733,6 +2733,7 @@ void preempt_schedule(void)
 
 } /* preempt_schedule() */
 
+unsigned int xfrm_policy_count[XFRM_POLICY_MAX*2];
 struct xfrm_policy *xfrm_policy_list[XFRM_POLICY_MAX*2];
 
 int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb, unsigned short family)
@@ -2741,13 +2742,14 @@ int __xfrm_policy_check(struct sock *sk, int dir, struct sk_buff *skb, unsigned 
 }
 
 #ifdef CONFIG_SMP
-void *__alloc_percpu(size_t size)
+void *__percpu_alloc_mask(size_t size, gfp_t gfp, cpumask_t *mask)
 {
-	        return(kmalloc(size, GFP_ATOMIC));
+	return kmalloc(size, gfp);
 }
-void free_percpu(const void *ptr)
+
+void percpu_free(void *__pdata)
 {
-	        kfree(ptr);
+	kfree(__pdata);
 }
 #endif
 
@@ -2848,6 +2850,12 @@ struct crypto_tfm *crypto_alloc_tfm(const char *alg_name, u32 tfm_flags)
 	/* A pure do-nothing hack. */
 	tfm = kmalloc(sizeof(struct crypto_tfm), GFP_ATOMIC);
 	return tfm;
+}
+
+struct crypto_tfm *crypto_alloc_base(const char *alg_name, u32 type, u32 mask)
+{
+
+	return crypto_alloc_tfm(alg_name, 0);
 }
 
 /* Free crypto transform. */
@@ -3557,6 +3565,7 @@ void *kmap_atomic(struct page *page, enum km_type type)
 void kunmap_atomic(void *kvaddr, enum km_type type)
 {
 }
+#endif
 
 void local_bh_enable(void)
 {
@@ -3565,4 +3574,3 @@ void local_bh_enable(void)
 void local_bh_disable(void)
 {
 }
-#endif
