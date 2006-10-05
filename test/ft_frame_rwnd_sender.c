@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 	 * given a chance to SACK. 
 	 */
 	printf("Testing that we updated our local view of peer's rwnd.\n");
-	if (rwnd - msglen  != asoc1->peer.rwnd) {
+	if (rwnd - (msglen + sizeof(struct sk_buff))  != asoc1->peer.rwnd) {
 		DUMP_CORE;
 	}
 
@@ -197,7 +197,7 @@ main(int argc, char *argv[])
 	/* We've submitted to the network but the peer has not 
 	 * been given a chance to SACK.
 	 */
-	if (rwnd - msglen != asoc1->peer.rwnd) {
+	if (rwnd - (msglen + sizeof(struct sk_buff)) != asoc1->peer.rwnd) {
 		DUMP_CORE;
 	}
 
@@ -356,7 +356,7 @@ main(int argc, char *argv[])
 	rwnd = asoc1->peer.rwnd;
 
         if (0 != inflight) { DUMP_CORE; }
-        if (rwnd >= msglen) { DUMP_CORE; }
+        if (rwnd >= (msglen + sizeof(struct sk_buff))) { DUMP_CORE; }
 
         /* Send another message.  We should be able to put a packet out on
 	 * the wire to probe for rwnd changes.  This is different than the

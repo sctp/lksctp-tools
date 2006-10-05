@@ -101,7 +101,7 @@ main(int argc, char *argv[])
         /* Create the two endpoints which will talk to each other.  */
         sk1 = sctp_socket(pf_class, SOCK_SEQPACKET);
         sk2 = sctp_socket(pf_class, SOCK_SEQPACKET);
-	sk2->sk_rcvbuf = 65536;
+	sk2->sk_rcvbuf = 70000;
 
 	/* Bind these sockets to the test ports.  */
 	error = test_bind(sk1, (struct sockaddr *)&loop1, sizeof(loop1));

@@ -2380,6 +2380,8 @@ sctp_socket(int class, int type)
 	if (SOCK_SEQPACKET == type)
 		test_frame_enable_data_assoc_events(retval);
 
+	sctp_sk(retval)->nodelay = 1;
+
         /* BUG:  we do not fill in any of those other juicy fields... */
         return(retval);
 
@@ -2898,10 +2900,9 @@ kmem_cache_t *kmem_cache_create(const char *name, size_t size,
 	cachep->objsize = size;
 	return cachep;
 }
-int kmem_cache_destroy(kmem_cache_t *cachep)
+void kmem_cache_destroy(struct kmem_cache *cachep)
 {
 	kfree(cachep);
-	return 0;
 }
 void *kmem_cache_alloc(kmem_cache_t *cachep, unsigned int flags)
 {
