@@ -3,6 +3,16 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA          Do not timestamp every SCTP packet.
+K:NA          Use correct mask when disabling PMTUD.
+K:NA          Include sk_buff overhead while updating the peer's receive window.
+K:NA          Enable Nagle algorithm by default.
+K:NA          Remove multiple levels of msecs to jiffies conversions.
+K:NA          Use the flags value that is passed as an arg to sctp_accept.
+K:NA          Fix IPv6 address flag setting when doing peel-off/accept.
+K:NA          Cleanup nomem handling in the state functions.
+K:NA          Extend /proc/net/sctp/snmp to provide more statistics.
+K:NA          Convert SCTP to use the new HMAC template and hash interface.
 K:NA          Fix sctp_primitive_ABORT() call in sctp_close().
 K:NA          Fix sctp_make_abort_user() to avoid use of buggy 
               get_user_iov_size().
