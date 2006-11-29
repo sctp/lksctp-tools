@@ -383,7 +383,7 @@ void kfree(const void *m)
 	free((void *)m);
 }
 
-void get_random_bytes(void *s, size_t count)
+void get_random_bytes(void *s, int count)
 {
 	int i;
 	uint8_t *t;
@@ -2140,8 +2140,6 @@ ipv6_getsockopt(struct sock *sk, int level,
 /* Hacked testframe version of ip6_route_output. It returns a dst entry for a
  * given ipv6 destination and source. If an entry is not present the the list,
  * a new entry is created and added to rt6_list.
- * The source address is not filled in the returned route entry to simulate
- * the behavior of kernel's version.
  */
 struct dst_entry *ip6_route_output(struct sock *sk, struct flowi *flp)
 {
@@ -2165,9 +2163,14 @@ struct dst_entry *ip6_route_output(struct sock *sk, struct flowi *flp)
 	rt6->u.dst.path = &rt6->u.dst;
 	rt6->u.dst.metrics[RTAX_MTU-1] = ip_mtu;
 	rt6->u.dst.obsolete = -1;
+	rt6->u.dst.error = 0;
 	atomic_set(&rt6->u.dst.__refcnt, 1);
 
 	ipv6_addr_copy(&rt6->rt6i_dst.addr,  &flp->fl6_dst);
+	if (ipv6_addr_any(&flp->fl6_src))
+		ipv6_addr_copy(&rt6->rt6i_src.addr,  &flp->fl6_dst);
+	else
+		ipv6_addr_copy(&rt6->rt6i_src.addr,  &flp->fl6_src);
 
 	if (!ipv6_addr_cmp(&flp->fl6_dst, &lo_inet6_ifa.addr)) {
 		rt6->u.dst.dev = &loopback_dev;
@@ -3574,4 +3577,13 @@ void local_bh_enable(void)
 
 void local_bh_disable(void)
 {
+}
+
+void *__kzalloc(size_t s, gfp_t flags)
+{
+	void *p;
+
+	p = malloc(s);
+	memset(p, 0, s);
+	return p;
 }

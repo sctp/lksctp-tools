@@ -36,7 +36,6 @@
  * be incorporated into the next SCTP release.
  */
 
-#include <linux/config.h>
 #include <linux/types.h>
 #include <net/sctp/sctp.h>
 #include <net/sctp/sm.h>

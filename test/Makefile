@@ -53,7 +53,6 @@ COMMON_OBJECTS= \
 	\
 	debug.o \
 	proc.o \
-	objcnt.o \
 
 ifdef CONFIG_IPV6	
 COMMON_OBJECTS += ipv6.o

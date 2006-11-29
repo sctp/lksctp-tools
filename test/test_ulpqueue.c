@@ -33,7 +33,6 @@
  * be incorporated into the next SCTP release.
  */
 
-#include <linux/config.h>
 #include <linux/types.h>
 #include <linux/skbuff.h>
 #include <net/sock.h>

@@ -39,7 +39,6 @@
  *   Karl Knutson          <karl@athena.chicago.il.us>
  *   La Monte H.P. Yarroll <piggy@acm.org>
  */
-#include <linux/config.h>
 #include <linux/types.h>
 #include <linux/list.h> /* For struct list_head */
 #include <linux/socket.h>
