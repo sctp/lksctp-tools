@@ -197,7 +197,7 @@ main(int argc, char *argv[])
  
 	daddr.v4.sin_family = AF_INET;
 	daddr.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-	daddr.v4.sin_port = SCTP_TESTPORT_2;
+	daddr.v4.sin_port = htons(SCTP_TESTPORT_2);
 
 	test_ep = sctp_lookup_endpoint(&daddr);
 
@@ -216,7 +216,7 @@ main(int argc, char *argv[])
 	test_listen(sk1, 1);
 	daddr.v4.sin_family = AF_INET;
 	daddr.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-	daddr.v4.sin_port = SCTP_TESTPORT_2;
+	daddr.v4.sin_port = htons(SCTP_TESTPORT_2);
 
 	test_ep = sctp_lookup_endpoint(&daddr);
 
@@ -354,6 +354,7 @@ test_INIT_addr_list(struct sctp_endpoint *ep, struct sock *sk,
 			       tmpaddr.v4.sin_addr.s_addr);
 			goto fail;
 		}
+		tmpaddr.v4.sin_port = htons(tmpaddr.v4.sin_port);
 		/* Is this address bound to the endpoint? */
 		tmp_ep = sctp_lookup_endpoint(&tmpaddr);
 		if (!tmp_ep || tmp_ep != ep) {

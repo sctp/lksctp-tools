@@ -194,11 +194,11 @@ main(int argc, char *argv[])
 #if TEST_V6
 	dest.v6.sin6_family = AF_INET6;	
 	dest.v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_GLOBAL_ETH0;
-	dest.v6.sin6_port = SCTP_TESTPORT_1;
+	dest.v6.sin6_port = htons(SCTP_TESTPORT_1);
 #else
 	dest.v4.sin_family = AF_INET;
         dest.v4.sin_addr.s_addr = SCTP_ADDR_ETH0;
-        dest.v4.sin_port = SCTP_TESTPORT_1;
+        dest.v4.sin_port = htons(SCTP_TESTPORT_1);
 #endif /* TEST_V6 */
 
 	tmp_ep = sctp_lookup_endpoint(&dest);
@@ -212,11 +212,11 @@ main(int argc, char *argv[])
 #if TEST_V6
 	dest.v6.sin6_family = AF_INET6;	
 	dest.v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_GLOBAL_ETH2;
-	dest.v6.sin6_port = SCTP_TESTPORT_1;
+	dest.v6.sin6_port = htons(SCTP_TESTPORT_1);
 #else
 	dest.v4.sin_family = AF_INET;
         dest.v4.sin_addr.s_addr = SCTP_ADDR_ETH2;
-        dest.v4.sin_port = SCTP_TESTPORT_1;
+        dest.v4.sin_port = htons(SCTP_TESTPORT_1);
 #endif /* TEST_V6 */
 
 	tmp_ep = sctp_lookup_endpoint(&dest);

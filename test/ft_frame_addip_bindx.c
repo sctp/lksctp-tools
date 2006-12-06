@@ -144,13 +144,11 @@ int main(int argc, char *argv[])
 	asoc2 = test_ep_first_asoc(ep2);
 	p = asoc2->peer.transport_addr_list.next;
 	tp = list_entry(p, struct sctp_transport, transports);
-	bindx_addr1.v4.sin_port = ntohs(bindx_addr1.v4.sin_port);
 	if (!(sctp_cmp_addr_exact(&tp->ipaddr, &bindx_addr1)))
 		DUMP_CORE;
 
 	p = p->next;
 	tp = list_entry(p, struct sctp_transport, transports);
-	addr1.v4.sin_port = ntohs(addr1.v4.sin_port);
 	if (!(sctp_cmp_addr_exact(&tp->ipaddr, &addr1)))
 		DUMP_CORE;
 
@@ -189,7 +187,6 @@ int main(int argc, char *argv[])
 	 * is created is also available.
 	 */
 	addr_found = 0;
-	bindx_addr2.v4.sin_port = ntohs(bindx_addr2.v4.sin_port);
 	list_for_each(p, &asoc2->peer.transport_addr_list) {
 		tp = list_entry(p, struct sctp_transport, transports);
 		if (sctp_cmp_addr_exact(&tp->ipaddr, &bindx_addr2)) {

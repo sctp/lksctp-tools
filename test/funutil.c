@@ -2168,7 +2168,7 @@ void test_assoc_peer_transports(struct sctp_association *asoc,
 		tp = list_entry(pos, struct sctp_transport, transports);
 		addr_found = 0;
 		for (i = 0; i < num_peers; i++) {
-			if (sctp_cmp_addr_exact(&tp->ipaddr, &tmppeers[i])) {
+			if (sctp_cmp_addr_exact(&tp->ipaddr, &peers[i])) {
 				addr_found = 1;
 				peer_found[i] = 1;
 				break;

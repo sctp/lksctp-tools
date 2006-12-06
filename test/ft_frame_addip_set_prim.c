@@ -224,7 +224,6 @@ int main(int argc, char *argv[])
 	asoc2 = test_ep_first_asoc(ep2);
 
 	/* Verify that the peer primary address	is updated. */
-	bindx_addr.v4.sin_port = ntohs(bindx_addr.v4.sin_port);
 	if (!(sctp_cmp_addr_exact(&asoc2->peer.primary_addr, &bindx_addr)))
 		DUMP_CORE;
 

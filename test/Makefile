@@ -195,7 +195,8 @@ PASSING_V6_FRAME_TESTS = \
 	ft_frame_addip_set_prim_v6 \
 	ft_frame_addip_bindx_v6 \
 	ft_frame_delip_bindx_v6 \
-	ft_frame_t4_timer_v6
+	ft_frame_t4_timer_v6 \
+	ft_frame_addrover_v6
 
 FAILING_TESTS = \
 	ft_frame_init_bomb \

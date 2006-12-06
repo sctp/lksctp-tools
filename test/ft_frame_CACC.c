@@ -96,7 +96,7 @@ main(int argc, char *argv[])
         asoc1_t = asoc1->peer.primary_path;
         if (asoc1_t->ipaddr.v4.sin_family != AF_INET ||
             asoc1_t->ipaddr.v4.sin_addr.s_addr != SCTP_IP_LOOPBACK ||
-            asoc1_t->ipaddr.v4.sin_port != SCTP_TESTPORT_2)
+            asoc1_t->ipaddr.v4.sin_port != htons(SCTP_TESTPORT_2))
                 DUMP_CORE;
 
 	ep2 = sctp_sk(sk2)->ep;

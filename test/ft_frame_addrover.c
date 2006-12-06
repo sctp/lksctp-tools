@@ -32,8 +32,6 @@ int main(int argc, char *argv[])
 	struct sctp_endpoint *svr_ep, *clt_ep;
         struct sctp_association *svr_asoc, *clt_asoc;
         union sctp_addr svr_loop, clt_loop, svr_eth0, svr_eth1, svr_any;
-        union sctp_addr svr_loop_h, clt_loop_h, svr_eth0_h;
-       	union sctp_addr svr_eth1_h, svr_any_h;
         int error, bytes_sent;
         struct iovec out_iov;
 	char buf[CMSG_SPACE_SNDRCV] = {0};
@@ -58,83 +56,49 @@ int main(int argc, char *argv[])
         sctp_init();
 
 	/* Set some basic values which depend on the address family. */
-	/* svr_loop_h, clt_loop_h and svr_eth0_h are addresses with port in host
-	 * byte order and are used for comparisions with the transport's
-	 * ip address.
-	 */ 
 #if TEST_V6
 	pf_class = PF_INET6;
         svr_loop.v6.sin6_family = AF_INET6;
         svr_loop.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_LOOPBACK_INIT;
         svr_loop.v6.sin6_port = htons(SCTP_TESTPORT_1);
-        svr_loop_h.v6.sin6_family = AF_INET6;
-        svr_loop_h.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_LOOPBACK_INIT;
-        svr_loop_h.v6.sin6_port = SCTP_TESTPORT_1;
 
         clt_loop.v6.sin6_family = AF_INET6;
         clt_loop.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_LOOPBACK_INIT;
         clt_loop.v6.sin6_port = htons(SCTP_TESTPORT_2);
-        clt_loop_h.v6.sin6_family = AF_INET6;
-        clt_loop_h.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_LOOPBACK_INIT;
-        clt_loop_h.v6.sin6_port = SCTP_TESTPORT_2;
 
         svr_eth0.v6.sin6_family = AF_INET6;
         svr_eth0.v6.sin6_addr = (struct in6_addr)SCTP_ADDR6_GLOBAL_ETH0;
         svr_eth0.v6.sin6_port = htons(SCTP_TESTPORT_1);
-        svr_eth0_h.v6.sin6_family = AF_INET6;
-        svr_eth0_h.v6.sin6_addr = (struct in6_addr)SCTP_ADDR6_GLOBAL_ETH0;
-        svr_eth0_h.v6.sin6_port = SCTP_TESTPORT_1;
 
         svr_eth1.v6.sin6_family = AF_INET6;
         svr_eth1.v6.sin6_addr = (struct in6_addr)SCTP_ADDR6_GLOBAL_ETH1;
         svr_eth1.v6.sin6_port = htons(SCTP_TESTPORT_1);
-        svr_eth1_h.v6.sin6_family = AF_INET6;
-        svr_eth1_h.v6.sin6_addr = (struct in6_addr)SCTP_ADDR6_GLOBAL_ETH1;
-        svr_eth1_h.v6.sin6_port = SCTP_TESTPORT_1;
 
         svr_any.v6.sin6_family = AF_INET6;
         svr_any.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_ANY_INIT;
         svr_any.v6.sin6_port = htons(SCTP_TESTPORT_1);
-        svr_any_h.v6.sin6_family = AF_INET6;
-        svr_any_h.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_ANY_INIT;
-        svr_any_h.v6.sin6_port = SCTP_TESTPORT_1;
 	addr_len = sizeof(struct sockaddr_in6);
 #else
 	pf_class = PF_INET;
         svr_loop.v4.sin_family = AF_INET;
         svr_loop.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
         svr_loop.v4.sin_port = htons(SCTP_TESTPORT_1);
-        svr_loop_h.v4.sin_family = AF_INET;
-        svr_loop_h.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-        svr_loop_h.v4.sin_port = SCTP_TESTPORT_1;
 
 	clt_loop.v4.sin_family = AF_INET;
         clt_loop.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
         clt_loop.v4.sin_port = htons(SCTP_TESTPORT_2);
-	clt_loop_h.v4.sin_family = AF_INET;
-        clt_loop_h.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
-        clt_loop_h.v4.sin_port = SCTP_TESTPORT_2;
 
         svr_eth0.v4.sin_family = AF_INET;
         svr_eth0.v4.sin_addr.s_addr = SCTP_ADDR_ETH0;
         svr_eth0.v4.sin_port = htons(SCTP_TESTPORT_1);
-        svr_eth0_h.v4.sin_family = AF_INET;
-        svr_eth0_h.v4.sin_addr.s_addr = SCTP_ADDR_ETH0;
-        svr_eth0_h.v4.sin_port = SCTP_TESTPORT_1;
 
         svr_eth1.v4.sin_family = AF_INET;
         svr_eth1.v4.sin_addr.s_addr = SCTP_ADDR_ETH1;
         svr_eth1.v4.sin_port = htons(SCTP_TESTPORT_1);
-        svr_eth1_h.v4.sin_family = AF_INET;
-        svr_eth1_h.v4.sin_addr.s_addr = SCTP_ADDR_ETH1;
-        svr_eth1_h.v4.sin_port = SCTP_TESTPORT_1;
 
         svr_any.v4.sin_family = AF_INET;
         svr_any.v4.sin_addr.s_addr = INADDR_ANY;
         svr_any.v4.sin_port = SCTP_TESTPORT_1;
-        svr_any_h.v4.sin_family = AF_INET;
-        svr_any_h.v4.sin_addr.s_addr = INADDR_ANY;
-        svr_any_h.v4.sin_port = SCTP_TESTPORT_1;
 	addr_len = sizeof(struct sockaddr_in);
 #endif /* TEST_V6 */
 
@@ -215,7 +179,7 @@ int main(int argc, char *argv[])
 
 	/* Verify that the peer primary addr is set correctly. */
 	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr,
-			       		&svr_loop_h))
+			       		&svr_loop))
 		DUMP_CORE;
 
         error = test_run_network();
@@ -261,7 +225,7 @@ int main(int argc, char *argv[])
 
 	/* Verify that the peer primary address is still the same. */
 	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr,
-			       		&svr_loop_h))
+			       		&svr_loop))
 		DUMP_CORE;
 
         if (!sctp_outq_is_empty(&svr_asoc->outqueue)) {
@@ -298,7 +262,7 @@ int main(int argc, char *argv[])
 		DUMP_CORE;
 
 	/* Verify that the peer primary address hasn't changed. */
-	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr, &svr_loop_h))
+	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr, &svr_loop))
 		DUMP_CORE;
 
 	/* Now try a valid address and a valid associd. */
@@ -312,7 +276,7 @@ int main(int argc, char *argv[])
 
 	/* Make sure that the primary address is changed to svr_eth0. */
 	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr,
-			       		&svr_eth0_h))
+			       		&svr_eth0))
 		DUMP_CORE;
 
 	/* Now try a valid address and a zero associd. */
@@ -326,7 +290,7 @@ int main(int argc, char *argv[])
 
 	/* Make sure that the primary address is changed back to clt_loop. */
 	if (!sctp_cmp_addr_exact(&clt_asoc->peer.primary_path->ipaddr,
-			       		&svr_loop_h))
+			       		&svr_loop))
 		DUMP_CORE;
 
         /* Shut down the link.  */

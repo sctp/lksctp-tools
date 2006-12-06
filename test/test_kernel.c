@@ -592,8 +592,8 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	atomic_set(&new->users, 1);
 	new->pkt_type=old->pkt_type;
 	new->destructor = NULL;
+	new->mark=old->mark;
 #ifdef CONFIG_NETFILTER
-	new->nfmark=old->nfmark;
 	new->nfct=old->nfct;
 	nf_conntrack_get(new->nfct);
 #ifdef CONFIG_NETFILTER_DEBUG
@@ -973,12 +973,12 @@ int test_get_network_sctp_addr(union sctp_addr *addr)
 
 /* Put a packet "on the wire".  */
 int
-ip_queue_xmit(struct sk_buff *skb, int ipfragok)
+ip_queue_xmit(struct sk_buff *skb, struct sock *sk, int ipfragok)
 {
         struct iphdr *ih;
         int error = 0;
         static struct sk_buff_head *network;
-	struct inet_sock *inet = inet_sk(skb->sk);
+	struct inet_sock *inet = inet_sk(sk);
 
         /* If it is the beginning of time, initialize the Internet.  */
         if (!epoch_started) {
@@ -2267,7 +2267,7 @@ sctp_lookup_endpoint(const union sctp_addr *laddr)
 	struct sctp_ep_common *ep;
 	int hash;
 
-	hash = sctp_ep_hashfn(laddr->v4.sin_port);
+	hash = sctp_ep_hashfn(ntohs(laddr->v4.sin_port));
 	head = &sctp_ep_hashtable[hash];
 	read_lock(&head->lock);
 	for (ep= head->chain; ep; ep = ep->next) {
@@ -2281,16 +2281,6 @@ hit:
 	return sctp_ep(ep);
 
 } /* sctp_lookup_endpoint() */
-
-
-struct sctp_endpoint *
-sctp_lookup_endpoint_ntohs(const union sctp_addr *laddr)
-{
-	union sctp_addr tmpaddr;
-	memcpy(&tmpaddr, laddr, sizeof(tmpaddr));
-	tmpaddr.v4.sin_port = ntohs(laddr->v4.sin_port);
-	return sctp_lookup_endpoint(&tmpaddr);
-}
 
 
 /* API 3.1.1 socket() - UDP Style Syntax
@@ -3417,16 +3407,11 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
-			u8 *vaddr;
-
 			if (copy > len)
 				copy = len;
 
-			vaddr = kmap_skb_frag(&skb_shinfo(skb)->frags[i]);
-			memcpy(to,
-			       vaddr + skb_shinfo(skb)->frags[i].page_offset+
+			memcpy(to, skb_shinfo(skb)->frags[i].page_offset +
 			       offset - start, copy);
-			kunmap_skb_frag(vaddr);
 
 			if ((len -= copy) == 0)
 				return 0;
@@ -3585,5 +3570,15 @@ void *__kzalloc(size_t s, gfp_t flags)
 
 	p = malloc(s);
 	memset(p, 0, s);
+	return p;
+}
+
+void *kmemdup(const void *src, size_t len, gfp_t gfp)
+{
+	void *p;
+
+	p = kmalloc(len, gfp);
+	if (p)
+		memcpy(p, src, len);
 	return p;
 }
