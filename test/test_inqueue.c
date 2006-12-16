@@ -150,7 +150,7 @@ main(void)
         
         /* Create an sctp_inq.  */
         sctp_inq_init(&q);
-        sctp_inq_set_th_handler(&q, th_callback, NULL); 
+        sctp_inq_set_th_handler(&q, th_callback); 
         /* Cause a SEGV if we have a bogus address.  */
         foo = *((char *)&q) ;
 

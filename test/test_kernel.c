@@ -405,7 +405,8 @@ void do_gettimeofday(struct timeval *retval)
 } /* void get_time(struct timeval *retval) */
 
 /* Create an new skb.  */
-struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask, int fclone)
+struct sk_buff *__alloc_skb(unsigned int size, gfp_t gfp_mask, int fclone,
+				int node)
 {
 	struct sk_buff *skb;
 	int sctp_ip_overhead;
@@ -2780,7 +2781,7 @@ int seq_printf(struct seq_file *file, const char *buf, ...)
 	return 0;
 }
 
-int seq_open(struct file *file, struct seq_operations *op)
+int seq_open(struct file *file, const struct seq_operations *op)
 {
 	return 0;
 }

@@ -244,7 +244,7 @@ main(int argc, char *argv[])
 	}
 
 	printk("\n\n%s case 7 passed. \n\n\n", argv[0]);
-
+#if 0
         /* Case 8
          * Remove a device and verify that we get the correct INIT packet.
          */
@@ -261,6 +261,7 @@ main(int argc, char *argv[])
 		printk("\n\n%s case 8 failed.\n\n\n", argv[0]);
 		DUMP_CORE; 
 	}
+#endif
 
         sctp_close(sk1, /* timeout */ 0);
 
