@@ -3,6 +3,16 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA          Add support for SCTP_CONTEXT socket option.
+K:NA          Enable auto loading of SCTP when creating an ipv6 SCTP socket.
+K:NA          Handle address add/delete events in a more efficient way.
+K:NA          SCTP endianness annotations.
+K:NA          Cleanup of the sctp state table code.
+K:NA          Remove temporary associations from backlog and hash.
+K:NA          Correctly set IP id for SCTP traffic.
+K:NA          Always linearize packet on input.
+K:NA          Fix the RX queue size shown in /proc/net/sctp/assocs output.
+K:NA          Fix receive buffer accounting.
 K:NA          Do not timestamp every SCTP packet.
 K:NA          Use correct mask when disabling PMTUD.
 K:NA          Include sk_buff overhead while updating the peer's receive window.
