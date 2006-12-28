@@ -352,12 +352,12 @@ my_handle_notification(int fd,char *notify_buf) {
 		printf("SCTP_SEND_FAILED: assoc=%xh\n",
 		       (uint32_t)ssf->ssf_assoc_id);
 		break;
-	case SCTP_ADAPTION_INDICATION:
+	case SCTP_ADAPTATION_INDICATION:
 	  {
-	    struct sctp_adaption_event *ae;
-	    ae = &snp->sn_adaption_event;
-	    printf("\nSCTP_adaption_indication bits:0x%x\n",
-		   (u_int)ae->sai_adaption_ind);
+	    struct sctp_adaptation_event *ae;
+	    ae = &snp->sn_adaptation_event;
+	    printf("\nSCTP_adaptation_indication bits:0x%x\n",
+		   (u_int)ae->sai_adaptation_ind);
 	  }
 	  break;
 	case SCTP_PARTIAL_DELIVERY_EVENT:
@@ -612,7 +612,7 @@ main(int argc, char **argv)
 	event.sctp_peer_error_event = 1;
 	event.sctp_shutdown_event = 1;
 	event.sctp_partial_delivery_event = 1;
-	event.sctp_adaption_layer_event = 1;
+	event.sctp_adaptation_layer_event = 1;
 	if (setsockopt(fd, IPPROTO_SCTP, 
 		       SCTP_EVENTS, &event, 
 		       sizeof(event)) != 0) {

@@ -456,7 +456,7 @@ test_getsockopt(int sk, sctp_assoc_t assoc_id, int optname)
 		if (subscribe.sctp_partial_delivery_event) {
 			printf("\tPartial delivery events\n");
 		}
-		if (subscribe.sctp_adaption_layer_event) {
+		if (subscribe.sctp_adaptation_layer_event) {
 			printf("\tAdaptation layer events\n");
 		}
 		break;
@@ -1605,7 +1605,7 @@ test_frame_getsockopt(struct sock *sk, sctp_assoc_t assoc_id, int optname)
 		if (subscribe.sctp_partial_delivery_event) {
 			printf("\tPartial delivery events\n");
 		}
-		if (subscribe.sctp_adaption_layer_event) {
+		if (subscribe.sctp_adaptation_layer_event) {
 			printf("\tAdaptation layer events\n");
 		}
 		break;
