@@ -19,6 +19,7 @@
  * Written or modified by:
  *  Ardelle Fan     <ardelle.fan@intel.com>
  *  Sridhar Samudrala <sri@us.ibm.com>
+ *  Ivan Skytte Jørgensen <isj-sctp@i1.dk>
  */
 
 #include <malloc.h>
@@ -182,3 +183,26 @@ sctp_freeladdrs(struct sockaddr *addrs)
 	return 0;
 
 } /* sctp_freeladdrs() */
+
+int
+sctp_getaddrlen(sa_family_t family)
+{
+	/* We could call into the kernel to see what it thinks the size should
+	 * be, but hardcoding the address families here is: (a) faster,
+	 * (b) easier, and (c) probably good enough for forseeable future.
+	 */
+	switch(family) {
+	case AF_INET:
+		return sizeof(struct sockaddr_in);
+	case AF_INET6:
+		return sizeof(struct sockaddr_in6);
+	default:
+		/* Currently there is no defined error handling in
+		 * draft-ietf-tsvwg-sctpsocket-13.txt.
+		 * -1 might cause the application to overwrite buffer
+		 * or misinterpret data. 0 is more likely to cause
+		 * an endless loop.
+		 */
+		return 0;
+	}
+}

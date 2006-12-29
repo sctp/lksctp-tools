@@ -698,6 +698,9 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 		 socklen_t *fromlen, struct sctp_sndrcvinfo *sinfo,
 		 int *msg_flags);
 
+/* Return the address length for an address family. */
+int sctp_getaddrlen(sa_family_t family);
+
 __END_DECLS
 
 #endif /* __linux_sctp_h__ */
