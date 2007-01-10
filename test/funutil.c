@@ -1354,7 +1354,7 @@ void *test_frame_get_cmsg_data(struct msghdr *msgh, int level, int type)
  * good for testing MSG_EOR and for partial data delivery.
  * Die horribly if something unexpected happens.
  */
-#define NOT_SO_BIG 100
+#define NOT_SO_BIG 1000
 void test_frame_get_message_pd(struct sock *sk, uint8_t *buff, int aborted)
 {
 	uint8_t big_buffer[NOT_SO_BIG];
@@ -1449,6 +1449,142 @@ void test_frame_get_message_all(struct sock *sk, uint8_t *buff)
 {
 	return test_frame_get_message_pd(sk, buff, 0);
 }
+
+int test_frame_get_message_interleave(struct sock *sk, uint8_t *buff1,
+				       uint8_t *buff2)
+{
+	uint8_t big_buffer[NOT_SO_BIG];
+	struct sctp_association *asoc1;
+	struct sctp_association *asoc2;
+	struct sctp_association *last;
+        struct msghdr msg;
+        struct iovec iov;
+        size_t len1 = (NULL == buff1)?0:strlen(buff1) + 1;
+        size_t len2 = (NULL == buff2)?0:strlen(buff2) + 1;
+        int cmsghdr[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
+	struct sctp_sndrcvinfo *sinfo;
+        int addr_len;
+        int error, rtx = 0;
+	int offset1 = 0, offset2 = 0;
+	int interleave = 0;
+
+	/* there better be 2 assocaionts on this endpoing */
+	asoc1 = test_ep_first_asoc(sctp_sk(sk)->ep);
+	asoc2 = test_ep_last_asoc(sctp_sk(sk)->ep);
+	if (asoc1 && asoc2 && asoc1 == asoc2)
+		DUMP_CORE;
+
+	while (len1 || len2) {
+
+		memset(&msg, 0, sizeof(struct msghdr));
+		iov.iov_base = big_buffer;
+		iov.iov_len = NOT_SO_BIG;
+		msg.msg_iov = &iov;
+		msg.msg_iovlen = 1;
+		msg.msg_control = cmsghdr;
+		msg.msg_controllen = sizeof(cmsghdr);
+		error = sctp_recvmsg(NULL, sk, &msg, NOT_SO_BIG,
+				     /* noblock */ 1, /* flags */ 0,
+				     &addr_len);
+
+		if ((-EAGAIN == error) && (!rtx)) {
+			/* force a retransmit */
+			jiffies += asoc1->peer.primary_path->rto + 1;
+			test_run_timeout();
+			test_run_network();
+			rtx = 1;
+			printf("\n RETRANSMIT FORCED \n\n");
+			continue;
+		} else if (error > 0) {
+			rtx = 0;
+		}
+
+		if (error < 0) {
+			printf("error code %d\n", error);
+			DUMP_CORE;
+		}
+
+		if (msg.msg_flags & MSG_NOTIFICATION)
+			continue;  /* not interested */
+			
+		/* Fixup to account for testframe not having sock glue. */
+		test_frame_fixup_msg_control(&msg, sizeof(cmsghdr));
+		msg.msg_iov[0].iov_len  = NOT_SO_BIG - msg.msg_iov[0].iov_len;
+
+		sinfo = (struct sctp_sndrcvinfo *)
+			 test_frame_get_cmsg_data(&msg, SOL_SCTP, SCTP_SNDRCV);
+
+		if (sinfo->sinfo_assoc_id == asoc1->assoc_id) {
+			if (memcmp(big_buffer, buff1+offset1, error)) {
+				printk("Didn't get a match on partial\n");
+				DUMP_CORE;
+			}
+
+			offset1 += error;
+			/* we better still have data to read */
+			if (len1)
+				len1 -= error;
+			else
+				DUMP_CORE;
+
+
+			/* Verify the value of the MSG_EOR flag.  MSG_EOR
+			 * should only be set if this is the last part of
+			 * the message.
+			 */
+
+			/* Verify the partial delivery. */
+			if (len1) {
+				if (msg.msg_flags & MSG_EOR)
+					 DUMP_CORE;
+			} else {
+				if (!(msg.msg_flags & MSG_EOR))
+					DUMP_CORE;
+			}
+			/* count interleave */
+			if (last != asoc1) {
+				last = asoc1;
+				interleave++;
+			}
+		} else {
+			if (memcmp(big_buffer, buff2+offset2, error)) {
+				printk("Didn't get a match on partial\n");
+				DUMP_CORE;
+			}
+
+			offset2 += error;
+			/* we better still have data to read */
+			if (len2)
+				len2 -= error;
+			else
+				DUMP_CORE;
+
+
+			/* Verify the value of the MSG_EOR flag.  MSG_EOR
+			 * should only be set if this is the last part of
+			 * the message.
+			 */
+
+			/* Verify the partial delivery. */
+			if (len2) {
+				if (msg.msg_flags & MSG_EOR)
+					 DUMP_CORE;
+			} else {
+				if (!(msg.msg_flags & MSG_EOR))
+					DUMP_CORE;
+			}
+			/* count interleave */
+			if (last != asoc2) {
+				last = asoc2;
+				interleave++;
+			}
+		}
+
+		test_run_network();
+	}
+	return interleave;
+
+} /* test_frame_get_message_all() */
 
 /* Receive a notification from a socket.  It should match the notification
  * type and (if appropriate) the event type corresponding to the notification.

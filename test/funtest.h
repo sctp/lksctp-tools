@@ -280,6 +280,8 @@ void test_frame_send_message2(struct sock *sk, struct sockaddr *addr,
 void test_frame_get_message(struct sock *sk, uint8_t *buff);
 void test_frame_get_message_all(struct sock *sk, uint8_t *buff);
 void test_frame_get_message_pd(struct sock *, uint8_t *buff, int aborted);
+int test_frame_get_message_interleave(struct sock *, uint8_t *buff1,
+				       uint8_t *buff2);
 void test_frame_get_message2(struct sock *sk, uint8_t *buff, int len, uint32_t in_flags, uint32_t out_flags);
 void test_frame_get_event(struct sock *sk, uint16_t ntype, uint16_t etype);
 void test_frame_get_event_error(struct sock *sk, uint16_t ntype, 
