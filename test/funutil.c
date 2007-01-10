@@ -1811,6 +1811,20 @@ struct sctp_association *test_ep_first_asoc(struct sctp_endpoint *ep)
 } /* test_ep_first_asoc(ep) */
 
 
+/* Test frame helper to return the last association. */
+struct sctp_association *test_ep_last_asoc(struct sctp_endpoint *ep)
+{
+	struct sctp_association *asoc = NULL;
+
+	if (!list_empty(&ep->asocs)) {
+		asoc = list_entry(ep->asocs.prev, struct sctp_association, asocs);
+	}
+
+	return asoc;
+
+} /* test_ep_last_asoc(ep) */
+
+
 /* Get to the first outstanding packet on the specified network.  */
 struct sk_buff *
 test_peek_packet(int net)

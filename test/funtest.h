@@ -349,6 +349,7 @@ int memcpy_toiovec(struct iovec *iov, unsigned char *kdata, int len);
 
 struct sock * sctp_socket(int class, int type);
 struct sctp_association *test_ep_first_asoc(struct sctp_endpoint *ep);
+struct sctp_association *test_ep_last_asoc(struct sctp_endpoint *ep);
 struct sctp_endpoint *sctp_lookup_endpoint(const union sctp_addr *);
 struct sctp_endpoint *sctp_lookup_endpoint_ntohs(const union sctp_addr *);
 int sctp_msghdr_parse(const struct msghdr *, sctp_cmsgs_t *);

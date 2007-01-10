@@ -1,5 +1,6 @@
 /* SCTP kernel reference Implementation
  * (C) Copyright IBM Corp. 2001, 2003
+ * (C) Copyright 2006 Hewlett-Packard Development Company, L.P.
  *
  * This file is part of the SCTP kernel reference Implementation
  *
@@ -29,15 +30,16 @@
  *
  * Written or modified by:
  *    Jon Grimm   <jgrimm@us.ibm.com>
+ *    Vlad Yasevich <vladislav.yasevich@hp.com>
  *
  * Any bugs reported given to us we will try to fix... any fixes shared will
  * be incorporated into the next SCTP release.
  */
 
 /*
- * Test to verify send and receive of a data message larger than can 
- * fit inside a single chunk and that partial delivery can really 
- * delivery it.  
+ * Test to verify send and receive of a data message larger than can
+ * fit inside a single chunk and that partial delivery can really
+ * delivery it. 
  *
  * Advanced tests:
  *   * Test multiple association and that partial delivery is both honored and
@@ -47,6 +49,9 @@
  *   * Test peeloff & partial delivery
  *      a) peeloff partial delivery association
  *      b) peeloff non-partial delivery association
+ *   * Test partial delivery point
+ *      a) set partial delivery point and receive data immidiately
+ *      b) clear partial delivery point and recieve rest of data.
  */
 
 #include <net/ip.h>
@@ -64,10 +69,12 @@ int main(int argc, char *argv[])
 	char infobuf1[CMSG_SPACE_SNDRCV] = {0};
 	struct sctp_sndrcvinfo *sinfo1;
 	struct sockaddr_in loop1, loop2;
-	void *msg_buf, *msg_buf2, *msg_buf3;
+	void *msg_buf, *msg_buf2, *msg_buf3, *msgp;
 	struct sctp_event_subscribe subscribe;
 	int bytes_sent;
 	int error;
+	int pd_point = 1000;
+	int i;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
 	sctp_init();
@@ -82,11 +89,11 @@ int main(int argc, char *argv[])
 
 	sk3 = sctp_socket(PF_INET, SOCK_SEQPACKET);
 
-	/* Test without patial data delivery by upping the send 
+	/* Test without patial data delivery by upping the send
 	 * and receive buffers.
 	 */
-	sk1->sk_sndbuf = (1<<18);	
-	sk3->sk_sndbuf = (1<<18);	
+	sk1->sk_sndbuf = (1<<18);
+	sk3->sk_sndbuf = (1<<18);
 
 	/* Bind this sockets to the test ports.  */
 	loop1.sin_family = AF_INET;
@@ -110,7 +117,7 @@ int main(int argc, char *argv[])
 	subscribe.sctp_data_io_event = 1;
 	subscribe.sctp_association_event = 1;
 	subscribe.sctp_partial_delivery_event = 1;
-	if (0 !=  sctp_setsockopt(sk2, SOL_SCTP, SCTP_EVENTS, 
+	if (0 !=  sctp_setsockopt(sk2, SOL_SCTP, SCTP_EVENTS,
 				  (char *)&subscribe,
 				  sizeof(struct sctp_event_subscribe))) {
 		DUMP_CORE;
@@ -187,7 +194,7 @@ int main(int argc, char *argv[])
 	 * frame into a similar state.   The SACK rules have one
 	 * SACKing every other packet, so we do a SACK timeout to get
 	 * the sender into a known state regardless of the even/odd
-	 * number of packets sent.  
+	 * number of packets sent.
 	 */
 	jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK]+1;
 	test_run_timeout();
@@ -209,7 +216,7 @@ int main(int argc, char *argv[])
 	if (0 != test_run_network()) { DUMP_CORE; }
 	test_frame_get_message_all(sk2, msg_buf2);
 	if (0 != test_run_network()) { DUMP_CORE; }
-	
+
 	jiffies += asoc3->peer.primary_path->rto +1;
 	test_run_timeout();
 	if (0 != test_run_network()) { DUMP_CORE; }
@@ -229,8 +236,8 @@ int main(int argc, char *argv[])
 	if (0 != test_run_network()) { DUMP_CORE; }
 
 	/* OK.  We should have a partial delivery sitting in the
-	 * receive queue for sk1 and sk3 must wait. 
-	 * Now ABORT sk1.  
+	 * receive queue for sk1 and sk3 must wait.
+	 * Now ABORT sk1. 
 	 */
 	/* Build up a msghdr structure we can use for all sending.  */
 	outmsg1.msg_name = &loop2;
@@ -288,8 +295,8 @@ int main(int argc, char *argv[])
 	test_frame_get_message_all(sk2, msg_buf2);
 	if (0 != test_run_network()) { DUMP_CORE; }
 
-	/* OK. There are three associations up. */  
-       
+	/* OK. There are three associations up. */ 
+      
 	/* Send a small message that can move up to the receive queue. */
 	msg_buf3 = test_build_msg(100);
 	test_frame_send_message(sk3, (struct sockaddr *)&loop2, msg_buf3);
@@ -325,9 +332,9 @@ int main(int argc, char *argv[])
 
 	/* Now for the fun.  Each of the three associations are
 	 * on different sockets.  The partial delivery socket
-	 * is on peeloff2 now.  
+	 * is on peeloff2 now. 
 	 */
-	
+
 	/* This message wasn't blocked, so this is really just testing
 	 * that I haven't broken normal peeloff.
 	 */
@@ -335,29 +342,214 @@ int main(int argc, char *argv[])
 
 	/* The next message is for the association that is left on the
 	 * original socket.  It is no longer blocked by the partial
-	 * delivery socket.  
+	 * delivery socket. 
 	 */
 	test_frame_get_message_all(sk2, msg_buf2);
 
 	/* This message was also blocked by the partial delivery association,
-	 * but no longer as it has been peeled off.  
+	 * but no longer as it has been peeled off. 
 	 */
 	test_frame_get_message_all(peeloff1->sk, msg_buf2);
 
 	/* Test the message that had to be partially delivered. */
 	test_frame_get_message_all(peeloff2->sk, msg_buf);
 
-	/* Finally, did we get the message that was sent after 
+	/* Finally, did we get the message that was sent after
 	 * first peeloff (to make sure the partial delivery condition
 	 * did not get bypassed.
 	 */
 	test_frame_get_message_all(peeloff2->sk, msg_buf2);
 
+	/* Clean everything up to set up for the next test */
+	jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK]+1;
+	test_run_timeout();
+
 	sctp_close(sk1, 0);
-	sctp_close(sk3, 0);
 	sctp_close(sk2, 0);
-	sctp_close(peeloff2->sk, 0);
+	sctp_close(sk3, 0);
 	sctp_close(peeloff1->sk, 0);
+	sctp_close(peeloff2->sk, 0);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Test partial delivery ACK point.
+	 * We just establish 1 association, force it into partial delivery
+	 * and make sure that we start getting partial data once we've
+	 * received PARTIAL_DELIVERY_POINT worth of data.
+	 */
+
+	sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	sk1->sk_sndbuf = (1<<18);
+	/* Bind this sockets to the test ports.  */
+	loop1.sin_family = AF_INET;
+	loop1.sin_addr.s_addr = SCTP_IP_LOOPBACK;
+	loop1.sin_port = 0;
+
+	error = test_bind(sk1, (struct sockaddr *)&loop1, sizeof(loop1));
+	if (error != 0) { DUMP_CORE; }
+
+	sk2 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	sk2->sk_rcvbuf = (1<<18);
+	/* Bind this socket to the server test port */
+	loop2.sin_family = AF_INET;
+	loop2.sin_addr.s_addr = SCTP_IP_LOOPBACK;
+	loop2.sin_port = htons(SCTP_TESTPORT_2);
+
+	error = test_bind(sk2, (struct sockaddr *)&loop2, sizeof(loop2));
+	if (error != 0) { DUMP_CORE; }
+
+	/* enable events */
+	memset(&subscribe, 0, sizeof(struct sctp_event_subscribe));
+	subscribe.sctp_data_io_event = 1;
+	subscribe.sctp_association_event = 1;
+	if (0 !=  sctp_setsockopt(sk2, SOL_SCTP, SCTP_EVENTS,
+				  (char *)&subscribe,
+				  sizeof(struct sctp_event_subscribe))) {
+		DUMP_CORE;
+	}
+
+	/* Set the partial deliver point on sk2 */
+	if (0 != sctp_setsockopt(sk2, SOL_SCTP, SCTP_PARTIAL_DELIVERY_POINT,
+				(char*)&pd_point, sizeof(pd_point)))
+		DUMP_CORE;
+
+	/* Mark sk2 as being able to accept new associations. */
+	if (0 != sctp_seqpacket_listen(sk2, 1)) { DUMP_CORE; }
+
+	/* Send the first messages.  This will create the association.  */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf2);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	ep1 = sctp_sk(sk1)->ep;
+	asoc1 = test_ep_first_asoc(ep1);
+
+	/* We have two established associations.  Let's extract some
+	 * useful details.
+	 */
+	ep2 = sctp_sk(sk2)->ep;
+	asoc2 = test_ep_first_asoc(ep2);
+
+	/* Get the communication up message from sk2.  */
+	test_frame_get_event(sk2, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+
+	/* Get the communication up message from sk1.  */
+	test_frame_get_event(sk1, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+
+	/* Get the first message which was sent.  */
+	test_frame_get_message(sk2, msg_buf2);
+
+	/* Now the real test starts...
+	 * Send a large amount of data and see if we jump into PD
+	 */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	/* Read 4 data chunks one at a time.
+	 * We set our PD point low enough that every data chunk would
+	 * exceed the PD point and be delivered immidiately.
+	 * I think doing this 4 times is enough.
+	 */
+	msgp = msg_buf;
+	for (i = 1; i <= 4; i++) {
+		test_run_network_once(TEST_NETWORK0);
+
+		/* make sure that we entered partial delivery */
+		if (!asoc2->ulpq.pd_mode)
+			DUMP_CORE;
+
+		test_frame_get_message2(sk2, msgp, 1452, 0, 0);
+		msgp = msg_buf + i*1452;
+	}
+
+	/* Shut off PD point */
+	pd_point = 0;
+	if (0 != sctp_setsockopt(sk2, SOL_SCTP, SCTP_PARTIAL_DELIVERY_POINT,
+				(char*)&pd_point, sizeof(pd_point)))
+		DUMP_CORE;
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	test_frame_get_message_all(sk2, msgp);
+
+	/* Once more, but with multiple associatons.
+	 * This will make sure that only 1 association and thus 1 message
+	 * is ever in Partial Delivery.
+	 */
+	sk3 = sctp_socket(PF_INET, SOCK_SEQPACKET);
+	sk3->sk_sndbuf = (1<<18);
+
+	error = test_bind(sk3, (struct sockaddr *)&loop1, sizeof(loop1));
+	if (error != 0) { DUMP_CORE; }
+
+	/* Now start a second association on sk2. */
+	test_frame_send_message(sk3, (struct sockaddr *)&loop2, msg_buf2);
+
+	asoc3 = test_ep_last_asoc(ep2);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* We have two established associations.  Let's extract some
+	 * useful details.
+	 */
+	/* Get the communication up message from sk2.  */
+	test_frame_get_event(sk2, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+
+	/* Get the communication up message from sk1.  */
+	test_frame_get_event(sk3, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+
+	/* Get the first message which was used to setup a new association. */
+	test_frame_get_message(sk2, msg_buf2);
+
+	/* Now the bulk of this test.  We'll set the PD point to 2 data chunks
+	 * and send data to both associations.  Only 1 association should
+	 * be in PD.
+	 */
+	pd_point = 2*1452;
+	if (0 != sctp_setsockopt(sk2, SOL_SCTP, SCTP_PARTIAL_DELIVERY_POINT,
+				(char*)&pd_point, sizeof(pd_point)))
+		DUMP_CORE;
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_frame_send_message(sk3, (struct sockaddr *)&loop2, msg_buf);
+
+	/* get 2 segments onto the networks and make sure we get into
+	 * partial delivery
+	 */
+	test_run_network_once(TEST_NETWORK0);
+	test_run_network_once(TEST_NETWORK0);
+
+	/* Now only the first assocation should be in partial delivery */
+	if (asoc2->ulpq.pd_mode == 0)
+		DUMP_CORE;
+
+	/* Read 4 segments again */
+	msgp = msg_buf;
+	for (i = 1; i <= 4; i++) {
+		test_run_network_once(TEST_NETWORK0);
+
+		/* make sure that we entered partial delivery */
+		if (!asoc2->ulpq.pd_mode)
+			DUMP_CORE;
+
+		test_frame_get_message2(sk2, msgp, 1452, 0, 0);
+		msgp = msg_buf + i*1452;
+	}
+
+	/* Shut off PD point */
+	pd_point = 0;
+	if (0 != sctp_setsockopt(sk2, SOL_SCTP, SCTP_PARTIAL_DELIVERY_POINT,
+				(char*)&pd_point, sizeof(pd_point)))
+		DUMP_CORE;
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Read the reset of the message */
+	test_frame_get_message_all(sk2, msgp);
+
+	/* Read the second full message */
+	test_frame_get_message_all(sk2, msg_buf);
+
+	sctp_close(sk2, 0);
+	sctp_close(sk1, 0);
 
 	if (0 != test_run_network()) { DUMP_CORE; }
 
