@@ -320,7 +320,7 @@ main(int argc, char *argv[])
 	}
 	init_cnt = 1;
 
-	init_to = SCTP_RTO_INITIAL;
+	init_to = msecs_to_jiffies(SCTP_RTO_INITIAL);
 	for (j = 1; j <= 7; j++) {	// this should be able to go to 8...
 		for (i = 1; i <= LAST_SRV_ADDR; i++) {
 			int next_init = i % LAST_SRV_ADDR + 1;

@@ -59,15 +59,15 @@ get_expected_rto(uint32_t rtt, uint32_t srtt, uint32_t rttvar)
 	/* 6.3.1 C6) Whenever RTO is computed, if it is less than RTO.Min
 	 * seconds then it is rounded up to RTO.Min seconds.
 	 */
-	if (rto < SCTP_RTO_MIN) {
-		rto = SCTP_RTO_MIN;
+	if (rto < msecs_to_jiffies(SCTP_RTO_MIN)) {
+		rto = msecs_to_jiffies(SCTP_RTO_MIN);
 	}
 
 	/* 6.3.1 C7) A maximum value may be placed on RTO provided it is
 	 * at least RTO.max seconds.
 	 */
-	if (rto > SCTP_RTO_MAX) {
-		rto = SCTP_RTO_MAX;
+	if (rto > msecs_to_jiffies(SCTP_RTO_MAX)) {
+		rto = msecs_to_jiffies(SCTP_RTO_MAX);
 	}
 
 	printf("get_expected_rto: rtt: %d, srtt: %d rttvar: %d, "

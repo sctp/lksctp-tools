@@ -41,6 +41,7 @@ main(int argc, char *argv[])
 	struct sctp_paddrparams params;
 	char addr_buf[sizeof(struct sockaddr_in6)*3];
 	int pf_class;
+	unsigned long rto_min_jif;
 
         /* Do all that random stuff needed to make a sensible universe.  */
         sctp_init();
@@ -49,6 +50,7 @@ main(int argc, char *argv[])
          * (which makes all their transport timers end at the same time.
          */
         sctp_rto_initial = SCTP_RTO_MIN;
+	rto_min_jif = msecs_to_jiffies(SCTP_RTO_MIN);
 
 	/* Initialize the server and client addresses. */
 #if TEST_V6
@@ -284,8 +286,8 @@ main(int argc, char *argv[])
 
 	/* Make sure that heartbeats are sent and all the paths are 
 	 * confirmed.
-	 */ 
-	jiffies += (1.5 * SCTP_RTO_MIN + 1);
+	 */
+	jiffies += (1.5 * rto_min_jif + 1);
 	if (test_run_network())
 		DUMP_CORE;
 
@@ -299,7 +301,7 @@ main(int argc, char *argv[])
 
 	/* Test that heartbeat is actually sent. */
 	printf("About to cause heartbeats to happen\n");
-	jiffies += msecs_to_jiffies(HB_INTERVAL_1) - SCTP_RTO_MIN / 2 - 1;
+	jiffies += msecs_to_jiffies(HB_INTERVAL_1) - rto_min_jif / 2 - 1;
 	printf("About to run timeout\n");
 	test_run_timeout();
 
@@ -311,7 +313,7 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_HEARTBEAT, TEST_NETWORK_ETH2))
 		DUMP_CORE;
 
-	jiffies += 2 * SCTP_RTO_MIN + 2;
+	jiffies += 2 * rto_min_jif + 2;
 	test_run_timeout();
 
 	/* We should have a HEARTBEAT sitting on the Internet. */
@@ -370,7 +372,8 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 
 	printf("About to test timeout on asoc2\n");
-	jiffies += msecs_to_jiffies(HB_INTERVAL_2 - HB_INTERVAL_1) - SCTP_RTO_MIN - 2;
+	jiffies += msecs_to_jiffies(HB_INTERVAL_2 - HB_INTERVAL_1) -
+		    rto_min_jif - 2;
 	test_run_timeout();
 
 	/* We should NOT have a HEARTBEAT sitting on the Internet. */
@@ -381,7 +384,7 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_HEARTBEAT, TEST_NETWORK_ETH2))
 		DUMP_CORE;
 
-	jiffies += SCTP_RTO_MIN + 2;
+	jiffies += rto_min_jif + 2;
 	test_run_timeout();
 
 	/* We should have a HEARTBEAT sitting on the Internet. */

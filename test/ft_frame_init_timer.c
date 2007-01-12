@@ -136,7 +136,7 @@ main(int argc, char *argv[])
 	 */
 	sctp_max_retrans_init = 5;
 	/* The maximum initial timeout wait is derived from the rto.max. */
-	sctp_rto_max = SCTP_RTO_INITIAL*3;
+	sctp_rto_max = msecs_to_jiffies(SCTP_RTO_INITIAL)*3;
 
         /* Create a single endpoint which will attempt to contact
 	 * a unreachable peer.
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
 	ep1 = sctp_sk(sk1)->ep;
 	asoc1 = test_ep_first_asoc(ep1); 
 
-	if (asoc1->max_init_timeo != sctp_rto_max)
+	if (asoc1->max_init_timeo != msecs_to_jiffies(sctp_rto_max))
 		DUMP_CORE;
 
 	/* Walk through the startup sequence.  */
@@ -234,7 +234,7 @@ main(int argc, char *argv[])
         /* Set an arbitrary timeout high enough that it is out of the
 	 * way for the purposes of this test.  
 	 */
-	sctp_rto_max = SCTP_RTO_INITIAL * 5;
+	sctp_rto_max = msecs_to_jiffies(SCTP_RTO_INITIAL) * 5;
 
         /* Create a two endpoints. 
 	 */
@@ -329,7 +329,7 @@ main(int argc, char *argv[])
 	 * large, as we will override with the SCTP_INITMSG control. 
 	 */
 	sctp_max_retrans_init = 100;
-	sctp_rto_max = SCTP_RTO_INITIAL * 20;
+	sctp_rto_max = msecs_to_jiffies(SCTP_RTO_INITIAL) * 20;
 
         /* Create a single endpoint which will attempt to contact
 	 * an unreachable peer.  
