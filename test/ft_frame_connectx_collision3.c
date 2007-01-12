@@ -194,6 +194,16 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
+	/* Mark sk[0] as listening also, so that we get expected drops
+	 * from this test.  Otherwise, when we return the 2->1 INIT-ACK
+	 * to queue later, it will cause an ABORT because the sk1 peer
+	 * was removed from the asoc0 by 3->1 INIT-ACK and the sk[0]
+	 * endpoint was never hashed.  So INIT-ACK is OOTB.
+	 */
+	if (0 != sctp_seqpacket_listen(sk[0], 1)) {
+		DUMP_CORE;
+	}
+
 	printk("----------------------------------------------------\n"
 	       "Setup done\n"
 	       "----------------------------------------------------\n");
