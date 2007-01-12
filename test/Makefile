@@ -17,8 +17,6 @@ CFLAGS=-g ${INCLUDES} ${WARNINGS} -DTEST_FRAME=1 \
 	-D__KERNEL__=1 -DSCTP_DEBUG=1 -DSCTP_STATIC= -DKBUILD_BASENAME= \
 	-imacros ${INCLUDE_LINUX}/autoconf.h
 
-V6FLAGS=-DCONFIG_IPV6=1 -DTEST_V6=1 
-
 USER_CFLAGS=-g ${WARNINGS} ${USER_INCLUDES}
 
 LIBRARY_OBJECTS= kernel_funutil.o kernel_funutil_v6.o
@@ -56,6 +54,7 @@ COMMON_OBJECTS= \
 
 ifdef CONFIG_IPV6	
 COMMON_OBJECTS += ipv6.o
+V6FLAGS=-DCONFIG_IPV6=1 -DTEST_V6=1 
 endif
 
 ifdef CONFIG_SCTP_ADLER32
@@ -206,9 +205,11 @@ FAILING_V6_FRAME_TESTS = \
 	ft_frame_fragments_v6 \
 	ft_frame_maxseg_v6 \
 
-TARGETS = ${PASSING_UNIT_TESTS} ${PASSING_FRAME_TESTS} \
-	${PASSING_V6_FRAME_TESTS} ${FAILING_V6_FRAME_TESTS} \
-	${FAILING_TESTS} \
+TARGETS = ${PASSING_UNIT_TESTS} ${PASSING_FRAME_TESTS}
+#ifdef CONFIG_IPV6
+TARGETS += ${PASSING_V6_FRAME_TESTS} ${FAILING_V6_FRAME_TESTS} \
+#endif
+TARGETS += ${FAILING_TESTS}
 
 all:	${TARGETS}
 
@@ -255,6 +256,7 @@ frame_test:  ${PASSING_FRAME_TESTS}
 	done
 	@echo "Yippee!"
 
+ifdef CONFIG_IPV6
 framev6_test:  ${PASSING_V6_FRAME_TESTS}
 	@for a in $^;				\
 	do 					\
@@ -269,6 +271,11 @@ framev6_test:  ${PASSING_V6_FRAME_TESTS}
 		fi;				\
 	done
 	@echo "Yippee!"
+else
+framev6_test:
+	@echo -n "IPv6 is disabled in your kernel config."
+	@echo "Please enable it and rebuild your frame tests."
+endif
 
 
 # These are functional tests which are known to fail.
@@ -308,9 +315,15 @@ kern_test: ${PASSING_KERN_TESTS}
 
 
 # These are tests for live kernels which pass.
+ifdef CONFIG_IPV6
 kernv6_test: ${PASSING_V6_KERN_TESTS}
 	make -C ../src/func_tests v6test			
 	@echo "Hoody hoo!"
+else
+kernv6_test:
+	@echo -n "IPv6 is disabled in your kernel config."
+	@echo "Please enable it and rebuild your kernel tests."
+endif
 
 # These are functional tests for live kernels which are known to fail.
 # Kernel Works In Progress
