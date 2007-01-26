@@ -168,8 +168,17 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
+	/* Look for SHUTDOWN chunk that is sent  whenever DATA is received
+	 * in SHUTDOWN_SENT state.   SHUTDOWN is always sent first followed
+	 * by SACK.
+	 */
+	test_run_network_once(TEST_NETWORK0);
+	if (test_for_chunk(SCTP_CID_SHUTDOWN, TEST_NETWORK0) <= 0) {
+		DUMP_CORE;
+	}
+
 	/* Process the DATA chunk and look for SACK chunk. */
-	if (test_step(SCTP_CID_SACK, TEST_NETWORK0) <= 0) {
+	if (test_for_chunk(SCTP_CID_SACK, TEST_NETWORK0) <= 0) {
 		DUMP_CORE;
 	}
 
@@ -177,14 +186,6 @@ main(int argc, char *argv[])
 	 * reset.
 	 */
 	if (0 != asoc1->overall_error_count) {
-		DUMP_CORE;
-	}
-
-	/* Process the SACK chunk and look for SHUTDOWN chunk that is sent
-	 * whenever DATA is received in SHUTDOWN_SENT state. 
-	 */
-
-	if (test_step(SCTP_CID_SHUTDOWN, TEST_NETWORK0) <= 0) {
 		DUMP_CORE;
 	}
 
