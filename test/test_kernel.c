@@ -974,11 +974,12 @@ int test_get_network_sctp_addr(union sctp_addr *addr)
 
 /* Put a packet "on the wire".  */
 int
-ip_queue_xmit(struct sk_buff *skb, struct sock *sk, int ipfragok)
+ip_queue_xmit(struct sk_buff *skb, int ipfragok)
 {
         struct iphdr *ih;
         int error = 0;
         static struct sk_buff_head *network;
+	struct sock *sk = skb->sk;
 	struct inet_sock *inet = inet_sk(sk);
 
         /* If it is the beginning of time, initialize the Internet.  */

@@ -3,7 +3,16 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
-K:NA          Add support for SCTP_CONTEXT socket option.
+K:NA          Force update of the rto when processing HB-ACK
+K:NA          Fix SACK sequence during shutdown.
+K:NA          Correctly handle unexpected INIT-ACK chunk.
+K:NA          Verify some mandatory parameters.
+K:NA          Set correct error cause value for missing parameters
+K:NA          Fix err_hdr assignment in sctp_init_cause.
+T:NA          Add support for sctp_getaddrlen() API.
+K,T:NA        Fix typo adaption -> adaptation as per the latest API draft.
+K:NA          Don't export include/linux/sctp.h to userspace.
+K,T:NA        Add support for SCTP_CONTEXT socket option.
 K:NA          Enable auto loading of SCTP when creating an ipv6 SCTP socket.
 K:NA          Handle address add/delete events in a more efficient way.
 K:NA          SCTP endianness annotations.
