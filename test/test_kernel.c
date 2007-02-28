@@ -1231,7 +1231,7 @@ void icmp_frag_needed(struct sk_buff *skb)
 	/* Update the mtu and expires fields of any dst entry in the routing
 	 * table that matches the skb.
 	 */
-	for (rt = rt_list; rt != NULL; rt = rt->u.rt_next) {
+	for (rt = rt_list; rt != NULL; rt = rt->u.dst.rt_next) {
 		if ((rt->rt_src == iph->saddr) && (rt->rt_dst == iph->daddr)) {
 			rt->u.dst.metrics[RTAX_MTU-1] = ip_mtu;
 			dst_set_expires(&rt->u.dst, ip_rt_mtu_expires);
@@ -1280,7 +1280,7 @@ void icmpv6_frag_needed(struct sk_buff *skb)
 	 * table that matches the skb.
 	 */
 
-	for (rt = rt6_list; rt != NULL; rt = rt->u.next) {
+	for (rt = rt6_list; rt != NULL; rt = rt->u.dst.rt6_next) {
 		if (!ipv6_addr_cmp(&rt->rt6i_dst.addr, &ip6h->daddr)) {
 									      
 			rt->u.dst.metrics[RTAX_MTU-1] = ip_mtu;
@@ -1980,7 +1980,7 @@ int ip_route_output_key(struct rtable **rp, struct flowi *flp)
 {
 	struct rtable *rt;
 
-	for (rt = rt_list; rt != NULL; rt = rt->u.rt_next) {
+	for (rt = rt_list; rt != NULL; rt = rt->u.dst.rt_next) {
 		if ((rt->rt_dst == flp->fl4_dst) &&
 		    (((flp->fl4_src == 0) && (rt->rt_src == rt->rt_dst)) ||
 		      (rt->rt_src == flp->fl4_src))) {
@@ -2044,7 +2044,7 @@ int ip_route_output_key(struct rtable **rp, struct flowi *flp)
 
 	*rp = rt;
 
-	rt->u.rt_next = rt_list;
+	rt->u.dst.rt_next = rt_list;
 	rt_list = rt;
 
 	dst_hold(&rt->u.dst);
@@ -2064,10 +2064,10 @@ void test_update_rtables(void)
 	while ((rt = *rtp) != NULL) {
 		if (rt->u.dst.expires && (rt->u.dst.expires < jiffies)) {
 			rt->u.dst.obsolete = 2;
-			*rtp = rt->u.rt_next;
+			*rtp = rt->u.dst.rt_next;
 			continue;
 		}
-		rtp = &rt->u.rt_next;
+		rtp = &rt->u.dst.rt_next;
 	}
 
 #if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
@@ -2075,10 +2075,10 @@ void test_update_rtables(void)
 	while ((rt6 = *rt6p) != NULL) {
 		if (rt6->u.dst.expires && (rt6->u.dst.expires < jiffies)) {
 			rt6->u.dst.obsolete = 2;
-			*rt6p = rt6->u.next;
+			*rt6p = rt6->u.dst.rt6_next;
 			continue;
 		}
-		rt6p = &rt6->u.next;
+		rt6p = &rt6->u.dst.rt6_next;
 	}
 #endif /* CONFIG_IPV6 || CONFIG_IPV6_MODULE */
 }
@@ -2152,7 +2152,7 @@ struct dst_entry *ip6_route_output(struct sock *sk, struct flowi *flp)
         }
 
 	/* Look for an entry. */
-	for (rt6 = rt6_list; rt6 != NULL; rt6 = rt6->u.next) {
+	for (rt6 = rt6_list; rt6 != NULL; rt6 = rt6->u.dst.rt6_next) {
 		if (!ipv6_addr_cmp(&rt6->rt6i_dst.addr, &flp->fl6_dst)) {
 			dst_hold(&rt6->u.dst);
 			return &rt6->u.dst;
@@ -2212,7 +2212,7 @@ struct dst_entry *ip6_route_output(struct sock *sk, struct flowi *flp)
 	return NULL;
 
 done:
-	rt6->u.next = rt6_list;
+	rt6->u.dst.rt6_next = rt6_list;
 	rt6_list = rt6;
 
 	dst_hold(&rt6->u.dst);
@@ -2883,12 +2883,12 @@ void *_mmx_memcpy(void *to, const void *from, size_t size)
 struct kmem_cache {
 	int objsize;
 };
-kmem_cache_t *kmem_cache_create(const char *name, size_t size, 
+struct kmem_cache *kmem_cache_create(const char *name, size_t size, 
 		size_t align, unsigned long flags,
-		void (*ctor)(void *, kmem_cache_t *, unsigned long),
-		void (*dtor)(void *, kmem_cache_t *, unsigned long))
+		void (*ctor)(void *, struct kmem_cache *, unsigned long),
+		void (*dtor)(void *, struct kmem_cache *, unsigned long))
 {
-	kmem_cache_t *cachep;
+	struct kmem_cache *cachep;
 	cachep = kmalloc(sizeof(struct kmem_cache), GFP_KERNEL);
 	if (!cachep)
 		return NULL;
@@ -2899,11 +2899,11 @@ void kmem_cache_destroy(struct kmem_cache *cachep)
 {
 	kfree(cachep);
 }
-void *kmem_cache_alloc(kmem_cache_t *cachep, unsigned int flags)
+void *kmem_cache_alloc(struct kmem_cache *cachep, unsigned int flags)
 {
 	return kmalloc(cachep->objsize, flags);
 }
-void kmem_cache_free(kmem_cache_t *cachep, void *obj)
+void kmem_cache_free(struct kmem_cache *cachep, void *obj)
 {
 	kfree(obj);
 }	
@@ -3583,4 +3583,33 @@ void *kmemdup(const void *src, size_t len, gfp_t gfp)
 	if (p)
 		memcpy(p, src, len);
 	return p;
+}
+
+void *kmem_cache_zalloc(struct kmem_cache *cache, gfp_t flags)
+{
+	return kzalloc(cache->objsize, flags);
+}
+
+unsigned int jiffies_to_msecs(const unsigned long j)
+{
+#if HZ <= MSEC_PER_SEC && !(MSEC_PER_SEC % HZ)
+	return (MSEC_PER_SEC / HZ) * j;
+#elif HZ > MSEC_PER_SEC && !(HZ % MSEC_PER_SEC)
+	return (j + (HZ / MSEC_PER_SEC) - 1)/(HZ / MSEC_PER_SEC);
+#else
+	return (j * MSEC_PER_SEC) / HZ;
+#endif
+}
+
+unsigned long msecs_to_jiffies(const unsigned int m)
+{
+	if (m > jiffies_to_msecs(MAX_JIFFY_OFFSET))
+		return MAX_JIFFY_OFFSET;
+#if HZ <= MSEC_PER_SEC && !(MSEC_PER_SEC % HZ)
+	return (m + (MSEC_PER_SEC / HZ) - 1) / (MSEC_PER_SEC / HZ);
+#elif HZ > MSEC_PER_SEC && !(HZ % MSEC_PER_SEC)
+	return m * (HZ / MSEC_PER_SEC);
+#else
+	return (m * HZ + MSEC_PER_SEC - 1) / MSEC_PER_SEC;
+#endif
 }

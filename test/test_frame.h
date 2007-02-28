@@ -53,12 +53,14 @@
 #undef put_user
 #undef access_ok
 #undef __set_current_state
+#undef current
 
 #define get_user(x, ptr) ({ x = *ptr; 0; })
 #define put_user(x, ptr) ({ *ptr = x; 0; })
 #define access_ok(x, y, z) ({1==1;})
 #define __set_current_state(x)
 #define signal_pending(x) 0
+#define current NULL 
 
 #undef memcpy        
 #undef memset
