@@ -754,6 +754,18 @@ read_unlock_bh(rwlock_t *rw)
         /* DO NOTHING.  */
 } /* read_unlock_bh() */
 
+void __lockfunc
+_read_lock_bh(rwlock_t *rw)
+{
+        /* DO NOTHING.  */
+} /* _read_lock_bh() */
+
+void __lockfunc
+_read_unlock_bh(rwlock_t *rw)
+{
+        /* DO NOTHING.  */
+} /* _read_unlock_bh() */
+
 /* Halt the system because it has a bug.  */
 void
 debug_halt()
