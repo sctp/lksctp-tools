@@ -280,14 +280,14 @@ struct inet6_dev lo_ip6_ptr = {
 
 /* These are net_device definitions for the test frame. */
 struct net_device eth2_dev =
-	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, NULL, 4};
+	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 4};
 struct net_device eth1_dev =
-	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, NULL, 3};
+	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 3};
 struct net_device eth0_dev =
-	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, &eth1_dev, NULL, 0, NULL, 2};
+	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 2};
 struct net_device loopback_dev =
-	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, &eth0_dev, NULL, 0, NULL, 1};
-struct net_device *dev_base = &loopback_dev;
+	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},  NULL, 0, NULL, 1};
+LIST_HEAD(dev_base_head);
 rwlock_t inetdev_lock = RW_LOCK_UNLOCKED;
 rwlock_t dev_base_lock = RW_LOCK_UNLOCKED;
 rwlock_t addrconf_lock = RW_LOCK_UNLOCKED;
@@ -551,8 +551,9 @@ make_skb(const void *raw, int datalen)
         nskb->end	= nskb->head + datalen;
         nskb->data	= nskb->head;
         nskb->tail	= nskb->head + datalen;
-        nskb->nh.raw	= nskb->head;
 	nskb->len	= datalen;
+
+	skb_reset_network_header(nskb);
 
         /* Copy the actual packet... */
         memcpy(nskb->head, raw, datalen);
@@ -562,8 +563,6 @@ make_skb(const void *raw, int datalen)
         nskb->prev = NULL;
 
         nskb->sk = NULL;
-        nskb->h.raw = NULL;
-	nskb->mac.raw = NULL;
 
         atomic_set(&nskb->users, 1);
         atomic_set(&(skb_shinfo(nskb)->dataref), 1);
@@ -586,9 +585,9 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->priority=old->priority;
 	new->protocol=old->protocol;
 	new->dst=dst_clone(old->dst);
-	new->h.raw=old->h.raw+offset;
-	new->nh.raw=old->nh.raw+offset;
-	new->mac.raw=old->mac.raw+offset;
+	new->transport_header=old->transport_header+offset;
+	new->network_header=old->network_header+offset;
+	new->mac_header=old->mac_header+offset;
 	memcpy(new->cb, old->cb, sizeof(old->cb));
 	atomic_set(&new->users, 1);
 	new->pkt_type=old->pkt_type;
@@ -597,9 +596,6 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 #ifdef CONFIG_NETFILTER
 	new->nfct=old->nfct;
 	nf_conntrack_get(new->nfct);
-#ifdef CONFIG_NETFILTER_DEBUG
-	new->nf_debug=old->nf_debug;
-#endif
 #endif
 #ifdef CONFIG_NET_SCHED
 	new->tc_index = old->tc_index;
@@ -627,7 +623,7 @@ skb_copy(const struct sk_buff *skb, unsigned int priority)
         nskb->end	= nskb->head + datalen;
         nskb->data	= nskb->head + (skb->data - skb->head);
         nskb->tail	= nskb->head + (skb->tail - skb->head);
-        nskb->nh.raw	= nskb->head + (skb->nh.raw - skb->head);
+	copy_skb_header(nskb, skb);
 
         /* Copy the actual packet... */
         memcpy(nskb->head, skb->head, datalen + sizeof(struct skb_shared_info));
@@ -637,7 +633,6 @@ skb_copy(const struct sk_buff *skb, unsigned int priority)
         nskb->prev = NULL;
 
         nskb->sk = NULL;
-        nskb->h.raw = NULL;
 
         /* Error checking?  What error checking?  */
         return(nskb);
@@ -825,6 +820,11 @@ init_Internet(void)
         skb_queue_head_init(&sidelist);
 
 	/* Initialize multiple devices and the interfaces list.  */
+	list_add_tail(&loopback_dev.dev_list, &dev_base_head);
+	list_add_tail(&eth0_dev.dev_list, &dev_base_head);
+	list_add_tail(&eth1_dev.dev_list, &dev_base_head);
+	list_add_tail(&eth2_dev.dev_list, &dev_base_head);
+
 	loopback_dev.ip_ptr = &lo_ip_ptr;
 	network_mask[TEST_NETWORK0] = SCTP_IP_LOOPBACK & SCTP_MASK_LO;
 	devices[TEST_NETWORK0] = &loopback_dev;
@@ -1007,6 +1007,7 @@ ip_queue_xmit(struct sk_buff *skb, int ipfragok)
          * struct sock association with the skb.
          */
         ih = (struct iphdr *)skb_push(skb, sizeof(struct iphdr));
+	skb_reset_network_header(skb);
         ih->version	= 4;
 	ih->ihl 	= 5;
         ih->tos		= inet->tos;
@@ -1019,8 +1020,6 @@ ip_queue_xmit(struct sk_buff *skb, int ipfragok)
 	ih->ttl		= 255;
 	ih->protocol	= skb->sk->sk_protocol;
 	ih->check	= 0x1234; /* CHEAT! */
-
-        skb->nh.iph = ih;
 
         /* Route that packet!  */
 	/* FIX ME.  We probably want to do "real" routing.
@@ -1072,6 +1071,7 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl, struct ipv6
          * struct sock association with the skb.
          */
         ip6h = (struct ipv6hdr *)skb_push(skb, sizeof(struct ipv6hdr));
+	skb_reset_network_header(skb);
 	*(u32 *)ip6h = htonl(0x60000000) | fl->fl6_flowlabel;
         ip6h->payload_len = skb->len - sizeof(struct ipv6hdr);
         ip6h->hop_limit   = 255;
@@ -1084,8 +1084,6 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl, struct ipv6
 	} else {
 		return -EHOSTUNREACH;
 	}
-
-        skb->nh.ipv6h = ip6h;
 
         /* Route that packet!  */
 	network = &Internet[test_get_network_ip_addr(&ip6h->daddr, AF_INET6)];
@@ -1161,29 +1159,40 @@ do_slaughter(struct sk_buff *nskb)
 static inline int
 do_congest(struct sk_buff *nskb)
 {
+	void*  nh;
+
 	if (!congest)
 		return 0;
 
+	nh = skb_network_header(nskb);
 	if (CHUNK_TYPE(nskb, /* has_ip */ 0) == scapegoat) {
 		congest = 0;
 
-		switch (nskb->nh.iph->version) {
+		switch (((struct iphdr*)nh)->version) {
 		case 4:
-			if (INET_ECN_is_capable(ipv4_get_dsfield(nskb->nh.iph)))
-				IP_ECN_set_ce(nskb->nh.iph);
+		{
+			struct iphdr *iph = nh;
+
+			if (INET_ECN_is_capable(ipv4_get_dsfield(iph)))
+				IP_ECN_set_ce(iph);
 			else
 				/* Not ECN capable so drop the packet, as an
 				 * indicator of congestion */
 				return 1;
 			break;
+		}
 		case 6:
-			if (INET_ECN_is_capable(ipv6_get_dsfield(nskb->nh.ipv6h)))
-				IP6_ECN_set_ce(nskb->nh.ipv6h);
+		{
+			struct ipv6hdr *ipv6h = nh;
+
+			if (INET_ECN_is_capable(ipv6_get_dsfield(ipv6h)))
+				IP6_ECN_set_ce(ipv6h);
 			else
 				/* Not ECN capable so drop the packet, as an
 				 * indicator of congestion */
 				return 1;
 			break;
+		}
 		default:
 			DUMP_CORE;
 		}
@@ -1235,7 +1244,7 @@ void icmp_frag_needed(struct sk_buff *skb)
 {
 	struct sk_buff *iskb;
 	struct icmphdr *icmph;
-	struct iphdr *iph = skb->nh.iph;
+	struct iphdr *iph = ip_hdr(skb);
 	struct rtable *rt;
 	unsigned int len;
 
@@ -1259,7 +1268,7 @@ void icmp_frag_needed(struct sk_buff *skb)
 	icmph->type = ICMP_DEST_UNREACH;
 	icmph->code = ICMP_FRAG_NEEDED;
 	icmph->un.frag.mtu = ip_mtu;
-	iskb->h.icmph = icmph;
+	skb_reset_transport_header(iskb);
 	skb_pull(iskb, sizeof(struct icmphdr));
 
 	len -= sizeof(struct icmphdr);
@@ -1282,7 +1291,7 @@ void icmpv6_frag_needed(struct sk_buff *skb)
 #if defined(CONFIG_IPV6)
 	struct sk_buff *iskb;
 	struct icmp6hdr *icmph;
-	struct ipv6hdr *ip6h = (struct ipv6hdr *)skb->nh.raw;
+	struct ipv6hdr *ip6h = skb_network_header(skb);
 	unsigned int len;
 	struct rt6_info *rt;
 	
@@ -1311,7 +1320,7 @@ void icmpv6_frag_needed(struct sk_buff *skb)
 	icmph->icmp6_code = 0;
 	icmph->icmp6_pointer = htonl(ip_mtu);
 		       
-	iskb->h.raw= (char *)icmph;
+	skb_reset_transport_header(iskb);
 	skb_pull(iskb, sizeof(struct icmp6hdr));
 
 	len -= sizeof(struct icmp6hdr);
@@ -1333,6 +1342,7 @@ simulate_network_once(int net)
 {
 	struct sk_buff *skb;
 	struct sk_buff *nskb;
+	struct iphdr *iph = NULL;
 	int max_skb_len;
 
 	skb = skb_dequeue(&Internet[net]);
@@ -1355,8 +1365,12 @@ simulate_network_once(int net)
 	nskb->sk = skb->sk;
 	__kfree_skb(skb);
 
+	/* Save the network header for later */
+	iph = ip_hdr(nskb);
+
 	/* Set the transport header.  */
-	nskb->h.raw = skb_pull(nskb, test_hdr_size(nskb->data));
+	skb_pull(nskb, test_hdr_size(nskb->data));
+	skb_reset_transport_header(nskb);
 	/* Mark the "device" we received on.  */
 	nskb->dev = devices[net];
 
@@ -1370,9 +1384,9 @@ simulate_network_once(int net)
 	/* Check if ip fragmentation is needed.  */
 	max_skb_len = ip_mtu - sctp_sk(nskb->sk)->pf->af->net_header_len;
 	if (nskb->len > max_skb_len) {
-		if (nskb->nh.iph->version == 4) {
+		if (iph->version == 4) {
 			/* If ip fragmentation is allowed fragment the skb. */
-			if (!(nskb->nh.iph->frag_off & htons(IP_DF))) {
+			if (!(iph->frag_off & htons(IP_DF))) {
 				do_split_skb(nskb, max_skb_len);
 			} else {
 				icmp_frag_needed(nskb);
@@ -1722,7 +1736,7 @@ int __mod_timer(struct timer_list *timer, unsigned long expires)
 	}
 	list_add_tail(&timer->entry, lh);
 
-	timer->base = (struct timer_base_s *)&timer_base;
+	timer->base = &timer_base;
 
 	return 0;
 
@@ -1899,10 +1913,6 @@ inet_unregister_protosw(struct inet_protosw *p)
 int
 inet_add_protocol(struct net_protocol *prot, unsigned char num)
 {
-	/* hack to initialize proc_net_sctp before the call to 
-	 * sctp_proc_init()
-	 */
-	proc_net_sctp = malloc(sizeof(struct proc_dir_entry));	
 	return 0;
 }
 
@@ -2681,7 +2691,9 @@ change_chunk_sequence(int net)
 		__kfree_skb(skb);
 
 		/* Set the transport header.  */
-		nskb[i]->h.raw = skb_pull(nskb[i], test_hdr_size(nskb[i]->data));
+		skb_pull(nskb[i], test_hdr_size(nskb[i]->data));
+		skb_reset_transport_header(nskb[i]);
+
 		/* Mark the "device" we received on.  */
 		nskb[i]->dev = devices[net];
 
@@ -2901,6 +2913,13 @@ struct kmem_cache *kmem_cache_create(const char *name, size_t size,
 		void (*dtor)(void *, struct kmem_cache *, unsigned long))
 {
 	struct kmem_cache *cachep;
+
+	/* hack to initialize proc_net_sctp before the call to 
+	 * sctp_proc_init()
+	 */
+	if (!proc_net_sctp)
+		proc_net_sctp = malloc(sizeof(struct proc_dir_entry));	
+
 	cachep = kmalloc(sizeof(struct kmem_cache), GFP_KERNEL);
 	if (!cachep)
 		return NULL;
@@ -3187,12 +3206,12 @@ struct net_device *dev_get_by_index(int ifindex)
 	return dev; 
 }
 
-void __net_timestamp(struct sk_buff *skb)
+ktime_t ktime_get_real(void)
 {
 	struct timeval tv;
 
 	do_gettimeofday(&tv);
-	skb_set_timestamp(skb, &tv);
+	return timeval_to_ktime(tv);
 }
 
 cpumask_t cpu_possible_map = CPU_MASK_ALL;
@@ -3414,6 +3433,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 		to     += copy;
 	}
 
+#if 0 /* This code is broken and needs to be fixed when we start using it */
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
@@ -3434,6 +3454,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 		}
 		start = end;
 	}
+#endif
 
 	if (skb_shinfo(skb)->frag_list) {
 		struct sk_buff *list = skb_shinfo(skb)->frag_list;
@@ -3525,9 +3546,9 @@ int pskb_expand_head(struct sk_buff *skb, int nhead, int ntail,
 	skb->end      = data + size;
 	skb->data    += off;
 	skb->tail    += off;
-	skb->mac.raw += off;
-	skb->h.raw   += off;
-	skb->nh.raw  += off;
+	skb->mac_header += off;
+	skb->network_header   += off;
+	skb->transport_header  += off;
 	skb->cloned   = 0;
 	skb->nohdr    = 0;
 	atomic_set(&skb_shinfo(skb)->dataref, 1);
@@ -3563,6 +3584,7 @@ void init_waitqueue_head(wait_queue_head_t *q)
 #ifdef CONFIG_HIGHMEM
 void *kmap_atomic(struct page *page, enum km_type type)
 {
+	return NULL;
 }
 
 void kunmap_atomic(void *kvaddr, enum km_type type)
@@ -3624,4 +3646,81 @@ unsigned long msecs_to_jiffies(const unsigned int m)
 #else
 	return (m * HZ + MSEC_PER_SEC - 1) / MSEC_PER_SEC;
 #endif
+}
+
+#ifdef CONFIG_DEBUG_LIST
+void list_del(struct list_head *entry)
+{
+	__list_del(entry->prev, entry->next);
+	entry->next = LIST_POISON1;
+	entry->prev = LIST_POISON2;
+}
+
+void list_add(struct list_head *new, struct list_head *head)
+{
+	__list_add(new, head, head->next);
+}
+
+void __list_add(struct list_head *new, struct list_head *prev,
+		struct list_head *next)
+{
+	next->prev = new;
+	new->next = next;
+	new->prev = prev;
+	prev->next = new;
+}
+#endif
+
+#ifdef CONFIG_DEBUG_SPINLOCK
+
+void __spin_lock_init(spinlock_t *lock, const char *name,
+		      struct lock_class_key *key)
+{
+	*lock = SPIN_LOCK_UNLOCKED;
+}
+
+void __rwlock_init(rwlock_t *lock, const char *name,
+		    struct lock_class_key *key)
+{
+	*lock = RW_LOCK_UNLOCKED;
+}
+#endif
+
+struct timeval ns_to_timeval(const s64 nsec)
+{
+	struct timespec ts = ns_to_timespec(nsec);
+	struct timeval tv;
+
+	tv.tv_sec = ts.tv_sec;
+	tv.tv_usec = (suseconds_t) ts.tv_nsec / 1000;
+
+	return tv;
+}
+
+struct timespec ns_to_timespec(const s64 nsec)
+{
+        struct timespec ts;
+
+	ts.tv_sec = nsec/NSEC_PER_SEC;
+	ts.tv_nsec = nsec%NSEC_PER_SEC;
+
+	return ts;
+}
+
+void __sock_recv_timestamp(struct msghdr *msg, struct sock *sk,
+			    struct sk_buff *skb)
+{
+	/* We never bother setting the timestamp flag in the frame tests */
+}
+
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
+void nf_conntrack_destroy(struct nf_conntrack *nfct)
+{
+	/* do nothing */
+}
+#endif
+
+int net_ratelimit(void)
+{
+	return 1;
 }

@@ -135,7 +135,6 @@ main(void)
         /* Clear out these headers which should NOT be set on
          * a packet fresh from the network.
          */
-        packet->skb->nh.iph = NULL;
         packet->chunk_hdr = NULL;
         packet->chunk_end = NULL;
         packet->subh.data_hdr = NULL;

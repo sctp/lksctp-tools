@@ -108,9 +108,9 @@ _test_make_recvchunk(struct sctp_association *asoc,
 	 * headers, so lets at least initialize it to something
 	 * interesting.
 	 */
-	rcvchunk->skb->nh.iph =
-		(struct iphdr *)skb_push(rcvchunk->skb, sizeof(struct iphdr));
-	rcvchunk->skb->nh.iph->version = 4;
+	skb_push(rcvchunk->skb, sizeof(struct iphdr));
+	skb_reset_network_header(rcvchunk->skb);
+	ip_hdr(rcvchunk->skb)->version = 4;
 	rcvchunk->skb->dst = (struct dst_entry *)rcvchunk->skb->cb;
 	skb_pull(rcvchunk->skb, sizeof(struct iphdr));
 

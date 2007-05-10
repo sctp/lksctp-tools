@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 	skb = test_peek_packet(TEST_NETWORK0);
 
 	if (skb) {
-		skb->nh.iph->daddr = SCTP_IP_BCAST;
+		ip_hdr(skb)->daddr = SCTP_IP_BCAST;
 	} else {
 		DUMP_CORE;
 	}

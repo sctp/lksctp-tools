@@ -295,7 +295,6 @@ main(int argc, char *argv[])
 		 
 		/* Set the skb info. */
 		nskb2->sk = nskb3->sk = nskb4->sk = nskb5->sk = skb->sk;
-		nskb2->h.raw = (unsigned char *)packet;
 	} else {
 		DUMP_CORE;
 	}
@@ -347,8 +346,6 @@ main(int argc, char *argv[])
 		val = sctp_end_cksum(val);
 		sh->checksum = htonl(val);
 		 
-		/* Set the skb info. */
-		nskb3->h.raw = (unsigned char *)packet;
 	} else {
 		DUMP_CORE;
 	}
@@ -410,9 +407,6 @@ main(int argc, char *argv[])
 				       nskb4->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
 		sh->checksum = htonl(val);
-		 
-		/* Set the skb info. */
-		nskb4->h.raw = (unsigned char *)packet;
 	} else {
 		DUMP_CORE;
 	}
@@ -475,9 +469,6 @@ main(int argc, char *argv[])
 				       nskb5->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
 		sh->checksum = htonl(val);
-		 
-		/* Set the skb info. */
-		nskb5->h.raw = (unsigned char *)packet;
 	} else {
 		DUMP_CORE;
 	}

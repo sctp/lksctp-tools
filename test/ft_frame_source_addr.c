@@ -350,18 +350,18 @@ main(int argc, char *argv[])
 		 * address should match the transport's ip address.
 		 */ 
 		if (transport->ipaddr.sa.sa_family == AF_INET) {
-			if (skb->nh.iph->saddr !=
+			if (ip_hdr(skb)->saddr !=
 					transport->ipaddr.v4.sin_addr.s_addr)
 				DUMP_CORE;
-			if (skb->nh.iph->daddr !=
+			if (ip_hdr(skb)->daddr !=
 					transport->ipaddr.v4.sin_addr.s_addr)
 				DUMP_CORE;
 #if TEST_V6
 		} else {
-			if (ipv6_addr_cmp(&skb->nh.ipv6h->saddr,
+			if (ipv6_addr_cmp(&ipv6_hdr(skb)->saddr,
 					  &transport->ipaddr.v6.sin6_addr))
 					DUMP_CORE;
-			if (ipv6_addr_cmp(&skb->nh.ipv6h->daddr,
+			if (ipv6_addr_cmp(&ipv6_hdr(skb)->daddr,
 					  &transport->ipaddr.v6.sin6_addr))
 					DUMP_CORE;
 #endif /* TEST_V6 */
@@ -488,17 +488,17 @@ main(int argc, char *argv[])
 		 * address.
 		 */
 		if (transport->ipaddr.sa.sa_family == AF_INET) {
-			if (skb->nh.iph->saddr != addr2.v4.sin_addr.s_addr)
+			if (ip_hdr(skb)->saddr != addr2.v4.sin_addr.s_addr)
 				DUMP_CORE;
-			if (skb->nh.iph->daddr !=
+			if (ip_hdr(skb)->daddr !=
 				       	transport->ipaddr.v4.sin_addr.s_addr)
 				DUMP_CORE;
 #if TEST_V6
 		} else {
-			if (ipv6_addr_cmp(&skb->nh.ipv6h->saddr,
+			if (ipv6_addr_cmp(&ipv6_hdr(skb)->saddr,
 					       	&addr2.v6.sin6_addr))
 					DUMP_CORE;
-			if (ipv6_addr_cmp(&skb->nh.ipv6h->daddr,
+			if (ipv6_addr_cmp(&ipv6_hdr(skb)->daddr,
 					  &transport->ipaddr.v6.sin6_addr))
 					DUMP_CORE;
 #endif

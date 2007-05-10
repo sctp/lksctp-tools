@@ -70,6 +70,7 @@ test_assoc_change(const struct sctp_association *asoc)
 						3,  /* error */
 						4,  /* outbound */
 						5,  /* inbound */
+						NULL, /* aobrt chunk */
 						GFP_KERNEL);
 						
 	if (NULL == event) { DUMP_CORE; }
@@ -320,9 +321,9 @@ test_recvmsg(struct sctp_association *asoc)
 	 * headers, so lets at least initialize it to something 
 	 * interesting.
 	 */
-	rcvchunk->skb->nh.iph = 
-		(struct iphdr *)skb_push(rcvchunk->skb, sizeof(struct iphdr));
-	rcvchunk->skb->nh.iph->version = 4; 
+	skb_push(rcvchunk->skb, sizeof(struct iphdr));
+	skb_reset_network_header(rcvchunk->skb);
+	ip_hdr(rcvchunk->skb)->version = 4; 
 	rcvchunk->skb->dst = (struct dst_entry *)rcvchunk->skb->cb;
 	skb_pull(rcvchunk->skb, sizeof(struct iphdr));
 

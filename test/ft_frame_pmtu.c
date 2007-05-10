@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 	tsn = ntohl(data_chunk->data_hdr.tsn);
 
 	/* Verify that the DF bit is set in the ip header for this packet. */
-	if (!(skb->nh.iph->frag_off & htons(IP_DF)))
+	if (!(ip_hdr(skb)->frag_off & htons(IP_DF)))
 		DUMP_CORE;
 
 	/* Put the message on the network. This should result in the SCTP error
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
 	/* Verify that the DF bit is not set in the ip header for this
 	 * packet.
 	 */
-	if (skb->nh.iph->frag_off & htons(IP_DF))
+	if (ip_hdr(skb)->frag_off & htons(IP_DF))
 		DUMP_CORE;
 
 	if (0 != test_run_network()) { DUMP_CORE; }

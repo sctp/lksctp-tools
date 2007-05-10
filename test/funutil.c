@@ -1700,14 +1700,7 @@ test_frame_enable_data_assoc_events(struct sock *sk)
 void
 test_remove_dev(struct net_device *dev)
 {
-	struct net_device *tmp, **prev;
-
-	for (tmp = dev_base, prev = &dev_base; tmp; tmp = tmp->next) {
-		if (tmp == dev) {
-			*prev = dev->next;
-			break;
-		}
-	}
+	list_del(&dev->dev_list);
 
 	if (inetaddr_notifier_on) {
 		(*inetaddr_notifier_on->notifier_call)
@@ -1725,8 +1718,7 @@ void
 test_add_dev(struct net_device *dev)
 {
 
-	dev->next = dev_base;
-	dev_base = dev;
+	list_add_tail(&dev->dev_list, &dev_base_head);
 
 	if (inetaddr_notifier_on) {
 		(*inetaddr_notifier_on->notifier_call)
@@ -1749,7 +1741,7 @@ test_get_source_from_route(uint32_t daddr)
 	uint32_t mask = SCTP_MASK_LO;
 
 
-	for (dev = dev_base; dev; dev = dev->next) {
+	for_each_netdev(dev) {
 		if ((in_dev = __in_dev_get_rcu(dev)) == NULL) {
 			continue;
 		}
