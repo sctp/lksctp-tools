@@ -171,7 +171,6 @@ main(int argc, char *argv[])
 	 * through from the socket)
 	 */
 	setup_paddrparams(&params, asoc2, NULL);
-	params.spp_hbinterval = HB_INTERVAL_2;
 	params.spp_flags      = SPP_HB_DISABLE;
 
 	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_HB);
@@ -195,6 +194,7 @@ main(int argc, char *argv[])
 
 	/* Enable heartbeat on asoc2 */
 	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_hbinterval = HB_INTERVAL_2;
 	params.spp_flags = SPP_HB_ENABLE;
 
 	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
@@ -203,6 +203,7 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 
 	setup_paddrparams(&params, asoc2, NULL);
+	params.spp_hbinterval = HB_INTERVAL_2;
 	params.spp_flags      = SPP_HB_ENABLE;
 
 	error = test_paddrparams(sk2, &params, asoc2, NULL, SPP_HB);
@@ -235,6 +236,7 @@ main(int argc, char *argv[])
 
 	params.spp_hbinterval = HB_INTERVAL_1;
 	params.spp_pathmaxrxt = 3;
+	params.spp_flags |= SPP_PMTUD_ENABLE;
 
 	error = sctp_setsockopt(sk1, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
 				(char *)&params, sizeof(struct sctp_paddrparams));

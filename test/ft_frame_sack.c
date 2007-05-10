@@ -136,6 +136,7 @@ main(int argc, char *argv[])
 
 	/* Setup SACK delay for sk2 to be shorter. */
 	setup_paddrparams(&params, NULL, NULL);
+	params.spp_flags |= SPP_SACKDELAY_ENABLE;
 	params.spp_sackdelay = SACK_DELAY_2;
 
 	error = sctp_setsockopt(sk2, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
