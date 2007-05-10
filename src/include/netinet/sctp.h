@@ -27,6 +27,7 @@
  *    Daisy Chang              <daisyc@us.ibm.com>
  *    Inaky Perez-Gonzalez     <inaky.gonzalez@intel.com>
  *    Sridhar Samudrala        <sri@us.ibm.com>
+ *    Vlad Yasevich		<vladislav.yasevich@hp.com>
  */
 
 #ifndef __linux_sctp_h__
@@ -98,6 +99,12 @@ enum sctp_optname {
 #define SCTP_DELAYED_ACK_TIME SCTP_DELAYED_ACK_TIME
 	SCTP_CONTEXT,	/* Receive Context */
 #define SCTP_CONTEXT SCTP_CONTEXT
+	SCTP_FRAGMENT_INTERLEAVE,
+#define SCTP_FRAGMENT_INTERLEAVE SCTP_FRAGMENT_INTERLEAVE
+	SCTP_PARTIAL_DELIVERY_POINT,	/* Set/Get partial delivery point */
+#define SCTP_PARTIAL_DELIVERY_POINT SCTP_PARTIAL_DELIVERY_POINT
+	SCTP_MAX_BURST,		/* Set/Get max burst */
+#define SCTP_MAX_BURST SCTP_MAX_BURST
 
 	/* Internal Socket Options. Some of the sctp library functions are 
 	 * implemented using these socket options.
@@ -192,7 +199,9 @@ typedef union {
 /* These are cmsg_types.  */
 typedef enum sctp_cmsg_type {
 	SCTP_INIT,              /* 5.2.1 SCTP Initiation Structure */
+#define SCTP_INIT SCTP_INIT
 	SCTP_SNDRCV,            /* 5.2.2 SCTP Header Information Structure */
+#define SCTP_SNDRCV SCTP_SNDRCV
 } sctp_cmsg_t;
 
 
@@ -214,6 +223,7 @@ struct sctp_assoc_change {
 	__u16 sac_outbound_streams;
 	__u16 sac_inbound_streams;
 	sctp_assoc_t sac_assoc_id;
+	__u8 sac_info[0];
 };
 
 /*
@@ -262,6 +272,7 @@ enum sctp_spc_state {
 	SCTP_ADDR_REMOVED,
 	SCTP_ADDR_ADDED,
 	SCTP_ADDR_MADE_PRIM,
+	SCTP_ADDR_CONFIRMED,
 };
 
 
@@ -483,10 +494,13 @@ struct sctp_setpeerprim {
  *  association peer's addresses. The following structure is used to
  *  make a set peer primary request:
  */
-struct sctp_prim {
+struct sctp_setprim {
 	sctp_assoc_t            ssp_assoc_id;
 	struct sockaddr_storage ssp_addr;
 } __attribute__((packed, aligned(4)));
+
+/* For backward compatibility use, define the old name too */
+#define sctp_prim sctp_setprim
 
 /*
  * 7.1.11 Set Adaptation Layer Indicator (SCTP_ADAPTATION_LAYER)
@@ -509,13 +523,17 @@ struct sctp_setadaptation {
  *   address's parameters:
  */
 enum  sctp_spp_flags {
-	SPP_HB_ENABLE = 1,		/*Enable heartbeats*/
-	SPP_HB_DISABLE = 2,		/*Disable heartbeats*/
-	SPP_HB_DEMAND = 4,		/*Send heartbeat immediately*/
-	SPP_PMTUD_ENABLE = 8,		/*Enable PMTU discovery*/
-	SPP_PMTUD_DISABLE = 16,		/*Disable PMTU discovery*/
-	SPP_SACKDELAY_ENABLE = 32,	/*Enable SACK*/
-	SPP_SACKDELAY_DISABLE = 64,	/*Disable SACK*/
+	SPP_HB_ENABLE = 1<<0,		/*Enable heartbeats*/
+	SPP_HB_DISABLE = 1<<1,		/*Disable heartbeats*/
+	SPP_HB = SPP_HB_ENABLE | SPP_HB_DISABLE,
+	SPP_HB_DEMAND = 1<<2,		/*Send heartbeat immediately*/
+	SPP_PMTUD_ENABLE = 1<<3,	/*Enable PMTU discovery*/
+	SPP_PMTUD_DISABLE = 1<<4,	/*Disable PMTU discovery*/
+	SPP_PMTUD = SPP_PMTUD_ENABLE | SPP_PMTUD_DISABLE,
+	SPP_SACKDELAY_ENABLE = 1<<5,	/*Enable SACK*/
+	SPP_SACKDELAY_DISABLE = 1<<6,	/*Disable SACK*/
+	SPP_SACKDELAY = SPP_SACKDELAY_ENABLE | SPP_SACKDELAY_DISABLE,
+	SPP_HB_TIME_IS_ZERO = 1<<7,	/* Set HB delay to 0 */
 };
 
 struct sctp_paddrparams {
@@ -563,6 +581,7 @@ struct sctp_paddrinfo {
 enum sctp_spinfo_state {
 	SCTP_INACTIVE,
 	SCTP_ACTIVE,
+	SCTP_UNCONFIRMED
 };
 
 /*
