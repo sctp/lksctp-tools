@@ -1291,7 +1291,7 @@ void icmpv6_frag_needed(struct sk_buff *skb)
 #if defined(CONFIG_IPV6)
 	struct sk_buff *iskb;
 	struct icmp6hdr *icmph;
-	struct ipv6hdr *ip6h = skb_network_header(skb);
+	struct ipv6hdr *ip6h = ipv6_hdr(skb);
 	unsigned int len;
 	struct rt6_info *rt;
 	

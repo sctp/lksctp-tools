@@ -253,7 +253,7 @@ struct sctp_chunk *test_get_chunk(struct list_head *tlist, int n);
 
 /* Macros for test frame.  */
 void *kalloc(int);
-void *krealloc(void *, int);
+void *__must_check krealloc(const void *, size_t, gfp_t);
 void free(void *);
 
 void simulate_internet(void);
