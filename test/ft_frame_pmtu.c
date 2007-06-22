@@ -333,8 +333,26 @@ int main(int argc, char *argv[])
 	msg_buf = test_build_msg(2000);
 	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 
+	sk1->sk_lock.owner = 1;
+	/* Set the mtu to 512 */
+	test_set_ip_mtu(512);
+
 	if (0 != test_run_network()) { DUMP_CORE; }
 
+	sk1->sk_lock.owner = 0;
+
+	if (asoc1->pmtu_pending != 1) { DUMP_CORE; }
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	if (asoc1->pathmtu != 512 || dst_mtu(t1->dst) != 512)
+		DUMP_CORE;
+
+	/* We need to wait for a retransmit before we can get both packets */
+        jiffies += t1->rto + 1;
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	test_frame_get_message(sk2, msg_buf);
 	test_frame_get_message(sk2, msg_buf);
 
 	/* Generate and handle the delayed SACK. */
