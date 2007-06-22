@@ -94,6 +94,7 @@ cpumask_t cpu_callout_map;
 
 #ifdef CONFIG_SMP
 struct cpuinfo_x86 cpu_data[NR_CPUS];
+DEFINE_PER_CPU(int, cpu_number);
 #endif
 
 /* This array holds the first and last local port number. It is defined
@@ -370,6 +371,15 @@ struct icmp_err icmp_err_convert[] = {
 		.errno =EHOSTUNREACH,	/* ICMP_PREC_CUTOFF */
 		.fatal =1,
 	},
+};
+
+static void ip_rt_update_pmtu(struct dst_entry *, u32);
+
+static struct dst_ops ipv4_dst_ops = {
+	.family = AF_INET,
+	.protocol = __constant_htons(ETH_P_IP),
+	.update_pmtu = ip_rt_update_pmtu,
+	.entry_size = sizeof(struct rtable),
 };
 
 struct ipv4_config ipv4_config;
@@ -2017,6 +2027,7 @@ int ip_route_output_key(struct rtable **rp, struct flowi *flp)
 	rt->u.dst.path = &rt->u.dst;
 	rt->u.dst.metrics[RTAX_MTU-1] = ip_mtu;
 	rt->u.dst.obsolete = 0;
+	rt->u.dst.ops = &ipv4_dst_ops;
 	rt->rt_flags = 0;
 	atomic_set(&rt->u.dst.__refcnt, 1);
 
@@ -2072,6 +2083,11 @@ int ip_route_output_key(struct rtable **rp, struct flowi *flp)
 	dst_hold(&rt->u.dst);
 
 	return 0;
+}
+
+static void ip_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
+{
+	return;
 }
 
 /* Cleanup any expired entries from the v4 and v6 routing tables. */
