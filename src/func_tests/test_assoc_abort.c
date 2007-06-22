@@ -231,7 +231,7 @@ main(int argc, char *argv[])
 		inmessage.msg_controllen = sizeof(incmsg);
 		error = test_recvmsg(clt_sk[i], &inmessage, MSG_WAITALL);
 		test_check_msg_notification(&inmessage, error,
-					    sizeof(struct sctp_assoc_change),
+					    sizeof(struct sctp_assoc_change)+4,
 					    SCTP_ASSOC_CHANGE, SCTP_COMM_LOST);	
 
 		close(clt_sk[i]);
