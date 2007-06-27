@@ -107,6 +107,7 @@ sctp_getaddrs(int sd, sctp_assoc_t id,
 		}
 		if (errno != ENOMEM ) {
 			/*unknown error*/
+			free(getaddrs);
 			return -1;
 		}
 		/*expand buffer*/
