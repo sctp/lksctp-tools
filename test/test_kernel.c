@@ -3740,3 +3740,8 @@ int net_ratelimit(void)
 {
 	return 1;
 }
+
+void fastcall lock_sock_nested(struct sock *sk, int subclass)
+{
+	return;
+}
