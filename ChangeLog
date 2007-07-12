@@ -3,6 +3,26 @@ Kernel Reference Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+K:NA	      Don't disable PMTU discovery when mtu is small
+K:NA          Flag a pmtu change request
+K:NA          Update pmtu handling to be similar to tcp
+K:NA          Fix leak in sctp_getsockopt_local_addrs when copy_to_user fails
+K:NA          Allow unspecified port in sctp_bindx()
+K:NA          Correctly set daddr for IPv6 sockets during peeloff
+K:NA          Do not include ABORT chunk header in the notification.
+K:NA          Correctly copy addresses in sctp_copy_laddrs.
+K:NA          Prevent OOPS if hmac modules didn't load
+K:NA	      Set assoc_id correctly during INIT collision.
+K:NA          Re-order SCTP initializations to avoid race with sctp_rcv()
+K:NA          Fix the SO_REUSEADDR handling to be similar to TCP.
+K:NA          Verify all destination ports in sctp_connectx.
+K:NA          Fix sctp_getsockopt_local_addrs_old() to use local storage.
+K:NA          Implement SCTP_MAX_BURST socket option.
+K:NA          Implement sac_info field in SCTP_ASSOC_CHANGE notification.
+K:NA          Honor flags when setting peer address parameters
+K:NA          Implement SCTP_ADDR_CONFIRMED state for ADDR_CHNAGE event.
+K:NA          Implement SCTP_PARTIAL_DELIVERY_POINT option.
+K:NA          Implement SCTP_FRAGMENT_INTERLEAVE socket option
 K:NA          Do not interleave non-fragments when in partial delivery
 K:NA          Unmap v4mapped addresses during SCTP_BINDX_REM_ADDR operation.
 K:NA          Fix assertion (!atomic_read(&sk->sk_rmem_alloc)) failed message
