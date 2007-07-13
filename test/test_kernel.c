@@ -603,7 +603,7 @@ static void copy_skb_header(struct sk_buff *new, const struct sk_buff *old)
 	new->pkt_type=old->pkt_type;
 	new->destructor = NULL;
 	new->mark=old->mark;
-#ifdef CONFIG_NETFILTER
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	new->nfct=old->nfct;
 	nf_conntrack_get(new->nfct);
 #endif
@@ -680,7 +680,7 @@ struct sk_buff *skb_clone(struct sk_buff *skb, unsigned int gfp_mask)
 	n->sk = NULL;
 	atomic_set(&n->users, 1);
 	n->destructor = NULL;
-#ifdef CONFIG_NETFILTER
+#if defined(CONFIG_NF_CONNTRACK) || defined(CONFIG_NF_CONNTRACK_MODULE)
 	nf_conntrack_get(skb->nfct);
 #endif
 	return n;
@@ -2004,6 +2004,24 @@ inet_sendmsg(struct socket *sock, struct msghdr *msg,
 	return 0;
 }
 
+static struct dst_entry *ip6_dst_check(struct dst_entry *dst, u32 cookie)
+{
+	return dst;
+}
+
+static void ip6_rt_update_pmtu(struct dst_entry *dst, u32 mtu)
+{
+}
+
+static struct dst_ops ip6_dst_ops = {
+	.family			=	AF_INET6,
+	.protocol		=	__constant_htons(ETH_P_IPV6),
+	.gc_thresh		=	1024,
+	.check			=	ip6_dst_check,
+	.update_pmtu		=	ip6_rt_update_pmtu,
+	.entry_size		=	sizeof(struct rt6_info),
+};
+
 /* Hacked testframe version of ip_route_output_key. It returns a route entry
  * for a given destination and source. If an entry is not present the the list,
  * a new entry is created and added to rt_list.
@@ -2205,6 +2223,7 @@ struct dst_entry *ip6_route_output(struct sock *sk, struct flowi *flp)
 	rt6->u.dst.obsolete = -1;
 	rt6->u.dst.error = 0;
 	atomic_set(&rt6->u.dst.__refcnt, 1);
+	rt6->u.dst.ops = &ip6_dst_ops;
 
 	ipv6_addr_copy(&rt6->rt6i_dst.addr,  &flp->fl6_dst);
 	if (ipv6_addr_any(&flp->fl6_src))
