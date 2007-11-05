@@ -387,7 +387,18 @@ struct ipv4_config ipv4_config;
 const char dst_underflow_bug_msg[] = KERN_DEBUG "BUG: dstunderflow %d: %p at %p\n";
 
 /* These are kernel functions we need to emulate for testing.  */
-void *__kmalloc(size_t s, unsigned int flags) { return((void *)malloc(s)); }
+void *__kmalloc(size_t s, unsigned int flags) {
+    void *p = malloc(s);
+
+    if (!p)
+	    return NULL;
+
+    if (flags & __GFP_ZERO)
+	    memset(p, 0, s);
+
+    return p;
+}
+
 void kfree(const void *m)
 {
 	free((void *)m);
@@ -2944,8 +2955,7 @@ struct kmem_cache {
 };
 struct kmem_cache *kmem_cache_create(const char *name, size_t size, 
 		size_t align, unsigned long flags,
-		void (*ctor)(void *, struct kmem_cache *, unsigned long),
-		void (*dtor)(void *, struct kmem_cache *, unsigned long))
+		void (*ctor)(void *, struct kmem_cache *, unsigned long))
 {
 	struct kmem_cache *cachep;
 
@@ -3654,11 +3664,6 @@ void *kmemdup(const void *src, size_t len, gfp_t gfp)
 	return p;
 }
 
-void *kmem_cache_zalloc(struct kmem_cache *cache, gfp_t flags)
-{
-	return kzalloc(cache->objsize, flags);
-}
-
 unsigned int jiffies_to_msecs(const unsigned long j)
 {
 #if HZ <= MSEC_PER_SEC && !(MSEC_PER_SEC % HZ)
@@ -3763,4 +3768,16 @@ int net_ratelimit(void)
 void fastcall lock_sock_nested(struct sock *sk, int subclass)
 {
 	return;
+}
+
+void fastcall call_rcu(struct rcu_head *head,
+			void (*func)(struct rcu_head *rcu))
+{
+    func(head);
+}
+
+void fastcall call_rcu_bh(struct rcu_head *head,
+			void (*func)(struct rcu_head *rcu))
+{
+    func(head);
 }

@@ -282,6 +282,8 @@ int main(int argc, char *argv[])
         jiffies += asoc2->timeouts[SCTP_EVENT_TIMEOUT_SACK] + 1;
 	if (0 != test_run_network()) { DUMP_CORE; }
 
+	dst_set_expires(t1->dst, 0);
+
 	/* Let the dst expire. */
 	jiffies += t1->dst->expires + 1;
 	if (0 != test_run_timeout()) { DUMP_CORE; }
