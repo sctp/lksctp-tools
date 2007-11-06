@@ -437,6 +437,7 @@ static void test_ulpevent()
 	kfree_skb(sctp_event2skb(event));
 
 	/* Build an endpoint. */
+	init_Internet();
 	sctp_init();
 	sk = sctp_socket(PF_INET, SOCK_SEQPACKET);
 	ep = sctp_sk(sk)->ep;

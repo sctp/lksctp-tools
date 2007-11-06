@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
         /* Do all that random stuff needed to make a sensible
          * universe.
          */
+	init_Internet();
         sctp_init();
 
 	/* Set some basic values which depend on the address family. */

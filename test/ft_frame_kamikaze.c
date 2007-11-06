@@ -193,8 +193,10 @@ main(int argc, char *argv[])
         /* Do all that random stuff needed to make a sensible
          * universe.
          */
+	init_Internet();
         sctp_init();
 	sctp_addip_enable = 1;
+	sctp_addip_noauth = 1;
 
 	/* Set some basic values which depend on the address family. */
 

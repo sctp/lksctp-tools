@@ -59,6 +59,7 @@ main(int argc, char *argv[])
 	int flags;
 
 	/* Do all that random stuff needed to make a sensible universe. */
+	init_Internet();
 	sctp_init();
 
 	/* Initialize the server and client addresses. */ 

@@ -67,6 +67,7 @@ main(int argc, char *argv[])
 	struct sctp_assocparams assocparams;
 
 	/* Do all that random stuff needed to make a sensible universe. */
+	init_Internet();
 	sctp_init();
 	/* Set Valid.Cookie.Life to 2 seconds to accelerate */
 	/* Create the two endpoints which will talk to each other.  */

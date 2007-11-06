@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 	int num_interleave;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 
 	sctp_rcvbuf_policy = 1;

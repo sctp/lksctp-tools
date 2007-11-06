@@ -7,7 +7,7 @@ INCLUDE_USR=../src/include
 INCLUDE_LINUX=${LKSCTP_LINUX}/include/linux
 INCLUDE_SCTP=${LKSCTP_LINUX}/include/net/sctp
 
-MACH_INCLUDES=${LKSCTP_LINUX}/include/asm-i386/mach-default
+MACH_INCLUDES=${LKSCTP_LINUX}/include/asm-x86/mach-default
 INCLUDES=-I. -I${INCLUDE} -I${LKSCTP_LINUX}/include -I${MACH_INCLUDES}
 USER_INCLUDES=-I. -I${INCLUDE_USR}
 
@@ -51,6 +51,7 @@ COMMON_OBJECTS= \
 	\
 	debug.o \
 	proc.o \
+	auth.o
 
 ifdef CONFIG_IPV6	
 COMMON_OBJECTS += ipv6.o

@@ -63,6 +63,7 @@ main(void)
         int msg1_len, msg2_len;
         int size1, size2, size;
 
+	init_Internet();
         sctp_init();
         printk("Expect three \"chunkifying w/o an sk\" messages.\n");
 
@@ -140,6 +141,7 @@ main(void)
         packet->subh.data_hdr = NULL;
         packet->param_hdr.v = NULL;
         packet->asoc = NULL;
+	packet->rcvr = &asoc;
         
         /* At this point we have a packet with a valid SCTP header in
          * host byte order.

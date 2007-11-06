@@ -64,6 +64,7 @@ main(int argc, char *argv[])
         int addr_len;
 
         /* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 
 	memset(&loop1, 0, sizeof(union sctp_addr));

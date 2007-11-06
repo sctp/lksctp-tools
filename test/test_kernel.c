@@ -288,7 +288,8 @@ struct net_device eth0_dev =
 	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 2};
 struct net_device loopback_dev =
 	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},  NULL, 0, NULL, 1};
-LIST_HEAD(dev_base_head);
+
+struct net init_net;
 rwlock_t inetdev_lock = RW_LOCK_UNLOCKED;
 rwlock_t dev_base_lock = RW_LOCK_UNLOCKED;
 rwlock_t addrconf_lock = RW_LOCK_UNLOCKED;
@@ -828,6 +829,14 @@ is_empty_network(int i)
         return(skb_queue_empty(&Internet[i]));
 }
 
+static void setup_net(struct net *net)
+{
+        atomic_set(&net->count, 1);
+	atomic_set(&net->use_count, 0);
+
+	INIT_LIST_HEAD(&net->dev_base_head);
+}
+
 void
 init_Internet(void)
 {
@@ -840,11 +849,20 @@ init_Internet(void)
         }
         skb_queue_head_init(&sidelist);
 
+	setup_net(&init_net);
+
 	/* Initialize multiple devices and the interfaces list.  */
-	list_add_tail(&loopback_dev.dev_list, &dev_base_head);
-	list_add_tail(&eth0_dev.dev_list, &dev_base_head);
-	list_add_tail(&eth1_dev.dev_list, &dev_base_head);
-	list_add_tail(&eth2_dev.dev_list, &dev_base_head);
+	list_add_tail(&loopback_dev.dev_list, &init_net.dev_base_head);
+	loopback_dev.nd_net = &init_net;
+
+	list_add_tail(&eth0_dev.dev_list, &init_net.dev_base_head);
+	eth0_dev.nd_net = &init_net;
+
+	list_add_tail(&eth1_dev.dev_list, &init_net.dev_base_head);
+	eth1_dev.nd_net = &init_net;
+
+	list_add_tail(&eth2_dev.dev_list, &init_net.dev_base_head);
+	eth2_dev.nd_net = &init_net;
 
 	loopback_dev.ip_ptr = &lo_ip_ptr;
 	network_mask[TEST_NETWORK0] = SCTP_IP_LOOPBACK & SCTP_MASK_LO;
@@ -2335,12 +2353,13 @@ sctp_lookup_endpoint(const union sctp_addr *laddr)
 {
 	struct sctp_hashbucket *head;
 	struct sctp_ep_common *ep;
+	struct hlist_node *node;
 	int hash;
 
 	hash = sctp_ep_hashfn(ntohs(laddr->v4.sin_port));
 	head = &sctp_ep_hashtable[hash];
 	read_lock(&head->lock);
-	for (ep= head->chain; ep; ep = ep->next) {
+	sctp_for_each_hentry(ep, node, &head->chain) {
 		if (sctp_endpoint_is_match(sctp_ep(ep), laddr)) { goto hit; }
 	}
 
@@ -2412,7 +2431,7 @@ sctp_socket(int class, int type)
 		return NULL;
 	} /* switch class */
 
-	retval->sk_prot = &sctp_prot;
+	retval->sk_prot_creator = retval->sk_prot = &sctp_prot;
 	socket = (struct socket *)t_new(struct socket, GFP_KERNEL);
 	if (NULL == socket) { return(NULL); }
 	file = (struct file *)t_new(struct file, GFP_KERNEL);
@@ -2463,7 +2482,6 @@ sock_create(int family, int type, int protocol, struct socket **res)
 
 	sk = sctp_socket(family, type);
 	if (sk) {
-		sk->sk_prot = &sctp_prot;
 		socket->sk = sk;
 		sk->sk_socket = socket;
 		*res = socket;
@@ -2482,8 +2500,8 @@ sock_release(struct socket *socket)
 	kfree(socket);
 } /* sock_release */
 
-struct sock *sk_alloc(int family, unsigned int priority, struct proto *prot,
-			 int zero_it)
+struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
+		      struct proto *prot, int zero_it)
 {
 	struct sock *sk;
 
@@ -2494,7 +2512,7 @@ struct sock *sk_alloc(int family, unsigned int priority, struct proto *prot,
         	if (NULL == sk) { return(NULL); }
 		memset(sk, 0, sizeof(struct sctp_sock));
 		sk->sk_family = PF_INET;
-		sk->sk_prot = prot;
+		sk->sk_prot_creator = sk->sk_prot = prot;
 		break;
 	}
 #if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
@@ -2507,6 +2525,7 @@ struct sock *sk_alloc(int family, unsigned int priority, struct proto *prot,
 		memset(sk, 0, sizeof(struct sctp6_sock));
 		sk->sk_family = PF_INET6;
 		sk->sk_prot = prot;
+		sk->sk_prot_creator = sk->sk_prot = prot;
 		sctp6sk = (struct sctp6_sock *)sk;
 		inet_sk(sk)->pinet6 = &(sctp6sk->inet6);
 		break;
@@ -2955,7 +2974,7 @@ struct kmem_cache {
 };
 struct kmem_cache *kmem_cache_create(const char *name, size_t size, 
 		size_t align, unsigned long flags,
-		void (*ctor)(void *, struct kmem_cache *, unsigned long))
+		void (*ctor)(struct kmem_cache *, void *))
 {
 	struct kmem_cache *cachep;
 
@@ -3235,7 +3254,7 @@ unsigned long sock_i_ino(struct sock *sk)
 	return ino;
 }
 
-struct net_device *dev_get_by_index(int ifindex)
+struct net_device *dev_get_by_index(struct net *net, int ifindex)
 {
 	int i;
 	struct net_device *dev = NULL;
@@ -3780,4 +3799,38 @@ void fastcall call_rcu_bh(struct rcu_head *head,
 			void (*func)(struct rcu_head *rcu))
 {
     func(head);
+}
+
+int sk_stream_mem_schedule(struct sock *sk, int size, int kind)
+{
+	int amt = sk_stream_pages(size);
+
+	sk->sk_forward_alloc += amt * SK_STREAM_MEM_QUANTUM;
+	atomic_add(amt, sk->sk_prot->memory_allocated);
+
+	return 1;
+}
+
+void __sk_stream_mem_reclaim(struct sock *sk)
+{
+	atomic_sub(sk->sk_forward_alloc / SK_STREAM_MEM_QUANTUM,
+		    sk->sk_prot->memory_allocated);
+	sk->sk_forward_alloc &= SK_STREAM_MEM_QUANTUM - 1;
+}
+
+void inet_get_local_port_range(int *low, int *high)
+{
+	*low = sysctl_local_port_range[0];
+	*high = sysctl_local_port_range[1];
+}
+
+u32 random32(void)
+{
+	return (u32)rand();
+}
+
+struct proc_dir_entry *proc_mkdir(const char *name,
+	                struct proc_dir_entry *parent)
+{
+    return NULL;
 }

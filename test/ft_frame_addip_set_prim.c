@@ -71,8 +71,10 @@ int main(int argc, char *argv[])
 	int			addr_len, addr_param_len;
 	int			retval;
 
+	init_Internet();
 	sctp_init();
 	sctp_addip_enable = 1;
+	sctp_addip_noauth = 1;
 
 #if TEST_V6
 	pf_class = PF_INET6;

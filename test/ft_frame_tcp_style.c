@@ -76,6 +76,7 @@ main(int argc, char *argv[])
 #endif /* TEST_V6 */
 
 	/* Do all that random stuff needed to make a sensible universe. */
+	init_Internet();
 	sctp_init();
 
 	/* Initialize the server and client addresses. */ 

@@ -58,11 +58,11 @@ main(int argc, char *argv[])
 	union sctp_addr addr1, addr2, addr3;
 	void *msg_buf;
 
-	/* Do all that random stuff needed to make a sensible universe. */
-	sctp_init();
-
 	/* Jump start the Internet. */
 	init_Internet();
+
+	/* Do all that random stuff needed to make a sensible universe. */
+	sctp_init();
 
 	/* Create the two endpoints which will talk to each other.  */
 	sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);

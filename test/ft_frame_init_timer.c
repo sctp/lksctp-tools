@@ -42,8 +42,8 @@ main(int argc, char *argv[])
         /* Do all that random stuff needed to make a sensible
          * universe.
          */
-        sctp_init();
 	init_Internet();
+        sctp_init();
 	
 	/* Do a little cheating to manipulate the protocol defaults to 
 	 * something easier to test. 

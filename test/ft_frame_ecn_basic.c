@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
         /* Do all that random stuff needed to make a sensible
          * universe.
          */
+	init_Internet();
 	sctp_init();
 
 	_get_sockets(&sk1, &sk2);

@@ -94,6 +94,7 @@ main(int argc, char *argv[])
 	struct sctp_signed_cookie *c;
 
 	/* Do all that random stuff needed to make a sensible universe. */
+	init_Internet();
 	sctp_init();
 
 	/* Case 1:  Modify my_vtag in the state cookie parameter of

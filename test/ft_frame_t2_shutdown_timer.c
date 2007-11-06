@@ -26,6 +26,7 @@ main(int argc, char *argv[])
 	int i;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 	sctp_hb_interval = 100000;
 	

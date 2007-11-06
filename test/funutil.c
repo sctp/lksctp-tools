@@ -77,6 +77,8 @@ extern int network_up[];
 extern struct notifier_block *inetaddr_notifier_on;
 
 extern void test_update_rtables(void);
+extern struct list_head dev_base_head;
+extern struct net init_net;
 
 /* These two variables are for killing chunks.  If slaughter is true,
  * we kill the next packet where the first chunk has a chunk type of
@@ -804,6 +806,7 @@ test_run_network_once(int net)
 {
 	struct sctp_ep_common *ep;
 	struct sctp_hashbucket *head;
+	struct hlist_node *node;
         int error = 0;
 	int i;
 
@@ -817,7 +820,7 @@ test_run_network_once(int net)
 
 	for (i = 0; i < sctp_ep_hashsize; i++) {
 		head = &sctp_ep_hashtable[i];
-		for (ep = head->chain; ep; ep = ep->next) {
+		sctp_for_each_hentry(ep, node, &head->chain) {
 			if (ep->sk->sk_err) {
 
 				error = ep->sk->sk_err;
@@ -1854,7 +1857,8 @@ void
 test_add_dev(struct net_device *dev)
 {
 
-	list_add_tail(&dev->dev_list, &dev_base_head);
+	list_add_tail(&dev->dev_list, &init_net.dev_base_head);
+	dev->nd_net = &init_net;
 
 	if (inetaddr_notifier_on) {
 		(*inetaddr_notifier_on->notifier_call)
@@ -1877,7 +1881,7 @@ test_get_source_from_route(uint32_t daddr)
 	uint32_t mask = SCTP_MASK_LO;
 
 
-	for_each_netdev(dev) {
+	for_each_netdev(&init_net, dev) {
 		if ((in_dev = __in_dev_get_rcu(dev)) == NULL) {
 			continue;
 		}

@@ -34,6 +34,7 @@ main(int argc, char *argv[])
 	int pf_class;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 	
 #if TEST_V6

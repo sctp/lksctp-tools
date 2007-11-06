@@ -84,8 +84,8 @@ main(int argc, char *argv[])
 	int error, i;
 
 	/* Do all that random stuff needed to make a sensible universe. */
-	sctp_init();
 	init_Internet();
+	sctp_init();
 
 	/* Initialize the server addresses. */
 #if TEST_V6

@@ -69,6 +69,7 @@ main(int argc, char *argv[])
 
         
         /* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
         sctp_init();
 
  	/*    Open sk1, bind it with 2 addresses. Open sk2,

@@ -61,6 +61,7 @@ int
 main(int argc, char * const argv[])
 {
 	/* Test normally. */
+	init_Internet();
 	test_ulpqueue();
 	printk("%s passes...\n", argv[0]);
 
@@ -80,7 +81,11 @@ _test_make_recvchunk(struct sctp_association *asoc,
 	struct sctp_chunk *chunk;
 	struct sctp_chunk *rcvchunk;
 	struct sctp_sndrcvinfo sinfo = {0};
+	struct sctp_datamsg *msg;
 	sctp_chunkhdr_t *ch;
+
+	msg = sctp_datamsg_new(GFP_KERNEL);
+	if (!msg) { DUMP_CORE; }
 
 	sinfo.sinfo_stream = stream;
 	sinfo.sinfo_ppid = ppid;
@@ -98,6 +103,14 @@ _test_make_recvchunk(struct sctp_association *asoc,
 	rcvchunk = sctp_chunkify(chunk->skb, asoc, asoc->base.sk);
 
 	if (NULL == rcvchunk) { DUMP_CORE; }
+
+	/* We need this ugly hack since we are both assigning ssns for
+	 * transmission and receive the same chunk.  We need to ref
+	 * the message since that's what the code expects.
+	 */
+	chunk->msg = msg;
+	list_add_tail(&chunk->frag_list, &msg->chunks);
+
 	sctp_chunk_assign_ssn(chunk);
 
 	/* Fix up the recvchunk like it has been dequeued from

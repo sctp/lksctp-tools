@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
 	struct sctp_paddrparams params1, params2;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 
 	/* Create the two endpoints which will talk to each other.  */
@@ -335,13 +336,13 @@ int main(int argc, char *argv[])
 	msg_buf = test_build_msg(2000);
 	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 
-	sk1->sk_lock.owner = 1;
+	sk1->sk_lock.owned = 1;
 	/* Set the mtu to 512 */
 	test_set_ip_mtu(512);
 
 	if (0 != test_run_network()) { DUMP_CORE; }
 
-	sk1->sk_lock.owner = 0;
+	sk1->sk_lock.owned = 0;
 
 	if (asoc1->pmtu_pending != 1) { DUMP_CORE; }
 

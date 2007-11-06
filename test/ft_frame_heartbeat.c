@@ -44,6 +44,7 @@ main(int argc, char *argv[])
 	unsigned long rto_min_jif;
 
         /* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
         sctp_init();
 
         /* The following makes sure all transports have the same rto

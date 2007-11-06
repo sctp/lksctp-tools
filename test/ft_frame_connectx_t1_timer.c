@@ -67,8 +67,8 @@ main(int argc, char *argv[])
 	int pf_class;
 
 	/* Do all that random stuff needed to make a sensible universe. */
-	sctp_init();
 	init_Internet();
+	sctp_init();
 
 	memset(svr_cntr, sizeof(svr_cntr), 0);
 

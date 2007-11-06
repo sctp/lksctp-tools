@@ -26,6 +26,7 @@ main(int argc, char *argv[])
 	uint32_t autoclose;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
 	
 	/* Create the two endpoints which will talk to each other.  */

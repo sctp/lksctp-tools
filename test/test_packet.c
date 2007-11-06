@@ -117,6 +117,7 @@ main(void)
         skb_queue_head_init(&Aether);
 
         /* Build an endpoint. */
+	init_Internet();
         sctp_init();
         sk = sctp_socket(PF_INET, SOCK_SEQPACKET);
 	ep = sctp_sk(sk)->ep;
