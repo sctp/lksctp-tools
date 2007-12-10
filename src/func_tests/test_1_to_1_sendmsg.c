@@ -248,6 +248,7 @@ main(int argc, char *argv[])
 
 	tst_resm(TPASS, "sendmsg() on a closed association - EPIPE");
 
+	close(acpt1_sk);
 	close(sk);
 	close(lstn_sk);
 	close(acpt_sk);

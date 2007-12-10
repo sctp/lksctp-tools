@@ -80,6 +80,7 @@ v4test: ${PASSING_KERN_TESTS}
 			echo "$$a fails";	\
 			exit 1;			\
 		fi;				\
+		sleep 1;			\
 	done
 	@echo "Hoody hoo!"
 
@@ -96,6 +97,7 @@ v6test: ${PASSING_V6_KERN_TESTS}
 			echo "$$a fails";	\
 			exit 1;			\
 		fi;				\
+		sleep 1;			\
 	done
 	@echo "Hoody hoo!"
 
