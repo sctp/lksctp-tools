@@ -94,7 +94,9 @@ cpumask_t cpu_callout_map;
 
 #ifdef CONFIG_SMP
 struct cpuinfo_x86 cpu_data[NR_CPUS];
+unsigned long __per_cpu_offset[NR_CPUS];
 DEFINE_PER_CPU(int, cpu_number);
+DEFINE_PER_CPU(unsigned long, this_cpu_off);
 #endif
 
 /* This array holds the first and last local port number. It is defined
@@ -2501,14 +2503,14 @@ sock_release(struct socket *socket)
 } /* sock_release */
 
 struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
-		      struct proto *prot, int zero_it)
+		      struct proto *prot)
 {
 	struct sock *sk;
 
 	switch (family){
 	case PF_INET:
 	{
-        	sk = (struct sock *)t_new(struct sctp_sock, GFP_KERNEL);
+        	sk = (struct sock *)t_new(struct sctp_sock, GFP_KERNEL|__GFP_ZERO);
         	if (NULL == sk) { return(NULL); }
 		memset(sk, 0, sizeof(struct sctp_sock));
 		sk->sk_family = PF_INET;
@@ -2520,7 +2522,7 @@ struct sock *sk_alloc(struct net *net, int family, gfp_t priority,
 	{
 		struct sctp6_sock *sctp6sk;
 
-        	sk = (struct sock *)t_new(struct sctp6_sock, GFP_KERNEL);
+        	sk = (struct sock *)t_new(struct sctp6_sock, GFP_KERNEL|__GFP_ZERO);
         	if (NULL == sk) { return(NULL); }
 		memset(sk, 0, sizeof(struct sctp6_sock));
 		sk->sk_family = PF_INET6;
