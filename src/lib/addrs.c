@@ -129,7 +129,7 @@ sctp_getaddrs(int sd, sctp_assoc_t id,
 	/* we skip traversing the list, allocating a new buffer etc. and enjoy
 	 * a simple hack*/
 	cnt = getaddrs->addr_num;
-	memmove(getaddrs, getaddrs + 1, len - sizeof(struct sctp_getaddrs));
+	memmove(getaddrs, getaddrs + 1, len);
 	*addrs = (struct sockaddr*)getaddrs;
 
 	return cnt;
