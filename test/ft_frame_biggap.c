@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/*
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) Cisco 1999 
  * Copyright (c) Motorola 1999,2000,2001 
@@ -11,14 +11,12 @@
  * advance time, but if we have fast retran implemented, we should
  * retransmit the missing tsn after only four SACKs.
  *
- * This file is part of the SCTP kernel reference Implementation
- * 
- * The SCTP reference implementation is free software; you can
+ * This SCTP implementation is free software; you can
  * redistribute it and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software Foundation; either
  * version 2, or (at your option) any later version.
  * 
- * the SCTP reference implementation  is distributed in the hope that it 
+ * This SCTP implementation  is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ^^^^^^^^^^^^^^^^^^^^^^^^
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

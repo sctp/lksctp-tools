@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation: User API extensions.
+/* SCTP kernel Implementation: User API extensions.
  *
  * sctp.h
  *
@@ -6,7 +6,7 @@
  *    http://www.gnu.org/copyleft/lesser.txt 
  *
  * This file is part of the user library that offers support for the
- * SCTP kernel reference Implementation. The main purpose of this
+ * Linux Kernel SCTP Implementation. The main purpose of this
  * code is to provide the SCTP Socket API mappings for user
  * application to interface with SCTP in kernel.
  *

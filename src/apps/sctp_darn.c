@@ -1,17 +1,17 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999 Cisco
  * Copyright (c) 1999, 2000, 2001 Motorola
  * Copyright (c) 2001 Nokia
  * Copyright (c) 2001 La Monte H.P. Yarroll
  *
- * The SCTP reference implementation is free software;
+ * The SCTP implementation is free software;
  * you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  *
- * The SCTP reference implementation is distributed in the hope that it
+ * The SCTP implementation is distributed in the hope that it
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -40,7 +40,7 @@
  *    Sridhar Samudrala <sri@us.ibm.com>
  */
 
-/* This is a userspace test application for the SCTP kernel reference
+/* This is a userspace test application for the SCTP kernel 
  * implementation state machine.  It is vaguely inspired by Stevens'
  * program "sock".
  *

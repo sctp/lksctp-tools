@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/* 
  * (C) Copyright IBM Corp. 2003
  * Copyright (c) 2003 Intel Corp.
  *

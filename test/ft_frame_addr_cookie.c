@@ -1,10 +1,7 @@
-/* SCTP kernel reference Implementation
+/*
  * (C) Copyright IBM Corp. 2001
  * 
- * This file is part of the SCTP kernel reference Implementation.
- * 
- * This is a functional test for the SCTP kernel reference
- * implementation.
+ * This is a functional test for the SCTP kernel implementation.
  * This test will test the SCTP ports with the following scenarios:
  * 
  *    Open socket sk1, bind it with 2 addresses. Open socket sk2,
@@ -15,13 +12,13 @@
  *    address list of the association under sk1 contains the 
  *    original 2 bound addresses.
  *
- * The SCTP reference implementation  is free software; 
+ * This SCTP implementation  is free software; 
  * you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  * 
- * The SCTP reference implementation  is distributed in the hope that it 
+ * This SCTP implementation  is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

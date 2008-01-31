@@ -1,8 +1,8 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2002, 2003
  * Copyright (C) 1999 Cisco and Motorola
  *
- * This file is part of the SCTP Linux kernel reference implementation
+ * This file is part of the SCTP Linux kernel implementation
  * 
  * This is a functional test for the SCTP kernel reference
  * implementation state machine.

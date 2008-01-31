@@ -1,8 +1,8 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (C) 1999 Cisco and Motorola
  *
- * This file is part of the SCTP Linux kernel reference implementation.
+ * This file is part of the SCTP Linux kernel implementation.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
  *
  *                                                                       
  * ft_frame_local_addr.c
- * This is a functional test for the SCTP kernel reference implementation.
+ * This is a functional test for the SCTP kernel implementation.
  *
  * This program tests the local addresses with the following scenario:
  * 

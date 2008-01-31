@@ -1,21 +1,21 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999 Cisco
  * Copyright (c) 1999-2001 Motorola
  * Copyright (c) 2001 Nokia, Inc.
  * Copyright (c) 2001 La Monte H.P. Yarroll
  *
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  *
  * These functions populate the sctp protocol structure for sockets.
  *
- * The SCTP reference implementation  is free software;
+ * The SCTP implementation  is free software;
  * you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  *
- * the SCTP reference implementation  is distributed in the hope that it
+ * the SCTP implementation  is distributed in the hope that it
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

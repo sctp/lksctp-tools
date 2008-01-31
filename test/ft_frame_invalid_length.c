@@ -1,17 +1,17 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright Hewlett-Packard Corp. 
  *
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  *
  * This test is focused on testing the invalid paramater and chunk lengths.
  *
- * The SCTP reference implementation is free software;
+ * The SCTP implementation is free software;
  * you can redistribute it and/or modify it under the terms of
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  *
- * The SCTP reference implementation is distributed in the hope that it
+ * The SCTP implementation is distributed in the hope that it
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -37,7 +37,7 @@
  */
 
 /*
- * This is a functional test for the SCTP kernel reference implementation.
+ * This is a functional test for the SCTP kernel implementation.
  *
  * RFC 3.2.1
  *

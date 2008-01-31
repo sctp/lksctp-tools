@@ -1,10 +1,10 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999-2000 Cisco, Inc.
  * Copyright (c) 1999-2001 Motorola, Inc.
  *
  * ft_frame_nobind.c
- * This is a functional test for the SCTP kernel reference implementation.
+ * This is a functional test for the SCTP kernel implementation.
  *
  * This test will test the SCTP auto-bind capability defined as a 
  * UDP-style API support:
@@ -14,13 +14,13 @@
  * initiates a new association,, the system picks an ephemeral port and 
  * will choose an address set equivalent to binding with a wildcard address. 
  *
- * The SCTP reference implementation  is free software; 
+ * The SCTP implementation  is free software; 
  * you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  * 
- * the SCTP reference implementation  is distributed in the hope that it 
+ * the SCTP implementation  is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

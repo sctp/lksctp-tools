@@ -1,9 +1,9 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * Copyright (c) 1999, Cisco
  * Copyright (c) 1999, Motorola
  * Copyright (c) 2002, International Business Machines, Corp.
  * 
- * This file is part of the SCTP kernel reference Implementation.
+ * This file is part of the SCTP kernel Implementation.
  *  
  * This is a standalone program to test struct sctp_packet.
  *
@@ -11,13 +11,13 @@
  * endpoint, as well as properly formed chunks for output to the "wire".
  *
  *
- * The SCTP reference implementation  is free software; 
+ * The SCTP implementation  is free software; 
  * you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  *
- * The SCTP reference implementation  is distributed in the hope that it 
+ * The SCTP implementation  is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied 
  *                    ***********************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the

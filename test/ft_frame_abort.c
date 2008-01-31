@@ -1,11 +1,9 @@
-/* SCTP kernel reference Implementation 
+/*
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (C) 1999 Cisco and Motorola
  *
- * This file is part of the SCTP Linux kernel reference implementation
- * 
- * This is a functional test for the SCTP kernel reference
- * implementation state machine.
+ * This is a functional test for the SCTP kernel implementation
+ * state machine.
  * 
  * Set up a link, send an abort with the originator's verification
  * tag, see that the receiving association is down.  Set up a second

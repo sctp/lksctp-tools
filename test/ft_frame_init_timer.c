@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  *
  * This is the Functional Test for testing init timeout functionality for 

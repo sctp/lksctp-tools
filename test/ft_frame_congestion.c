@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/*
  * (C) Copyright IBM Corp. 2001, 2004
  *
  * This is a Functional Test to verify Congestion control functionality 

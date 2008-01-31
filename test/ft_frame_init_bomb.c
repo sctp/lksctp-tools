@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999-2000 Cisco, Inc.
  * Copyright (c) 1999-2001 Motorola, Inc.
@@ -6,7 +6,7 @@
  * Copyright (c) 2001 Nokia, Inc.
  *
  * This is the Functional Test for basic functionality of
- * the SCTP kernel reference implementation state machine.
+ * the SCTP kernel implementation state machine.
  * 
  * It walks the state machine through a complete data exchange--we set
  * up a link, send three data messages, and then tear down the link

@@ -1,10 +1,10 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999 Cisco
  * Copyright (c) 1999,2000,2001 Motorola
  * Copyright (c) 2001 Nokia
  * 
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  * 
  * This is a standalone program to test SCTP related CMSG parsing.  
  * 

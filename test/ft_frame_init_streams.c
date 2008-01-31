@@ -1,7 +1,7 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  *
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  *
  * This is a standalone program to test stream negotiation.
  * 

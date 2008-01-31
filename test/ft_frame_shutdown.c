@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  *
  * This is a Functional Test for verifying the T5-SHUTDOWN guard timer and

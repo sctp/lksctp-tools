@@ -1,8 +1,8 @@
-/* SCTP Kernel reference Implementation
+/* SCTP Kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 2001-2002 Intel Corp.
  *
- * This file is part of the SCTP Linux kernel reference implementation.
+ * This file is part of the SCTP Linux kernel implementation.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
  * draft-ietf-tsvwg-sctpsocket-07.txt.
  *
  * ft_frame_getfreeaddrs.c
- * This is a functional test for the SCTP kernel reference implementation.
+ * This is a functional test for the SCTP kernel implementation.
  *
  * This program tests the getsockopt option:
  * 	SCTP_GET_PEER_ADDRS_NUM		SCTP_GET_PEER_ADDRS

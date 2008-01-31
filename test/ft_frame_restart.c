@@ -1,10 +1,10 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright HP  2004
  * (C) Copyright IBM Corp 2000, 2003
  * Copyright (C) 1999 Cisco and Motorola
  * Copyright (c) Nokia, 2002
  *
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  *
  * $Id: ft_frame_restart.c, 
  * 
@@ -25,13 +25,13 @@
  * The association will be accepted as a new one by peer. 
  * 3) The stale data form former sk1 should be discard.
  * 
- * The SCTP reference implementation is free software; 
+ * The SCTP implementation is free software; 
  * you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  * 
- * The SCTP reference implementation is distributed in the hope that it 
+ * The SCTP implementation is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

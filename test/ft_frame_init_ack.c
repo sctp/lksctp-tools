@@ -1,8 +1,8 @@
-/* SCTP kernel reference Implementation 
+/* SCTP kernel Implementation 
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (C) 1999-2001 Cisco, Motorola, and Intel
  *
- * This file is part of the SCTP kernel reference Implementation
+ * This file is part of the SCTP kernel Implementation
  * 
  * This is the Functional Test for the ability to handle INIT_ACK
  * whose source IPv4 address doesn't match the destination IPv4 of a
@@ -14,13 +14,13 @@
  * address of the INIT, however, using a different source address.
  * The test stops after both endpoint receives COMM_UP event.
  *
- * The SCTP reference implementation  is free software; 
+ * The SCTP implementation  is free software; 
  * you can redistribute it and/or modify it under the terms of 
  * the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
  * any later version.
  * 
- * the SCTP reference implementation  is distributed in the hope that it 
+ * the SCTP implementation  is distributed in the hope that it 
  * will be useful, but WITHOUT ANY WARRANTY; without even the implied
  *                 ************************
  * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.

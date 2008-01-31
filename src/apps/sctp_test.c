@@ -1,11 +1,11 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (c) 1999 Cisco
  * Copyright (c) 1999, 2000, 2001 Motorola
  * Copyright (c) 2001-2002 Nokia
  * Copyright (c) 2001 La Monte H.P. Yarroll
  *
- * This is a userspace test application for the SCTP kernel reference
+ * This is a userspace test application for the SCTP kernel 
  * implementation.
  *
  * This program is free software; you can redistribute it and/or modify

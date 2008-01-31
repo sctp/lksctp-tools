@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * Copyright (c) 2003 Intel Corp.
  *
  * This is the Functional frame test to verify the ungraceful abort of an

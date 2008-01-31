@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/*
  * (C) Copyright IBM Corp. 2001, 2003
  *
  * This is a Functional Test to verify autoclose functionality and the

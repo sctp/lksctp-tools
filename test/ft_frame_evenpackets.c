@@ -1,8 +1,8 @@
-/* SCTP kernel reference Implementation
+/* SCTP kernel Implementation
  * (C) Copyright IBM Corp. 2001, 2003
  * Copyright (C) 1999 Cisco and Motorola
  * 
- * This file is part of the SCTP Linux kernel reference implementation
+ * This file is part of the SCTP Linux kernel implementation
  * 
  * This program is free software; you can redistribute it and/or modify 
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
 
 /* ft_frame_evenpackets.c
  * This is the Functional Test for receiving (and sacking) an even
- * number of packets in the SCTP kernel reference implementation state machine.
+ * number of packets in the SCTP kernel implementation state machine.
  * 
  * It walks the state machine through a complete data exchange--we set
  * up a link, send three data messages, and then tear down the link

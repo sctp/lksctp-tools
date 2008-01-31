@@ -1,4 +1,4 @@
-/* SCTP kernel reference Implementation
+/*
  * (C) Copyright IBM Corp. 2001, 2003
  *
  * This is the Functional frame test to verify the graceful shutdown of an
