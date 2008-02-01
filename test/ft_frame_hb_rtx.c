@@ -138,7 +138,7 @@ main(int argc, char *argv[])
         	printf("Prepare to send first Hearbeat.\n");
 	}
 
-	for (i = 0; i < asoc1->max_retrans; i++) {
+	for (i = 0; i <= asoc1->max_retrans; i++) {
 		jiffies = t->hb_timer.expires + 1;
 		test_run_timeout();
 
