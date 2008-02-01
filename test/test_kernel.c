@@ -3836,3 +3836,14 @@ struct proc_dir_entry *proc_mkdir(const char *name,
 {
     return NULL;
 }
+
+
+#ifdef CONFIG_LOCKDEP
+
+void lockdep_init_map(struct lockdep_map *lock, const char *name,
+		      struct lock_class_key *key, int subclass)
+{
+	return;
+}
+
+#endif
