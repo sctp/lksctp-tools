@@ -4,7 +4,7 @@
 # Author          : Francois-Xavier Kowalski
 # Created On      : Sat Jan 10 14:53:53 2004
 # Last Modified By: Vlad Yasevich
-# Last Modified On: Fri Jun  29 12:08:04 2007
+# Last Modified On: Fri Feb  1 14:09:04 2008
 # 
 #   (c) Copyright Hewlett-Packard Company 2004
 #   (C) Copyright IBM Corp. 2004
@@ -25,7 +25,7 @@
 #   Free Software Foundation, Inc., 675 Mass Ave, Cambridge,
 #   MA 02139, USA.
 
-%define kernel_version 2.6.22
+%define kernel_version 2.6.24
 %define kernel_extraflags
 %define lksctp_version @VERSION@
 
@@ -129,6 +129,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Fri Feb 01 2008 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.8-1
+- 1.0.8 Release
+
 * Fri Jun 29 2007 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.7-1
 - 1.0.7 Release
 

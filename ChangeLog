@@ -1,8 +1,81 @@
-Version 2.6.22-1.0.7 of the Developers' Release of the SCTP
-Kernel Reference Implementation is available from
+Version 2.6.24-1.0.8 of the Developers' Release of the SCTP
+Linux Kernel Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+
+lksctp-2.6.24-1.0.5: Fri Feb  01 14:55:00 EST 2008
+K:NA          Add back the code that accounted for FORWARD_TSN parameter in
+              INIT.
+K:NA          Correctly handle AUTH parameters in unexpected INIT
+K:NA          Fix the name of the authentication event.
+K:NA          Spelling fixes
+K:NA          Flush fragment queue when exiting partial delivery.
+K:NA          Fix the bind_addr info during migration.
+K:NA          Add bind hash locking to the migrate code
+K:NA          Fix build issues with SCTP AUTH.
+K:NA          Fix chunk acceptance when no authenticated chunks were listed.
+K:NA          Fix the supported extensions paramter
+K:NA          Fix SCTP-AUTH to correctly add HMACS paramter.
+K:NA          Fix the number of HB transmissions.
+K:NA          Add missing "space"
+K:NA          Always flush the queue when uncorcking.
+K:NA          Clean-up some defines for regressions tests.
+K:NA          Fix PR-SCTP to deliver all the accumulated ordered chunks
+K:NA          Make sctp_verify_param return multiple indications.
+K:NA          Convert custom hash lists to use hlist.
+K:NA          Use hashed lookup when looking for an association.
+K:NA          Fix a potential race between timers and receive path.
+K:NA          Allow ADD_IP to work with AUTH for backward compatibility.
+K:NA          Correctly disable ADD-IP when AUTH is not supported.
+K:NA          Update RCU handling during the ADD-IP case
+K:NA          Fix difference cases of retransmit.
+K:NA          Fix to process bundled ASCONF chunk correctly
+K:NA          Fix bad formatted comment in outqueue.c
+Patch         Use the {DEFINE|REF}_PROTO_INUSE infrastructure
+K:NA          SCTP endianness annotations regression
+K:NA          net/sctp/auth.c: make 3 functions static
+K:NA          #if 0 sctp_update_copy_cksum()
+K:NA          Consolidate sctp_ulpq_renege_xxx functions
+Patch         port randomization
+Patch         Tie ADD-IP and AUTH functionality as required by spec.
+Patch         API updates to suport SCTP-AUTH extensions.
+Patch         Implement the receive and verification of AUTH chunk
+Patch         Enable the sending of the AUTH chunk.
+Patch         Implement SCTP-AUTH parameter processing
+Patch         Implement SCTP-AUTH initializations.
+Patch         Implement SCTP-AUTH internals
+Patch         protocol definitions for SCTP-AUTH implementation
+K:NA          Move sysctl_sctp_[rw]mem definitions to protocol.
+Patch         Implement the Supported Extensions Parameter
+K:NA          net/sctp/socket.c: make 3 variables static
+K:NA          Make sctp_addto_param() static.
+Patch         Rewrite of sctp buffer management code
+K:NA          Add paramters validity check for ASCONF chunk
+K:NA          Discard OOTB packetes with bundled INIT early.
+K:NA          Clean up OOTB handling and fix infinite loop processing
+K:NA          Explicitely discard OOTB chunks
+K:NA          Send ABORT chunk with correct tag in response to INIT ACK
+K:NA          Validate buffer room when processing sequential chunks
+K:NA          Convert bind_addr_list locking to RCU
+K:NA          Add RCU synchronization around sctp_localaddr_list
+K:NA          Fix to handle invalid parameter length correctly
+K:NA          Abort on COOKIE-ECHO if backlog is exceeded.
+K:NA          Correctly disable listening when backlog is 0.
+K:NA          Do not retransmit chunks that are newer then rtt.
+K:NA          Uncomfirmed transports can't become Inactive
+K:NA          Pick the correct port when binding to 0.
+K:NA          Use net_ratelimit to suppress error messages print too fast
+K:NA          Fix to encode PROTOCOL VIOLATION error cause correctly
+K:NA          Fix sctp_addto_chunk() to add pad with correct length
+K:NA          Assign stream sequence numbers to the entire message
+K:NA          properly clean up fragment and ordering queues during FWD-TSN.
+K:NA	      remove useless code in function sctp_init_cause
+K:NA	      drop SACK if ctsn is not less than the next tsn of assoc
+K:NA	      IPv4 mapped addr not returned in SCTPv6 accept()
+K:NA          Fix whitespace errors.
+
+lksctp-2.6.22-1.0.7: Thu Jul  12 12:24:14 EDT 2007
 K:NA	      Don't disable PMTU discovery when mtu is small
 K:NA          Flag a pmtu change request
 K:NA          Update pmtu handling to be similar to tcp
