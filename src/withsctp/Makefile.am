@@ -20,7 +20,7 @@ pkgdoc_DATA = sctp_load_libs.c sctp_socket.c sctp_bind.c \
 	sctp_sockopt.c sctp_socket.h checksctp.c
 
 withsctp: withsctp.in
-        $(edit) $< >$@
+	$(edit) $< >$@
 
 EXTRA_DIST += withsctp.in
 
