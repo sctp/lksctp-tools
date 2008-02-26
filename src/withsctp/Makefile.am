@@ -18,3 +18,10 @@ libwithsctp_la_LDFLAGS = -version-info 1:8:0 -ldl
 
 pkgdoc_DATA = sctp_load_libs.c sctp_socket.c sctp_bind.c \
 	sctp_sockopt.c sctp_socket.h checksctp.c
+
+withsctp: withsctp.in
+        $(edit) $< >$@
+
+EXTRA_DIST += withsctp.in
+
+CLEANFILES += withsctp

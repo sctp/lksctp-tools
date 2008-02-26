@@ -11,3 +11,8 @@
 
 
 ## FIXME: Your stuff here
+
+edit = @sed \
+	-e "s|\@bindir\@|$(bindir)|" \
+	-e "s|\@libdir\@|$(libdir)|" \
+	-e "s|\@PACKAGE\@|$(PACKAGE)|"
