@@ -50,6 +50,9 @@ sctp_opt_info(int sd, sctp_assoc_t id, int opt, void *arg, socklen_t *size)
 	case SCTP_MAXSEG:
 	case SCTP_STATUS:
 	case SCTP_GET_PEER_ADDR_INFO:
+	case SCTP_AUTH_ACTIVE_KEY:
+	case SCTP_PEER_AUTH_CHUNKS:
+	case SCTP_LOCAL_AUTH_CHUNKS:
 		*(sctp_assoc_t *)arg = id;
 		return getsockopt(sd, IPPROTO_SCTP, opt, arg, size);
 	default:
