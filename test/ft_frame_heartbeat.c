@@ -295,12 +295,12 @@ main(int argc, char *argv[])
 		DUMP_CORE;
 
 	/* Reset all the timers so all heartbeats occur at the same time. */
-	sctp_transport_reset_timers(t1[0]);
-	sctp_transport_reset_timers(t1[1]);
-	sctp_transport_reset_timers(t1[2]);
-	sctp_transport_reset_timers(t2[0]);
-	sctp_transport_reset_timers(t2[1]);
-	sctp_transport_reset_timers(t2[2]);
+	sctp_transport_reset_timers(t1[0], 0);
+	sctp_transport_reset_timers(t1[1], 0);
+	sctp_transport_reset_timers(t1[2], 0);
+	sctp_transport_reset_timers(t2[0], 0);
+	sctp_transport_reset_timers(t2[1], 0);
+	sctp_transport_reset_timers(t2[2], 0);
 
 	/* Test that heartbeat is actually sent. */
 	printf("About to cause heartbeats to happen\n");

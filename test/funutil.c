@@ -1858,11 +1858,14 @@ test_add_dev(struct net_device *dev)
 {
 
 	list_add_tail(&dev->dev_list, &init_net.dev_base_head);
+#ifdef CONFIG_NET_NS
 	dev->nd_net = &init_net;
+#endif
 
 	if (inetaddr_notifier_on) {
 		(*inetaddr_notifier_on->notifier_call)
-                        (inetaddr_notifier_on, NETDEV_UP, dev);
+                        (inetaddr_notifier_on, NETDEV_UP,
+			 ((struct in_device *)dev->ip_ptr)->ifa_list);
 	}
 
 } /* test_add_dev() */

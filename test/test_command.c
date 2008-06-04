@@ -41,6 +41,19 @@
 #include <net/sctp/sm.h>
 #include <funtest.h>
 
+/* We need this now to ru the test. The kernel has been using the _sf
+ * version which BUGed out in the overflow case, so this fuction has
+ * be removed to de-bloat the kernel.
+ */
+static int sctp_add_cmd(sctp_cmd_seq_t *seq, sctp_verb_t verb, sctp_arg_t obj)
+{
+	if (seq->next_free_slot >= SCTP_MAX_NUM_COMMANDS)
+		return 0;
+
+	sctp_add_cmd_sf(seq, verb, obj);
+	return 1;
+}
+
 int
 main(int argc, char * const argv[])
 {
