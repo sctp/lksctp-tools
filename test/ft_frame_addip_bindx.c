@@ -45,6 +45,7 @@
  */
 
 #include <net/sctp/sm.h>
+#include <net/sctp/checksum.h>
 #include <funtest.h>
 
 int main(int argc, char *argv[])
@@ -60,9 +61,18 @@ int main(int argc, char *argv[])
 	sctp_chunkhdr_t         	*chunk;
 	sctp_addiphdr_t         	*addip_hdr;
 	sctp_addip_param_t      	*addip_param;
+	union sctp_addr_param		*addr_param;
 	union sctp_addr 		addr1, addr2;
-	union sctp_addr			bindx_addr1, bindx_addr2;
+	union sctp_addr			bindx_addr1, bindx_addr2, bindx_addr3;
 	struct list_head		*p;	
+	struct sctphdr			*sh;
+	uint32_t			sum;
+#if TEST_V6
+	struct ipv6hdr			*ip;
+#else
+	struct iphdr 			*ip;
+#endif
+
 	
 	char	*messages = "I love the world!";
 	int	pf_class;
@@ -88,6 +98,9 @@ int main(int argc, char *argv[])
 	bindx_addr2.v6.sin6_family = AF_INET6;
 	bindx_addr2.v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_GLOBAL_ETH2;
 	bindx_addr2.v6.sin6_port = htons(SCTP_TESTPORT_1);	
+	bindx_addr3.v6.sin6_family = AF_INET6;
+	bindx_addr3.v6.sin6_addr = (struct in6_addr) SCTP_B_ADDR6_GLOBAL_ETH0;
+	bindx_addr3.v6.sin6_port = htons(SCTP_TESTPORT_1);	
 	addr_len = sizeof(struct sockaddr_in6);
 	addr_param_len = sizeof(sctp_ipv6addr_param_t);
 #else
@@ -104,6 +117,9 @@ int main(int argc, char *argv[])
 	bindx_addr2.v4.sin_family = AF_INET;
 	bindx_addr2.v4.sin_addr.s_addr = SCTP_ADDR_ETH2;
 	bindx_addr2.v4.sin_port = htons(SCTP_TESTPORT_1);
+	bindx_addr3.v4.sin_family = AF_INET;
+	bindx_addr3.v4.sin_addr.s_addr = SCTP_B_ETH0;
+	bindx_addr3.v4.sin_port = htons(SCTP_TESTPORT_1);
 	addr_len = sizeof(struct sockaddr_in);
 	addr_param_len = sizeof(sctp_ipv4addr_param_t);
 #endif
@@ -173,7 +189,7 @@ int main(int argc, char *argv[])
 	if (0 > test_run_network_once(TEST_NETWORK_ETH0))
 		DUMP_CORE;
 
-	network = get_Internet(TEST_NETWORK_ETH1);
+	network = get_Internet(TEST_NETWORK_ETH0);
 	skb = network->next;
 	packet = test_get_sctp(skb->data);
 	chunk = &packet->ch;
@@ -221,6 +237,110 @@ int main(int argc, char *argv[])
 	if (!addr_found) {
 		DUMP_CORE;
 	}
+
+	/*
+	 * Case 3:  This will test multiple things:
+	 *  a) assocaition lookup based on the Address Parameter
+	 *  b) addition of a whildcard address.
+	 */
+	if (test_bindx(sk1, (struct sockaddr *)&bindx_addr3, addr_len,
+		       SCTP_BINDX_ADD_ADDR)) {
+		DUMP_CORE;
+	}
+
+	network = get_Internet(TEST_NETWORK_ETH0);
+	skb = network->next;
+	packet = test_get_sctp(skb->data);
+	chunk = &packet->ch;
+
+	addip_hdr = (sctp_addiphdr_t *)packet->data;
+	addip_param = (sctp_addip_param_t *)&addip_hdr->params[addr_param_len];
+
+	/* Verify the chunk type and parameter type */	
+	if (SCTP_CID_ASCONF != chunk->type || 
+	    SCTP_PARAM_ADD_IP != addip_param->param_hdr.type)
+		DUMP_CORE;
+
+	/* modify the source of the packet to be from the newly added address
+	 * this will test the new association lookup code.
+	 */
+	ip = skb_network_header(skb);
+#if TEST_V6
+	memcpy(&ip->saddr, &bindx_addr3.v6.sin6_addr, sizeof(struct in6_addr));
+#else
+	ip->saddr = bindx_addr3.v4.sin_addr.s_addr;
+#endif
+
+	/* modify the new address parameter to be Wildcard */
+	addr_param = addip_param + 1;
+#if TEST_V6
+	memset(&addr_param->v6.addr, 0, sizeof(struct in6_addr));
+#else
+	memset(&addr_param->v4.addr, 0, sizeof(struct in_addr));
+#endif
+	/* Recompute checksum */
+	sh = &packet->sh;
+	sum = sctp_start_cksum((uint8_t *)sh, skb->len - 
+#if TEST_V6
+		sizeof(struct ipv6hdr));
+#else
+		sizeof(struct iphdr));
+#endif
+	sum = sctp_end_cksum(sum);
+	sh->checksum = htonl(sum);
+
+	if (0 > test_run_network_once(TEST_NETWORK_ETH0))
+		DUMP_CORE;
+
+	network = get_Internet(TEST_NETWORK_ETH0);
+	skb = network->next;
+	packet = test_get_sctp(skb->data);
+	chunk = &packet->ch;
+	addip_hdr = (sctp_addiphdr_t *)packet->data;
+	/* Verify the chunk type and parameter type */	
+	if (SCTP_CID_ASCONF_ACK != chunk->type)
+		DUMP_CORE;
+	
+	/* Verify that the new addr bound after the association in peer
+	 * is created is also available.
+	 */
+	addr_found = 0;
+	list_for_each(p, &asoc2->peer.transport_addr_list) {
+		tp = list_entry(p, struct sctp_transport, transports);
+		if (sctp_cmp_addr_exact(&tp->ipaddr, &bindx_addr3)) {
+			addr_found = 1;
+			break;
+		}
+	}
+
+	if (!addr_found) {
+		DUMP_CORE;
+	}
+
+	if (test_run_network()) {
+		DUMP_CORE;
+	}
+
+	/* Verify that the new addr bound after the association in local
+	 * is created is also available.
+	 */
+	ep1 = sctp_sk(sk1)->ep;
+	asoc1 = test_ep_first_asoc(ep1);
+	
+	addr_found = 0;
+	list_for_each(p, &asoc1->base.bind_addr.address_list) {
+		addr_entry = list_entry(p, struct sctp_sockaddr_entry, list);
+		
+		if (sctp_cmp_addr_exact(&addr_entry->a, &bindx_addr3)) {
+			addr_found = 1;
+			break;
+		}
+	}
+
+	if (!addr_found) {
+		DUMP_CORE;
+	}
+
 
 	sctp_close(sk1, 0);
 	sctp_close(sk2, 0);

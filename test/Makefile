@@ -2,6 +2,7 @@ ifndef LKSCTP_LINUX
 LKSCTP_LINUX=../../lksctp-2.6
 endif
 ROOT=${LKSCTP_LINUX}/net/sctp
+KERN_LIB=${LKSCTP_LINUX}/lib
 INCLUDE=./linux/include
 INCLUDE_USR=../src/include
 INCLUDE_LINUX=${LKSCTP_LINUX}/include/linux
@@ -58,11 +59,9 @@ COMMON_OBJECTS += ipv6.o
 V6FLAGS=-DCONFIG_IPV6=1 -DTEST_V6=1 
 endif
 
-ifdef CONFIG_SCTP_ADLER32
-COMMON_OBJECTS += adler32.o
-else
-COMMON_OBJECTS += crc32c.o
-endif
+KERN_LIB_OBJECTS= \
+	scatterlist.o \
+	libcrc32c.o
 
 SCTP_HEADERS= \
 	${INCLUDE_LINUX}/sctp.h \
@@ -72,9 +71,10 @@ SCTP_HEADERS= \
 	${INCLUDE_SCTP}/sm.h \
 
 
-FRAME_OBJECTS=test_kernel.o funutil.o ${COMMON_OBJECTS}
+FRAME_OBJECTS=test_kernel.o funutil.o ${COMMON_OBJECTS} ${KERN_LIB_OBJECTS}
 
-FRAME_V6_OBJECTS=test_kernel_v6.o funutil_v6.o ${COMMON_OBJECTS} 	
+FRAME_V6_OBJECTS=test_kernel_v6.o funutil_v6.o ${COMMON_OBJECTS} \
+		 ${KERN_LIB_OBJECTS}
 
 PASSING_UNIT_TESTS = \
 	test_inqueue \
@@ -869,6 +869,9 @@ test_kernel_v6.o: test_kernel.c test_kernel.h \
 	${CC} -c ${V6FLAGS} ${CFLAGS} -o $@ test_kernel.c
 
 ${COMMON_OBJECTS}: %.o: ${ROOT}/%.c ${SCTP_HEADERS}
+	${CC} -c ${CFLAGS} $< -o $@
+
+${KERN_LIB_OBJECTS}: %.o: ${KERN_LIB}/%.c
 	${CC} -c ${CFLAGS} $< -o $@
 
 #%.o :	${ROOT}/%.c

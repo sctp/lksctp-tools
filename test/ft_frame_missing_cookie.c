@@ -50,6 +50,7 @@
 #include <net/sctp/sctp.h>
 #include <errno.h> /* for sys_errlist[] */
 #include <funtest.h>
+#include <net/sctp/checksum.h>
 
 int
 main(int argc, char *argv[])

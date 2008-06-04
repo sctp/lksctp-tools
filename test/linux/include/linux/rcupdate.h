@@ -245,10 +245,10 @@ extern void rcu_check_callbacks(int cpu, int user);
 extern void rcu_restart_cpu(int cpu);
 
 /* Exported interfaces */
-extern void FASTCALL(call_rcu(struct rcu_head *head, 
-				void (*func)(struct rcu_head *head)));
-extern void FASTCALL(call_rcu_bh(struct rcu_head *head,
-				void (*func)(struct rcu_head *head)));
+extern void call_rcu(struct rcu_head *head, 
+				void (*func)(struct rcu_head *head));
+extern void call_rcu_bh(struct rcu_head *head,
+				void (*func)(struct rcu_head *head));
 extern void synchronize_kernel(void);
 
 #endif /* __KERNEL__ */

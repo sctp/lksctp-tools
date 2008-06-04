@@ -421,7 +421,7 @@ is_a_sctp_local_addr(union sctp_addr *addr)
                                      ifa;
                                      ifa = ifa->ifa_next) {
                                         
-                                        if (!(LOOPBACK(ifa->ifa_local)) && 
+                                        if (!(ipv4_is_loopback(ifa->ifa_local)) && 
                                             addr->v4.sin_addr.s_addr
                                             == ifa->ifa_local) {
                                                 goto succeed;
@@ -462,7 +462,7 @@ total_sctp_local_addr(void)
 	for_each_netdev(&init_net, dev) {
 		in_dev = __in_dev_get_rcu(dev);
 		for (ifa = in_dev->ifa_list; ifa; ifa = ifa->ifa_next) {
-			if (!(LOOPBACK(ifa->ifa_local))) {
+			if (!(ipv4_is_loopback(ifa->ifa_local))) {
 				total++;
 			}
 		}

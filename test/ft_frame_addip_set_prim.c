@@ -209,7 +209,10 @@ int main(int argc, char *argv[])
 	if (0 > retval)
 		DUMP_CORE;
 
-	network = get_Internet(TEST_NETWORK_ETH1);
+	/* ASCONF-ACKs are sent back to the source of the ASCONF, so we
+	 * have to test for the ACK on ETH0.
+	 */
+	network = get_Internet(TEST_NETWORK_ETH0);
 	skb = network->next;
 
 	packet = test_get_sctp(skb->data);

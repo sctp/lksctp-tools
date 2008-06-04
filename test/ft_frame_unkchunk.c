@@ -97,6 +97,7 @@
 #include <linux/errno.h>
 #include <net/sctp/sctp.h>
 #include <net/sctp/sm.h>
+#include <net/sctp/checksum.h>
 #include <errno.h> 
 #include <funtest.h>
 

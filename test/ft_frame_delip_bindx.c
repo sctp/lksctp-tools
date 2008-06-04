@@ -41,13 +41,15 @@
  * 
  * - Delete an addr that is not use in association, and see whether
  *   it will failed.
- * - Delete an addr that is sued in association, and see whether it is
+ * - Delete an addr that is used in association, and see whether it is
  *   removed from peer site.
+ * - Delete a wildcard.  This should remove all addresses except the source.
  * - Delete the last addr bind in assocaition, and see whether it can
  *   be deleted.
  */
 
 #include <net/sctp/sm.h>
+#include <net/sctp/checksum.h>
 #include <funtest.h>
 
 int main(int argc, char *argv[])
@@ -64,8 +66,12 @@ int main(int argc, char *argv[])
 	sctp_addiphdr_t         	*delip_hdr;
 	sctp_addip_param_t      	*delip_param;
 	union sctp_addr 		addr1, addr2;
-	union sctp_addr			bindx_addr1, bindx_addr2;
+	union sctp_addr			bindx_addr1, bindx_addr2, bindx_addr3;
 	struct list_head		*p;	
+	union sctp_addr_param		*addr_param;
+	struct sctphdr			*sh;
+	uint32_t			sum;
+
 	
 	char	*messages = "I love the world!";
 	int	pf_class;
@@ -90,6 +96,9 @@ int main(int argc, char *argv[])
 	bindx_addr2.v6.sin6_family = AF_INET6;
 	bindx_addr2.v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_GLOBAL_ETH2;
 	bindx_addr2.v6.sin6_port = htons(SCTP_TESTPORT_1);	
+	bindx_addr3.v6.sin6_family = AF_INET6;
+	bindx_addr3.v6.sin6_addr = (struct in6_addr) SCTP_B_ADDR6_GLOBAL_ETH0;
+	bindx_addr3.v6.sin6_port = htons(SCTP_TESTPORT_1);	
 	addr_len = sizeof(struct sockaddr_in6);
 	addr_param_len = sizeof(sctp_ipv6addr_param_t);
 #else
@@ -106,6 +115,9 @@ int main(int argc, char *argv[])
 	bindx_addr2.v4.sin_family = AF_INET;
 	bindx_addr2.v4.sin_addr.s_addr = SCTP_ADDR_ETH2;
 	bindx_addr2.v4.sin_port = htons(SCTP_TESTPORT_1);
+	bindx_addr3.v4.sin_family = AF_INET;
+	bindx_addr3.v4.sin_addr.s_addr = SCTP_B_ETH0;
+	bindx_addr3.v4.sin_port = htons(SCTP_TESTPORT_1);
 	addr_len = sizeof(struct sockaddr_in);
 	addr_param_len = sizeof(sctp_ipv4addr_param_t);
 #endif /* TEST _V6 */
@@ -121,8 +133,12 @@ int main(int argc, char *argv[])
 		DUMP_CORE;
 	}
 
-	/* Add one more address; eht1, to be bound to sk1.	*/
+	/* Add two more address; eth1, to be bound to sk1.	*/
 	if (test_bindx(sk1, (struct sockaddr *)&bindx_addr1, addr_len,
+		       SCTP_BINDX_ADD_ADDR)) {
+		DUMP_CORE;
+	}
+	if (test_bindx(sk1, (struct sockaddr *)&bindx_addr3, addr_len,
 		       SCTP_BINDX_ADD_ADDR)) {
 		DUMP_CORE;
 	}
@@ -213,7 +229,90 @@ int main(int argc, char *argv[])
 
 	printk("\n\n%s case 2 passed\n\n\n", argv[0]);
 
-	/* Case 3:
+	/* Case 3
+	 * We only have 2 addresses left.  Delete one of them and modify
+	 * the ASCONF chunk to contain a wildcard address.  This should
+	 * result in removal of all addresses except source.
+	 */
+	if (test_bindx(sk1, (struct sockaddr *)&bindx_addr3, addr_len,
+		       SCTP_BINDX_REM_ADDR)) {
+		DUMP_CORE;
+	}
+
+	network = get_Internet(TEST_NETWORK_ETH0);
+	skb = network->next;
+	packet = test_get_sctp(skb->data);
+	chunk = &packet->ch;
+
+	delip_hdr = (sctp_addiphdr_t *)packet->data;
+	delip_param = (sctp_addip_param_t *)&delip_hdr->params[addr_param_len];
+
+	/* Verify the chunk type and parameter type */	
+	if (SCTP_CID_ASCONF != chunk->type || 
+	    SCTP_PARAM_DEL_IP != delip_param->param_hdr.type)
+		DUMP_CORE;
+    
+	/* modify the the address parameter to be wildcard */
+	addr_param = (union sctp_addr_param *)(delip_param + 1);
+#if TEST_V6
+	memset(&addr_param->v6.addr, 0, sizeof(struct in6_addr));
+#else
+	memset(&addr_param->v4.addr, 0, sizeof(struct in_addr));
+#endif
+	/* Recompute checksum */
+	sh = &packet->sh;
+	sum = sctp_start_cksum((uint8_t *)sh, skb->len -
+#if TEST_V6
+		sizeof(struct ipv6hdr));
+#else
+		sizeof(struct iphdr));
+#endif
+	sum = sctp_end_cksum(sum);
+	sh->checksum = htonl(sum);
+
+	if (0 > test_run_network_once(TEST_NETWORK_ETH0))
+		DUMP_CORE;
+
+	network = get_Internet(TEST_NETWORK_ETH0);
+	skb = network->next;
+	packet = test_get_sctp(skb->data);
+	chunk = &packet->ch;
+	delip_hdr = (sctp_addiphdr_t *)packet->data;
+	/* Verify the chunk type and parameter type */	
+	if (SCTP_CID_ASCONF_ACK != chunk->type)
+		DUMP_CORE;
+
+	/* Check whether the address we deleted is still in use in
+	 * peer's association.
+	 */
+	ep2 = sctp_sk(sk2)->ep;
+	asoc2 = test_ep_first_asoc(ep2);
+	bindx_addr3.v4.sin_port = ntohs(bindx_addr3.v4.sin_port);
+	list_for_each(p, &asoc2->peer.transport_addr_list) {
+		tp = list_entry(p, struct sctp_transport, transports);
+		if (sctp_cmp_addr_exact(&tp->ipaddr, &bindx_addr3))
+			DUMP_CORE;
+	}
+
+	if (test_run_network()) {
+		DUMP_CORE;
+	}
+
+	/* Check whether the address we deleted is still in use in
+	 * local association.
+	 */
+	ep1 = sctp_sk(sk1)->ep;
+	asoc1 = test_ep_first_asoc(ep1);
+
+	list_for_each(p, &asoc1->base.bind_addr.address_list) {
+		addr_entry = list_entry(p, struct sctp_sockaddr_entry, list);
+		if (sctp_cmp_addr_exact(&addr_entry->a, &bindx_addr3))
+			DUMP_CORE;
+	}
+
+	printk("\n\n%s case 3 passed\n\n\n", argv[0]);
+
+	/* Case 4:
 	 * Remove last address bind in association.	*/
 	if (test_bindx(sk1, (struct sockaddr *)&addr1, addr_len,
 		       SCTP_BINDX_REM_ADDR) != -EBUSY) {
@@ -223,7 +322,7 @@ int main(int argc, char *argv[])
 	sctp_close(sk1, 0);
 	sctp_close(sk2, 0);
 
-	printk("\n\n%s case 3 passed\n\n\n", argv[0]);	
+	printk("\n\n%s case 4 passed\n\n\n", argv[0]);	
 
 	return 0;	
 }

@@ -1197,7 +1197,7 @@ do_slaughter(struct sk_buff *nskb)
 	return 0;
 } /* do_slaughter() */
 
-static inline int
+static int
 do_congest(struct sk_buff *nskb)
 {
 	void*  nh;
@@ -1664,31 +1664,31 @@ int ip_getsockopt(struct sock *sk, int level,
 
 
 /* Stubs for wait queue handling. */
-void fastcall add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
+void add_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	return;
 }
 
-void fastcall add_wait_queue_exclusive(wait_queue_head_t *q, wait_queue_t * wait)
+void add_wait_queue_exclusive(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	return;
 }
 
-void fastcall remove_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
+void remove_wait_queue(wait_queue_head_t *q, wait_queue_t * wait)
 {
 	return;
 }
 
-void fastcall prepare_to_wait(wait_queue_head_t *q, wait_queue_t *wait, int state)
+void prepare_to_wait(wait_queue_head_t *q, wait_queue_t *wait, int state)
 {
 	return;
 }
 
-void fastcall prepare_to_wait_exclusive(wait_queue_head_t *q, wait_queue_t *wait, int state)
+void prepare_to_wait_exclusive(wait_queue_head_t *q, wait_queue_t *wait, int state)
 {
 	return;
 }
-void fastcall finish_wait(wait_queue_head_t *q, wait_queue_t *wait)
+void finish_wait(wait_queue_head_t *q, wait_queue_t *wait)
 {
 	return;
 }
@@ -1699,7 +1699,7 @@ int autoremove_wake_function(wait_queue_t *wait, unsigned mode, int sync, void *
 }
 
 /* Simulate the scheduler (with timeout!)  */
-fastcall signed long __sched schedule_timeout(long timeo)
+signed long __sched schedule_timeout(long timeo)
 {
 	/* BUG:  we do not actually implement the timeout part...
 	 * We just run the Internet until it is empty.
@@ -1756,7 +1756,7 @@ struct tvec_t_base_s {
 };
 struct tvec_t_base_s timer_base;
 
-void fastcall init_timer(struct timer_list *timer)
+void init_timer(struct timer_list *timer)
 {
 	timer->entry.next = NULL;
 	timer->base = NULL;
@@ -1817,12 +1817,13 @@ int timer_len(struct list_head *list)
 	return(i);
 }
 
-unsigned int inet_addr_type(u32 addr)
+unsigned int inet_addr_type(struct net *net, __be32 addr)
 {
 	return RTN_LOCAL;
 }
 
-int ipv6_chk_addr(struct in6_addr *addr, struct net_device *dev, int strict)
+int ipv6_chk_addr(struct net *net, struct in6_addr *addr,
+		  struct net_device *dev, int strict)
 {
 	return 1;
 }
@@ -1905,28 +1906,24 @@ int __ipv6_addr_type(const struct in6_addr *addr)
 	return IPV6_ADDR_RESERVED;
 } /* ipv6_addr_type()  */
 
-int
-register_inetaddr_notifier(struct notifier_block *nb)
+int register_inetaddr_notifier(struct notifier_block *nb)
 {
 	inetaddr_notifier_on = nb;
 	return(0);
 } /* register_inetaddr_notifier() */
 
-int
-unregister_inetaddr_notifier(struct notifier_block *nb)
+int unregister_inetaddr_notifier(struct notifier_block *nb)
 {
 	inetaddr_notifier_on = NULL;
 	return(0);
 } /* unregister_inetaddr_notifier() */
 
-int
-register_inet6addr_notifier(struct notifier_block *nb)
+int register_inet6addr_notifier(struct notifier_block *nb)
 {
 	return(0);
 } /* register_inet6addr_notifier() */
 
-int
-unregister_inet6addr_notifier(struct notifier_block *nb)
+int unregister_inet6addr_notifier(struct notifier_block *nb)
 {
 	return(0);
 } /* unregister_inet6addr_notifier() */
@@ -1934,102 +1931,87 @@ unregister_inet6addr_notifier(struct notifier_block *nb)
 /* This is a testing stub for a function which wakes up threads which
  * are sleeping on sockets.
  */
-void fastcall
-__wake_up(wait_queue_head_t *q, unsigned int mode, int nr, void *key)
+void __wake_up(wait_queue_head_t *q, unsigned int mode, int nr,
+		       void *key)
 {
 	/* Do nothing.  */
 	/* Could we be cleverer?  Probably... */
 } /* __wake_up() */
 
-void
-inet_register_protosw(struct inet_protosw *p)
+void inet_register_protosw(struct inet_protosw *p)
 {
 }
 
-void
-inet_unregister_protosw(struct inet_protosw *p)
+void inet_unregister_protosw(struct inet_protosw *p)
 {
 }
 
-int
-inet_add_protocol(struct net_protocol *prot, unsigned char num)
+int inet_add_protocol(struct net_protocol *prot, unsigned char num)
 {
 	return 0;
 }
 
-int
-inet_del_protocol(struct net_protocol *prot, unsigned char num)
+int inet_del_protocol(struct net_protocol *prot, unsigned char num)
 {
 	return 0;
 }
 
-int
-inet_release(struct socket *sock)
+int inet_release(struct socket *sock)
 {
 	return 0;
 }
 
-int
-inet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
+int inet_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
 	return 0;
 }
 
-int
-inet_dgram_connect(struct socket *sock, struct sockaddr * uaddr,
+int inet_dgram_connect(struct socket *sock, struct sockaddr * uaddr,
 			int addr_len, int flags)
 {
 	return 0;
 }
 
-int
-inet_accept(struct socket *sock, struct socket *newsock, int flags)
+int inet_accept(struct socket *sock, struct socket *newsock, int flags)
 {
 	return 0;
 }
 
-int
-inet_getname(struct socket *sock, struct sockaddr *uaddr,
+int inet_getname(struct socket *sock, struct sockaddr *uaddr,
 			int *uaddr_len, int peer)
 {
 	return 0;
 }
 
-int
-inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
+int inet_ioctl(struct socket *sock, unsigned int cmd, unsigned long arg)
 {
 	return 0;
 }
 
-int
-inet_shutdown(struct socket *sock, int how)
+int inet_shutdown(struct socket *sock, int how)
 {
 	return 0;
 }
 
-int
-sock_common_setsockopt(struct socket *sock, int level, int optname,
+int sock_common_setsockopt(struct socket *sock, int level, int optname,
 			char *optval, int optlen)
 {
 	return 0;
 }
 
-int
-sock_common_getsockopt(struct socket *sock, int level, int optname, char *optval,
-			int *optlen)
+int sock_common_getsockopt(struct socket *sock, int level, int optname,
+			    char *optval, int *optlen)
 {
 	return 0;
 }
 
-int
-sock_common_recvmsg(struct kiocb *iocb, struct socket *sock,
+int sock_common_recvmsg(struct kiocb *iocb, struct socket *sock,
 		    struct msghdr *msg, size_t size, int flags)
 {
 	return 0;
 }
 
-int
-inet_sendmsg(struct socket *sock, struct msghdr *msg,
+int inet_sendmsg(struct socket *sock, struct msghdr *msg,
 			int size, struct scm_cookie *scm)
 {
 	return 0;
@@ -2057,7 +2039,7 @@ static struct dst_ops ip6_dst_ops = {
  * for a given destination and source. If an entry is not present the the list,
  * a new entry is created and added to rt_list.
  */
-int ip_route_output_key(struct rtable **rp, struct flowi *flp)
+int ip_route_output_key(struct net *net, struct rtable **rp, struct flowi *flp)
 {
 	struct rtable *rt;
 
@@ -2172,9 +2154,9 @@ void test_update_rtables(void)
 
 #if defined(CONFIG_IPV6) || defined (CONFIG_IPV6_MODULE)
 
-void
-inet6_register_protosw(struct inet_protosw *p)
+int inet6_register_protosw(struct inet_protosw *p)
 {
+	return 0;
 }
 
 void inet6_unregister_protosw(struct inet_protosw *p)
@@ -2634,8 +2616,7 @@ void inet_sock_destruct(struct sock *sk)
 struct tasklet_struct bh_task_vec[32];
 spinlock_t tqueue_lock = SPIN_LOCK_UNLOCKED;
 
-void fastcall
-__tasklet_hi_schedule(struct tasklet_struct *t)
+void __tasklet_hi_schedule(struct tasklet_struct *t)
 {
 }
 
@@ -2969,11 +2950,6 @@ void *_mmx_memcpy(void *to, const void *from, size_t size)
 	return memcpy(to, from, size);
 }
 
-
-/* slab.c */
-struct kmem_cache {
-	int objsize;
-};
 struct kmem_cache *kmem_cache_create(const char *name, size_t size, 
 		size_t align, unsigned long flags,
 		void (*ctor)(struct kmem_cache *, void *))
@@ -3015,13 +2991,13 @@ void in6_dev_finish_destroy(struct inet6_dev *idev)
 
 unsigned long num_physpages = 65536;
 
-fastcall unsigned long __get_free_pages(unsigned int gfp_mask, unsigned int order)
+unsigned long __get_free_pages(unsigned int gfp_mask, unsigned int order)
 {
 	
 	return ((unsigned long)kmalloc(((1UL << order) * PAGE_SIZE), gfp_mask));
 }
 
-fastcall void free_pages(unsigned long addr, unsigned int order)
+void free_pages(unsigned long addr, unsigned int order)
 {
 	kfree((void *)addr);
 }
@@ -3212,12 +3188,12 @@ unsigned int smp_processor_id(void)
 #endif
 
 #ifdef CONFIG_DEBUG_PREEMPT
-void fastcall add_preempt_count(int val)
+void add_preempt_count(int val)
 {
 	return;
 }
 
-void fastcall sub_preempt_count(int val)
+void sub_preempt_count(int val)
 {
 	return;
 }
@@ -3641,6 +3617,21 @@ void remove_proc_entry(const char *name, struct proc_dir_entry *parent)
 	return;
 }
 
+struct proc_dir_entry *proc_create(const char *name, mode_t mode,
+				   struct proc_dir_entry *parent,
+				   const struct file_operations *proc_fops)
+{
+	p.proc_fops = proc_fops;
+	return &p;
+}
+
+struct proc_dir_entry *proc_mkdir(const char *name,
+	                struct proc_dir_entry *parent)
+{
+    return NULL;
+}
+
+
 void init_waitqueue_head(wait_queue_head_t *q)
 {
         spin_lock_init(&q->lock);
@@ -3786,38 +3777,38 @@ int net_ratelimit(void)
 	return 1;
 }
 
-void fastcall lock_sock_nested(struct sock *sk, int subclass)
+void lock_sock_nested(struct sock *sk, int subclass)
 {
 	return;
 }
 
-void fastcall call_rcu(struct rcu_head *head,
+void call_rcu(struct rcu_head *head,
 			void (*func)(struct rcu_head *rcu))
 {
     func(head);
 }
 
-void fastcall call_rcu_bh(struct rcu_head *head,
+void call_rcu_bh(struct rcu_head *head,
 			void (*func)(struct rcu_head *rcu))
 {
     func(head);
 }
 
-int sk_stream_mem_schedule(struct sock *sk, int size, int kind)
+int __sk_mem_schedule(struct sock *sk, int size, int kind)
 {
-	int amt = sk_stream_pages(size);
+	int amt = sk_mem_pages(size);
 
-	sk->sk_forward_alloc += amt * SK_STREAM_MEM_QUANTUM;
+	sk->sk_forward_alloc += amt * SK_MEM_QUANTUM;
 	atomic_add(amt, sk->sk_prot->memory_allocated);
 
 	return 1;
 }
 
-void __sk_stream_mem_reclaim(struct sock *sk)
+void __sk_mem_reclaim(struct sock *sk)
 {
-	atomic_sub(sk->sk_forward_alloc / SK_STREAM_MEM_QUANTUM,
+	atomic_sub(sk->sk_forward_alloc >> SK_MEM_QUANTUM_SHIFT,
 		    sk->sk_prot->memory_allocated);
-	sk->sk_forward_alloc &= SK_STREAM_MEM_QUANTUM - 1;
+	sk->sk_forward_alloc &= SK_MEM_QUANTUM - 1;
 }
 
 void inet_get_local_port_range(int *low, int *high)
@@ -3831,13 +3822,6 @@ u32 random32(void)
 	return (u32)rand();
 }
 
-struct proc_dir_entry *proc_mkdir(const char *name,
-	                struct proc_dir_entry *parent)
-{
-    return NULL;
-}
-
-
 #ifdef CONFIG_LOCKDEP
 
 void lockdep_init_map(struct lockdep_map *lock, const char *name,
@@ -3847,3 +3831,22 @@ void lockdep_init_map(struct lockdep_map *lock, const char *name,
 }
 
 #endif
+
+#ifdef WANT_WARN_ON_SLOWPATH
+void warn_on_slowpath(const char *file, int line)
+{
+	return;
+}
+#endif
+
+unsigned long snmp_fold_field(void *mib[], int offt)
+{
+	unsigned long res = 0;
+	int i;
+
+	for_each_possible_cpu(i) {
+		res += *(((unsigned long *) per_cpu_ptr(mib[0], i)) + offt);
+		res += *(((unsigned long *) per_cpu_ptr(mib[1], i)) + offt);
+	}
+	return res;
+}

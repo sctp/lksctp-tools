@@ -73,6 +73,7 @@
 #include <linux/skbuff.h>
 #include <linux/errno.h>
 #include <net/sctp/sctp.h>
+#include <net/sctp/checksum.h>
 #include <errno.h> /* for sys_errlist[] */
 #include <funtest.h>
 
