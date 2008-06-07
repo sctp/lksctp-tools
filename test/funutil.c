@@ -1127,9 +1127,13 @@ test_bindx(struct sock *sk, struct sockaddr *addrs, int addrs_size, int flags)
 int
 test_connectx(struct sock *sk, struct sockaddr *addrs, int addrs_size)
 {
-	return sctp_setsockopt(sk, SOL_SCTP, SCTP_SOCKOPT_CONNECTX,
-			       (char *)addrs, addrs_size);
+	int ret = sctp_setsockopt(sk, SOL_SCTP, SCTP_SOCKOPT_CONNECTX,
+			          (char *)addrs, addrs_size);
 
+	if (ret < 0)
+		return ret;
+
+	return 0;
 } /* test_connectx() */
 
 
