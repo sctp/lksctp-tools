@@ -172,7 +172,7 @@ static inline int test_connect(int sk, struct sockaddr *addr, socklen_t addrlen)
 
 static inline int test_connectx(int sk, struct sockaddr *addr, int count)
 {
-	int error = sctp_connectx(sk, addr, count);
+	int error = sctp_connectx(sk, addr, count, NULL);
         if (-1 == error)
                 tst_brkm(TBROK, tst_exit, "connectx: %s", strerror(errno));
 	return error;

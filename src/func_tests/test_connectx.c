@@ -67,7 +67,7 @@ int
 main(int argc, char *argv[])
 {
 	int svr_sk, clt_sk1, clt_sk2, peeloff_sk;
-	sctp_assoc_t svr_associd1, svr_associd2, clt_associd1, clt_associd2; 
+	sctp_assoc_t associd, svr_associd1, svr_associd2, clt_associd1, clt_associd2;
 	struct iovec iov;
 	struct msghdr inmessage;
 	int error, i;
@@ -148,7 +148,8 @@ main(int argc, char *argv[])
 		tst_brkm(TBROK, tst_exit, "fcntl F_SETFL: %s", strerror(errno));
 
 	/* Do a non-blocking connectx from clt_sk1 to svr_sk */      
-	error = sctp_connectx(clt_sk1, (struct sockaddr *)svr_try, NUMADDR);
+	error = sctp_connectx(clt_sk1, (struct sockaddr *)svr_try, NUMADDR,
+			      &associd);
 	/* Non-blocking connectx should return immediately with EINPROGRESS. */
 	if ((error != -1) || (EINPROGRESS != errno))
 		tst_brkm(TBROK, tst_exit, "non-blocking connectx error: %d"
@@ -159,7 +160,8 @@ main(int argc, char *argv[])
 	/* Doing a connectx on a socket to create an association that is
 	 * is already established should return EISCONN.
 	 */
-	error = sctp_connectx(clt_sk1, (struct sockaddr *)svr_try, NUMADDR);
+	error = sctp_connectx(clt_sk1, (struct sockaddr *)svr_try, NUMADDR,
+			      NULL);
 	if ((error != -1) || (EISCONN != errno))
 		tst_brkm(TBROK, tst_exit, "connectx on a socket to create an "
 			 "assoc that is already established error:%d errno:%d",
@@ -184,6 +186,15 @@ main(int argc, char *argv[])
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	clt_associd1 = sac->sac_assoc_id;
+
+	if (associd) {
+		if (associd != clt_associd1)
+			tst_brkm(TBROK, tst_exit, "Association id mismatch: "
+			 "connectx returned %d, notification returned:%d",
+			 associd, clt_associd1);
+		tst_resm(TPASS, "Association id match between sctp_connectx()"
+				" and notification.");
+	}
 
 	/* Get COMM_UP on svr_sk */
 	error = test_recvmsg(svr_sk, &inmessage, MSG_WAITALL);
@@ -220,7 +231,8 @@ main(int argc, char *argv[])
 	peeloff_sk = test_sctp_peeloff(svr_sk, svr_associd1); 
 
 	/* Doing a connectx on a peeled off socket should fail. */
-	error = sctp_connectx(peeloff_sk, (struct sockaddr *)clt_loop3, NUMADDR);
+	error = sctp_connectx(peeloff_sk, (struct sockaddr *)clt_loop3, NUMADDR,
+			      NULL);
 	if ((error != -1) || (EISCONN != errno))
 		tst_brkm(TBROK, tst_exit, "connectx on a peeled off socket "
 			 "error:%d, errno:%d", error, errno);
@@ -230,7 +242,8 @@ main(int argc, char *argv[])
 	/* Trying to create an association on a socket that matches an 
 	 * existing peeled-off association should fail.
 	 */
-	error = sctp_connectx(svr_sk, (struct sockaddr *)clt_loop1, NUMADDR);
+	error = sctp_connectx(svr_sk, (struct sockaddr *)clt_loop1, NUMADDR,
+			      NULL);
 	if ((error != -1) || (EADDRNOTAVAIL != errno))
 		tst_brkm(TBROK, tst_exit, "connectx to create an assoc that "
 			 "matches a peeled off assoc error:%d errno:%d",
