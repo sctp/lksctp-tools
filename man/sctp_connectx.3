@@ -15,7 +15,8 @@ destination addresses.
 .B #include <sys/socket.h>
 .B #include <netinet/sctp.h>
 .sp
-.BI "int sctp_connectx(int " sd ", struct sockaddr * " addrs ", int " addrcnt );
+.BI "int sctp_connectx(int " sd ", struct sockaddr * " addrs ", int " addrcnt,
+.BI "                  sctp_assoc_t  * "id );
 .fi
 .SH DESCRIPTION
 .BR sctp_connectx
@@ -40,6 +41,10 @@ sockaddr_in6). The family of the address type must be used to distinguish
 the address length. The caller specifies the number of addresses in the
 array with
 .I addrcnt. 
+.PP
+.I id
+is a pointer to the association id and, if provided, will be set to the
+identifier of the newly created association.
 .SH "RETURN VALUE"
 On success, 0 is returned. On failure, \-1 is returned, and
 .I errno

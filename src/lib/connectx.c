@@ -23,6 +23,7 @@
 #include <netinet/in.h>
 #include <netinet/sctp.h> /* SCTP_SOCKOPT_CONNECTX_* */
 #include <errno.h>
+#include <stdio.h>
 
 /* Support the sctp_connectx() interface.
  *
@@ -31,12 +32,12 @@
  * Instead of implementing through a socket call in sys_socketcall(),
  * tunnel the request through setsockopt().
  */
-int
-sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
+static int __connectx_addrsize(const struct sockaddr *addrs,
+				     const int addrcnt)
 {
 	void *addrbuf;
 	struct sockaddr *sa_addr;
-	socklen_t addrs_size = 0;
+	int addrs_size = 0;
 	int i;
 
 	addrbuf = addrs;
@@ -56,6 +57,55 @@ sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
 			return -1;
 		}
 	}
-			
-	return setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX, addrs, addrs_size);
+
+	return addrs_size;
 }
+			
+
+int __sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
+{
+	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
+
+	if (addrs_size < 0)
+		return addrs_size;
+
+	return setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX_OLD, addrs,
+			    addrs_size);
+}
+
+extern int sctp_connectx_orig (int)
+	__attribute ((alias ("__sctp_connectx")));
+
+int sctp_connectx_new(int fd, struct sockaddr *addrs, int addrcnt,
+		      sctp_assoc_t *id)
+{
+	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
+	int status;
+
+	if (addrs_size < 0)
+		return addrs_size;
+
+	if (id)
+		*id = 0;
+
+	status =  setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX, addrs,
+			     addrs_size);
+
+	/* the kernel doesn't support the new connectx interface */
+	if (status < 0 && errno == ENOPROTOOPT)
+		return setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX_OLD,
+				  addrs, addrs_size);
+
+	/* Normalize status and set association id */
+	if (status > 0) {
+		if (id)
+			*id = status;
+		status = 0;
+	}
+
+	return status;
+}
+
+__asm__(".symver __sctp_connectx, sctp_connectx@");
+__asm__(".symver sctp_connectx_orig, sctp_connectx@VERS_1");
+__asm__(".symver sctp_connectx_new, sctp_connectx@@VERS_2");

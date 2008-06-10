@@ -138,12 +138,14 @@ enum sctp_optname {
 #define SCTP_GET_LOCAL_ADDRS_NUM_OLD	SCTP_GET_LOCAL_ADDRS_NUM_OLD
 	SCTP_GET_LOCAL_ADDRS_OLD, 	/* Get all local addresss. */
 #define SCTP_GET_LOCAL_ADDRS_OLD	SCTP_GET_LOCAL_ADDRS_OLD
-	SCTP_SOCKOPT_CONNECTX, /* CONNECTX requests. */
-#define SCTP_SOCKOPT_CONNECTX	SCTP_SOCKOPT_CONNECTX
+	SCTP_SOCKOPT_CONNECTX_OLD, /* CONNECTX requests. OLD implementation */
+#define SCTP_SOCKOPT_CONNECTX_OLD	SCTP_SOCKOPT_CONNECTX_OLD
 	SCTP_GET_PEER_ADDRS, 	/* Get all peer addresss. */
 #define SCTP_GET_PEER_ADDRS	SCTP_GET_PEER_ADDRS
 	SCTP_GET_LOCAL_ADDRS, 	/* Get all local addresss. */
 #define SCTP_GET_LOCAL_ADDRS	SCTP_GET_LOCAL_ADDRS
+	SCTP_SOCKOPT_CONNECTX, /* CONNECTX requests. NEW implementation */
+#define SCTP_SOCKOPT_CONNECTX	SCTP_SOCKOPT_CONNECTX
 };
 
 /*
@@ -775,7 +777,8 @@ typedef struct {
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
-int sctp_connectx(int sd, struct sockaddr *addrs, int addrcnt);
+int sctp_connectx(int sd, struct sockaddr *addrs, int addrcnt,
+		  sctp_assoc_t *id);
 
 int sctp_peeloff(int sd, sctp_assoc_t assoc_id);
 
