@@ -1,10 +1,88 @@
-Version 2.6.24-1.0.8 of the Developers' Release of the SCTP
+Version 2.6.26-1.0.9 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://sf.net/projects/lksctp/
 
+lksctp-2.6.26-1.0.9: Sun Jul 13 14:51:29 PDT 2008
+T:Patch	      Make frame tests work with 2.6.26 kernel.
+T:Patch       Implement and export SCTP-AUTH API extensions based on
+              sctpsocket-16 draft
+T:NA          Process withsctp.in at build time
+K:Patch       Add documentation for sctp sysctl variable
+K:NA          Mark the tsn as received after all allocations finish
+K:NA          Make sure N * sizeof(union sctp_addr) does not overflow.
+K:NA          Correclty set changeover_active for SFR-CACC
+K:NA          Correctly cleanup procfs entries upon failure.
+K:NA          Fix ECN markings for IPv6
+K:NA          Flush the queue only once during fast retransmit.
+K:NA          Start T3-RTX timer when fast retransmitting lowest TSN
+K:NA          Correctly implement Fast Recovery cwnd manipulations.
+K:NA          Move sctp_v4_dst_saddr out of loop
+K:NA          retran_path update bug fix
+K:NA          Fix NULL dereference of asoc.
+K:NA          Fix use of uninitialized pointer
+K:NA          Add address type check while process paramaters of ASCONF chunk
+K:NA          Do not enable peer IPv6 address support on PF_INET socket
+K:NA          Initialize partial_bytes_acked to 0, when all of the data is acked
+K:NA          IPv4 vs IPv6 addresses mess in sctp_inet[6]addr_event.
+K:NA          Fix compiler warning about const qualifiers
+K:NA          Fix protocol violation when receiving an error lenght INIT-ACK
+K:NA          Add check for hmac_algo parameter in sctp_verify_param()
+K:Patch       New sctp mailing list
+K:NA          Remove an unused parameter from sctp_cmd_hb_timer_update
+K:Patch       "list_for_each()" -> "list_for_each_entry()" where appropriate.
+K:NA          Correct /proc/net/assocs formatting error
+K:Patch       Use snmp_mib_{init,free}().
+K:Patch       Remove useless assignment from __sctp_rcv_lookup_endpoint
+K:NA          fix wrong debug counting of bind_bucket
+K:NA          fix wrong debug counting of datamsg
+K:Patch       Replace socket with sock for SCTP control socket.
+K:Patch       Use inet_ctl_sock_create for control socket creation.
+K:Patch       Remove sctp_add_cmd_sf wrapper bloat
+K:Patch       Remove redundant wrapper functions.
+K:Patch       Replace char msg[] with static const char[]
+K:NA          Fix a race between module load and protosw access
+K:NA          fix misannotated __sctp_rcv_asconf_lookup()
+K:NA          Fix local_addr deletions during list traversals.
+K:Patch       Bring MAX_BURST socket option into ietf API extension compliance
+K:NA          Fix chunk parameter processing bug
+K:Patch       Kill unused static inline sctp_sysctl_jiffies_ms
+K:Patch       extend exported data in /proc/net/sctp/assoc
+K:Patch       Use proc_create to setup de->proc_fops.
+K:Patch       Update AUTH structures to match declarations in draft-16.
+K:NA          Incorrect length was used in SCTP_*_AUTH_CHUNKS socket option
+K:Patch       Clean up naming conventions of sctp protocol/address family
+              registration
+K:NA          Correctly set the length of sctp_assoc_change notification
+K:NA          Pick up an orphaned sctp_sockets_allocated counter.
+K:Patch       Convert sctp_dbg_objcnt to seq files.
+K:Patch       Use snmp_fold_field instead of a homebrew analogue.
+K:NA          Make sure the chunk is off the transmitted list prior to freeing.
+K:NA          Fix kernel panic while received ASCONF chunk with bad serial
+              number
+K:NA          Set ports in every address returned by sctp_getladdrs()
+K:NA          Correctly reap SSNs when processing FORWARD_TSN chunk
+K:NA          Fix kernel panic while received AUTH chunk with BAD shared key
+              identifier
+K:NA          Fix kernel panic while received AUTH chunk while enabled auth
+K:Patch       Kill silly inlines in ulpqueue.c
+K:NA          Do not increase rwnd when reading partial notification.
+K:Patch       Stop claiming that this is a "reference implementation"
+K:NA          Fix miss of report unrecognized HMAC Algorithm parameter
+K:NA          Correctly initialize error when parameter validation failed.
+K:Patch       Follow Add-IP security consideratiosn wrt INIT/INIT-ACK
+K:Patch       Implement ADD-IP special case processing for ABORT chunk
+K:Patch       Change use_as_src into a full address state
+K:Patch       Update ASCONF processing to conform to spec.
+K:Patch       ADD-IP updates the states where ASCONFs can be sent
+K:Patch       Update association lookup to look at ASCONF chunks as well
+K:Patch       Add the handling of "Set Primary IP Address" parameter to INIT
+K:Patch       Handle the wildcard ADD-IP Address parameter
+K:Patch       Discard unauthenticated ASCONF and ASCONF ACK chunks
+K:Patch       Use crc32c library for checksum calculations.
+K:Patch       Use ipv4_is_<type>
 
-lksctp-2.6.24-1.0.5: Fri Feb  01 14:55:00 EST 2008
+lksctp-2.6.24-1.0.8: Fri Feb  01 14:55:00 EST 2008
 K:NA          Add back the code that accounted for FORWARD_TSN parameter in
               INIT.
 K:NA          Correctly handle AUTH parameters in unexpected INIT
