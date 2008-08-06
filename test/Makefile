@@ -173,7 +173,8 @@ PASSING_FRAME_TESTS = \
 	ft_frame_invalid_length \
 	ft_frame_cookie_ports \
 	ft_frame_hb_rtx \
-	ft_frame_frag_interleave
+	ft_frame_frag_interleave \
+	ft_frame_bind
 
 PASSING_V6_FRAME_TESTS = \
 	ft_frame_basic_v6 \
@@ -198,7 +199,9 @@ PASSING_V6_FRAME_TESTS = \
 	ft_frame_addip_bindx_v6 \
 	ft_frame_delip_bindx_v6 \
 	ft_frame_t4_timer_v6 \
-	ft_frame_addrover_v6
+	ft_frame_addrover_v6 \
+	ft_frame_v6only \
+	ft_frame_bind
 
 FAILING_TESTS = \
 	ft_frame_init_bomb \
@@ -592,6 +595,9 @@ ft_frame_tcp_style_v6: ft_frame_tcp_style_v6.o  ${FRAME_V6_OBJECTS}
 ft_frame_v4_mapped_v6: ft_frame_v4_mapped_v6.o  ${FRAME_V6_OBJECTS}
 	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
 
+ft_frame_v6only: ft_frame_v6only.o  ${FRAME_V6_OBJECTS}
+	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
+
 ft_frame_getfreeaddrs_v6: ft_frame_getfreeaddrs_v6.o  ${FRAME_V6_OBJECTS}
 	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
 
@@ -819,6 +825,12 @@ ft_frame_hb_rtx: ft_frame_hb_rtx.o  ${FRAME_OBJECTS}
 
 ft_frame_frag_interleave: ft_frame_frag_interleave.o  ${FRAME_OBJECTS}
 	${CC} ${CFLAGS} -o $@ $^
+
+ft_frame_bind: ft_frame_bind.o   ${FRAME_OBJECTS}
+	${CC} -DTEST_V6=0 -o $@ $^
+
+ft_frame_bind_v6: ft_frame_bind_v6.o ${FRAME_V6_OBJECTS}
+	${CC} ${V6FLAGS} ${CFLAGS} -o $@ $^
 
 test_inqueue.o: test_inqueue.c ${SCTP_HEADERS}
 test_packet.o: test_packet.c ${SCTP_HEADERS}
