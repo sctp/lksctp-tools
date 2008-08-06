@@ -233,14 +233,14 @@ main(void)
 	sctp_packet_config(&packet, vTag, 0);
 
         /* Commit the first chunk to the network. */
-        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[0]);
+        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[0], 0);
 
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
         /* Verify that it only contains one chunk. */
         if (!verify_packet(&packet, 1)) { DUMP_CORE; }
 
         /* Commit the second chunk to the network? */
-        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[1]);
+        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[1], 0);
 
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
 /*** Check that an appropriate packet was created but not sent. */
@@ -271,7 +271,7 @@ main(void)
         transport->asoc->pathmtu = MINUSCULE_PMTU;
 
         /* Commit the first chunk to the network. */
-        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[0]);
+        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[0],0);
 
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
         /* Verify that it only contains one chunk. */
@@ -280,7 +280,7 @@ main(void)
         }
 
         /* Commit the second chunk to the network. */
-        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[1]);
+        transmitted = sctp_packet_transmit_chunk(&packet, data_chunks[1],0);
         
         if (SCTP_XMIT_OK != transmitted) { DUMP_CORE; }
 
@@ -299,7 +299,7 @@ main(void)
         /* Note that the PMTU is still MINUSCULE */
 
         /* Commit the first chunk to the network. */
-        transmitted = sctp_packet_transmit_chunk(&packet, big_chunk);
+        transmitted = sctp_packet_transmit_chunk(&packet, big_chunk,0);
         
 	
 

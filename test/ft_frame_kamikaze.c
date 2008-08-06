@@ -108,7 +108,7 @@ replace_packet(int net, struct sctp_association *asoc)
 	packet->sh.checksum = 0;
 	crc32 = sctp_start_cksum((__u8 *)&packet->sh, packet_len);
 	crc32 = sctp_end_cksum(crc32);
-	packet->sh.checksum = htonl(crc32);
+	packet->sh.checksum = crc32;
 
 	iph = (struct iphdr *)skb->data;
 	ip_change_totlen(iph, htons(skb->len));

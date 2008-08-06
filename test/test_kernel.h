@@ -28,7 +28,7 @@ int sctp_disconnect(struct sock *sk, int flags);
 struct sock *sctp_accept(struct sock *sk, int flags, int *err);
 int sctp_ioctl(struct sock *sk, int cmd, unsigned long arg);
 int sctp_init_sock(struct sock *sk);
-int sctp_destroy_sock(struct sock *sk);
+void sctp_destroy_sock(struct sock *sk);
 void sctp_shutdown(struct sock *sk, int how);
 void sctp_hash(struct sock *sk);
 void sctp_unhash(struct sock *sk);

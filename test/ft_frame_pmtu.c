@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
 	/* Verify that the DF bit is not set in the ip header for this
 	 * packet.
 	 */
-	if (ip_hdr(skb)->frag_off & htons(IP_DF))
+	if (!skb->local_df && (ip_hdr(skb)->frag_off & htons(IP_DF)))
 		DUMP_CORE;
 
 	if (0 != test_run_network()) { DUMP_CORE; }

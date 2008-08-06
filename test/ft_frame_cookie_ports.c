@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 	val = sctp_start_cksum((uint8_t *)sh,
 			       skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	if (test_step(SCTP_CID_COOKIE_ECHO, TEST_NETWORK0) <= 0) {
 		printk("Case 1 Failed.\n");
@@ -307,7 +307,7 @@ main(int argc, char *argv[])
 	val = sctp_start_cksum((uint8_t *)sh,
 			       skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	if (test_step(SCTP_CID_COOKIE_ECHO, TEST_NETWORK0) <= 0) {
 		printk("Case 2 Failed\n");
@@ -430,7 +430,7 @@ main(int argc, char *argv[])
 	val = sctp_start_cksum((uint8_t *)sh,
 			       skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	if (test_step(SCTP_CID_COOKIE_ECHO, TEST_NETWORK0) <= 0) {
 		printk("Case 3 Failed.\n");

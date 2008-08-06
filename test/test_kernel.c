@@ -52,6 +52,7 @@
 #include <net/if_inet6.h>
 #include <linux/slab.h>
 #include <linux/proc_fs.h>
+#include <linux/mm.h>
 /* undefs were here */
 #include <net/protocol.h>
 #include <net/sock.h>
@@ -284,13 +285,29 @@ struct inet6_dev lo_ip6_ptr = {
 
 /* These are net_device definitions for the test frame. */
 struct net_device eth2_dev =
-	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 4};
+	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+#ifdef CONFIG_NETPOLL
+	    {NULL, NULL},
+#endif
+	    NULL, 0, 4};
 struct net_device eth1_dev =
-	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 3};
+	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+#ifdef CONFIG_NETPOLL
+	    {NULL, NULL},
+#endif
+	    NULL, 0, 3};
 struct net_device eth0_dev =
-	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL}, NULL, 0, NULL, 2};
+	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+#ifdef CONFIG_NETPOLL
+	    {NULL, NULL},
+#endif
+	    NULL, 0, 2};
 struct net_device loopback_dev =
-	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},  NULL, 0, NULL, 1};
+	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+#ifdef CONFIG_NETPOLL
+	    {NULL, NULL},
+#endif
+	    NULL, 0, 1};
 
 struct net init_net;
 rwlock_t inetdev_lock = RW_LOCK_UNLOCKED;
@@ -1050,7 +1067,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 	for (i = 0; i < skb_shinfo(skb)->nr_frags; i++) {
 		int end;
 
-		BUG_TRAP(start <= offset + len);
+		WARN_ON(start > offset + len);
 
 		end = start + skb_shinfo(skb)->frags[i].size;
 		if ((copy = end - offset) > 0) {
@@ -1075,7 +1092,7 @@ int skb_copy_bits(const struct sk_buff *skb, int offset, void *to, int len)
 		for (; list; list = list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset + len);
+			WARN_ON(start > offset + len);
 
 			end = start + list->len;
 			if ((copy = end - offset) > 0) {
@@ -1126,7 +1143,7 @@ int skb_copy_datagram_iovec(const struct sk_buff *skb, int offset,
 		for (list = skb_shinfo(skb)->frag_list; list; list=list->next) {
 			int end;
 
-			BUG_TRAP(start <= offset+len);
+			WARN_ON(start > offset+len);
 
 			end = start + list->len;
 			if ((copy = end-offset) > 0) {
@@ -1473,7 +1490,7 @@ ip_queue_xmit(struct sk_buff *skb, int ipfragok)
         ih->tos		= inet->tos;
         ih->tot_len	= skb->len;
         ih->id		= 0;
-	if (ipfragok)
+	if (ipfragok || inet_sk(skb->sk)->pmtudisc == IP_PMTUDISC_DONT)
 		ih->frag_off	= 0;
 	else
 		ih->frag_off	= htons(IP_DF);
@@ -1848,7 +1865,7 @@ simulate_network_once(int net)
 	if (nskb->len > max_skb_len) {
 		if (iph->version == 4) {
 			/* If ip fragmentation is allowed fragment the skb. */
-			if (!(iph->frag_off & htons(IP_DF))) {
+			if (skb->local_df || !(iph->frag_off & htons(IP_DF))) {
 				do_split_skb(nskb, max_skb_len);
 			} else {
 				icmp_frag_needed(nskb);
@@ -2149,7 +2166,7 @@ int __mod_timer(struct timer_list *timer, unsigned long expires)
 	}
 	list_add_tail(&timer->entry, lh);
 
-	timer->base = &timer_base;
+	timer->base = (struct tvec_base*)&timer_base;
 
 	return 0;
 
@@ -3178,7 +3195,7 @@ test_restore_network(int net)
 	}
 }
 
-int sock_map_fd(struct socket *sock)
+int sock_map_fd(struct socket *sock, int flags)
 {
 	return 0; /* STUB */
 
@@ -3352,7 +3369,7 @@ void *_mmx_memcpy(void *to, const void *from, size_t size)
 /* slab.c */
 struct kmem_cache *kmem_cache_create(const char *name, size_t size, 
 		size_t align, unsigned long flags,
-		void (*ctor)(struct kmem_cache *, void *))
+		void (*ctor)(void *))
 {
 	struct kmem_cache *cachep;
 
@@ -3390,6 +3407,8 @@ void in6_dev_finish_destroy(struct inet6_dev *idev)
 }
 
 unsigned long num_physpages = 65536;
+unsigned long totalram_pages = 65536;
+unsigned long totalhigh_pages = 0;
 
 unsigned long __get_free_pages(unsigned int gfp_mask, unsigned int order)
 {
@@ -3951,3 +3970,11 @@ unsigned long snmp_fold_field(void *mib[], int offt)
 	return res;
 }
 
+void *kmap(struct page *page)
+{
+	return page;
+}
+
+void kunmap(struct page *page)
+{
+}

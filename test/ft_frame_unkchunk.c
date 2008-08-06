@@ -192,7 +192,7 @@ main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -292,7 +292,7 @@ main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh, 
 				       nskb2->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 		 
 		/* Set the skb info. */
 		nskb2->sk = nskb3->sk = nskb4->sk = nskb5->sk = skb->sk;
@@ -345,7 +345,7 @@ main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh, 
 				       nskb3->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 		 
 	} else {
 		DUMP_CORE;
@@ -407,7 +407,7 @@ main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh, 
 				       nskb4->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -469,7 +469,7 @@ main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh, 
 				       nskb5->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -498,19 +498,12 @@ main(int argc, char *argv[])
 				!= SCTP_CID_COOKIE_ECHO) {
 			DUMP_CORE;
 		}
-	} else {
-		DUMP_CORE;
-	}
+		
+		/* the should be 2 bundled error chunks */
+		hdr = (u8 *)&packet->ch + WORD_ROUND(ntohs(packet->ch.length));
+		if (hdr > skb_tail_pointer(skb))
+			DUMP_CORE;
 
-	/* And there should be another ERROR for the second bad chunk. */
-	if (test_step(SCTP_CID_ERROR, TEST_NETWORK0) <= 0) {
-		DUMP_CORE;
-	}
-	skb = test_peek_packet(TEST_NETWORK0);
-
-	if (skb) {
-		packet = test_get_sctp(skb->data);
-		hdr = &packet->ch;
 		errhdr = (struct sctp_errhdr *)((uint8_t *)hdr + 
 			sizeof(sctp_chunkhdr_t));
 		if (errhdr->cause != SCTP_ERROR_UNKNOWN_CHUNK) {
@@ -524,7 +517,6 @@ main(int argc, char *argv[])
 	} else {
 		DUMP_CORE;
 	}
-
 
 	printk("\n\n%s case 5 passed\n\n\n", argv[0]);
 

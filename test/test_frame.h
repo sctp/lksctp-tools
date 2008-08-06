@@ -284,20 +284,20 @@ int sctp_disconnect(struct sock *sk, int flags);
 struct sock *sctp_accept(struct sock *sk, int flags, int *err);
 int sctp_ioctl(struct sock *sk, int cmd, unsigned long arg);
 int sctp_init_sock(struct sock *sk);
-int sctp_destroy_sock(struct sock *sk);
+void sctp_destroy_sock(struct sock *sk);
 void sctp_shutdown(struct sock *sk, int how);
 int sctp_seqpacket_listen(struct sock *sk, int backlog);
 int sctp_stream_listen(struct sock *sk, int backlog);
 int sctp_do_peeloff(struct sctp_association *, struct socket **);
 
 #undef IP_INC_STATS_BH
-#define IP_INC_STATS_BH(x)
+#define IP_INC_STATS_BH(net, x)
 
 #undef NET_INC_STATS_BH
-#define NET_INC_STATS_BH(x)
+#define NET_INC_STATS_BH(net, x)
 
 #undef ICMP_INC_STATS_BH
-#define ICMP_INC_STATS_BH(x)
+#define ICMP_INC_STATS_BH(net, x)
 
 #undef SCTP_INC_STATS
 #define SCTP_INC_STATS(x)

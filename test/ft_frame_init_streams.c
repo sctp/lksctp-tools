@@ -549,7 +549,7 @@ main(int argc, char **argv)
 	val = sctp_start_cksum((uint8_t *)sh,
 			       skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	/* We expect an ABORT with invalid mandatory parameters. */
 	if (test_step(SCTP_CID_ABORT, TEST_NETWORK0) <= 0) {
@@ -647,7 +647,7 @@ main(int argc, char **argv)
 	val = sctp_start_cksum((uint8_t *)sh,
 			       skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	/* We expect an ABORT with invalid mandatory parameters. */
 	if (test_step(SCTP_CID_ABORT, TEST_NETWORK0) <= 0) {

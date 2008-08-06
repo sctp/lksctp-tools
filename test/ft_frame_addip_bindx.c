@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
 		sizeof(struct iphdr));
 #endif
 	sum = sctp_end_cksum(sum);
-	sh->checksum = htonl(sum);
+	sh->checksum = sum;
 
 	if (0 > test_run_network_once(TEST_NETWORK_ETH0))
 		DUMP_CORE;

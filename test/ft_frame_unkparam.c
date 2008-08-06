@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		printf("Test 1 Failed.\n");
 		DUMP_CORE;
@@ -331,7 +331,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -557,7 +557,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -678,7 +678,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -754,7 +754,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -835,7 +835,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -918,7 +918,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}
@@ -1032,7 +1032,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		DUMP_CORE;
 	}

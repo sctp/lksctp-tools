@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		printf("Case 1 Failed.\n");
 		DUMP_CORE;
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		printf("Case 2 Failed.\n");
 		DUMP_CORE;
@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		printf("Case 3 Failed.\n");
 		DUMP_CORE;
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 		val = sctp_start_cksum((uint8_t *)sh,
 				       skb->len - sizeof(struct iphdr));
 		val = sctp_end_cksum(val);
-		sh->checksum = htonl(val);
+		sh->checksum = val;
 	} else {
 		printf("Case 4 Failed.\n");
 		DUMP_CORE;
@@ -502,7 +502,7 @@ int main(int argc, char *argv[])
 	val = sctp_start_cksum((uint8_t *)sh,
 				skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 
 	/* run through COOKIE_ACK since this will be returned first */
@@ -512,9 +512,9 @@ int main(int argc, char *argv[])
 	}
 
 	/* The next chunk is bad data so we expect it to be handled
-	 * and ABORT sent back
+	 * and ABORT sent back bundled.
 	 */
-	if (test_step(SCTP_CID_ABORT, TEST_NETWORK0) <= 0) {
+	if (test_for_chunk(SCTP_CID_ABORT, TEST_NETWORK0) <= 0) {
 		printf("Case 5 Failed.\n");
 		DUMP_CORE;
 	}
@@ -524,6 +524,9 @@ int main(int argc, char *argv[])
 	if (skb) {
 		packet = test_get_sctp(skb->data);
 		hdr = &packet->ch;
+		while (hdr->type != SCTP_CID_ABORT)
+		    hdr = (void *)hdr + WORD_ROUND(ntohs(hdr->length));
+
 		errhdr = (struct sctp_errhdr *)((uint8_t*)hdr +
 						sizeof(sctp_chunkhdr_t));
 		if (errhdr->cause != SCTP_ERROR_PROTO_VIOLATION)
@@ -563,13 +566,6 @@ int main(int argc, char *argv[])
 	while (!test_step(SCTP_CID_SACK, TEST_NETWORK0)) {
 	}
 
-	/* We don't bundle COOKIE-ACK and sack, but they are put
-	 * on the network at the same time.
-	 * Skip over the COOKIE-ACK so that the next packet has
-	 * a SACK.
-	 */
-	test_run_network_once(TEST_NETWORK0);
-
 	hdr = test_find_chunk(TEST_NETWORK0, SCTP_CID_SACK, NULL, NULL);
 	if (hdr == NULL) {
 		/* SACK was not found. Hosed for now? */
@@ -587,7 +583,7 @@ int main(int argc, char *argv[])
 	val = sctp_start_cksum((uint8_t *)sh,
 				skb->len - sizeof(struct iphdr));
 	val = sctp_end_cksum(val);
-	sh->checksum = htonl(val);
+	sh->checksum = val;
 
 	/* we should see an abort after SACK is processed */
 	if (test_step(SCTP_CID_ABORT, TEST_NETWORK0) == 0) {
