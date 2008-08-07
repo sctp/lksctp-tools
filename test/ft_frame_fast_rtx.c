@@ -5,6 +5,7 @@
  * Copyright (c) 2002 Intel Corp.
  * Copyright (c) 2002 Nokia, Inc.
  * Copyright (c) 2002 La Monte H.P. Yarroll
+ * Copyright 2008 Hewlett-Packard Development Company, L.P.
  * 
  * This file is part of the SCTP kernel Implementation
  * 
@@ -36,6 +37,9 @@
  *
  * Written or modified by: 
  *    Daisy Chang <tcdc@us.ibm.com>
+ *
+ * Re-written by
+ *    Vlad Yasevich <vladislav.yasevich@hp.com>
  * 
  * Any bugs reported given to us we will try to fix... any fixes shared will
  * be incorporated into the next SCTP release.
@@ -43,30 +47,23 @@
 
 /* 
  * This is a functional test for the SCTP kernel implementation.
- * This test is focused on testing a bug regarding the fast retransmit and
- * the cwnd limit.
+ * It test different fast retransmit scenarios:
  *
- * RFC 7.2.4 & the Implementers Guide 2.8.
+ * Test 1:  The first data packet of the association is reported missing 3
+ *   times.  This is there to test a bug that used to exist in our CACC
+ *   algorithm.
  *
- * 3) Determine how many of the earliest (i.e., lowest TSN) DATA chunks
- *    marked for retransmission will fit into a single packet, subject
- *    to constraint of the path MTU of the destination transport address
- *    to which the packet is being sent. Call this value K. Retransmit
- *    those K DATA chunks in a single packet. When a Fast Retransmit is
- *    being performed the sender SHOULD ignore the value of cwnd and
- *    SHOULD NOT delay retransmission.
+ * Test 2:  Fast-retransmission is lost and causes a T3-RTX timeout.  This
+ *   is to test a bug that we had wrt timing out chunks correctly.
  *
- * There is a bug in our code which always perform the cwnd check against
- * the flightsize, regardless if we are sending for fast retransmit or not.
- * This testcase is supposed to expose the bug and verify the code fix for
- * it. 
+ * Test 3:  Multiple chunks are reported missing at the same time.  We must
+ *   only fast-rtx 1 MTU worth of data.  We can not fast retransmit multiple
+ *   packets wort of data.  Subsequent retransmissions will occure once
+ *   fast-rtx is acknowledged.
  *
- * The test scenario is 
- * - To create a situation where the flight size would equal or
- * be greater than the possible cwnd value.
- * - Drop packets, create a big gap (big flight size), and force a fast
- *   retransmit.
- * - Make sure that all of the dropped packets are sent as fast retransmit.
+ * Test 4:  Two gaps are reported.  This test should make sure that cwnd
+ *   is not affected multiple times and that fast recorvery is correctly
+ *   implemented and exited.
  */
 
 #include <net/sctp/sctp.h>
@@ -80,16 +77,15 @@ main(int argc, char *argv[])
 	struct sctp_transport *t1, *t2;
 	struct sock *sk1, *sk2;
 	struct sockaddr_in loop1, loop2;
-	struct list_head *lchunk1;
-	struct sctp_chunk *chunk1;
 	void *msg_buf;
 	int error;
-	struct bare_sctp_packet *packet;
-	struct sk_buff *skb;
-	int count;
 
 	/* Do all that random stuff needed to make a sensible universe.  */
+	init_Internet();
 	sctp_init();
+
+	sctp_rto_initial = 20;
+	sctp_rto_min = 20;
 
 	/* Create the two endpoints which will talk to each other.  */
 	sk1 = sctp_socket(PF_INET, SOCK_SEQPACKET);
@@ -116,17 +112,13 @@ main(int argc, char *argv[])
 	/* We now do Cookie-Echo bundling as much as possible, so
 	 * get this out of the way for the rest of the tests.
 	 */
-	msg_buf = test_build_msg(100);
 	/* Send the first messages.  This will create the association.  */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	error = sctp_connect(sk1, (struct sockaddr *)&loop2, sizeof(loop2));
+	if (0 != test_run_network()) { DUMP_CORE; }
 
 	ep1 = sctp_sk(sk1)->ep;
 	asoc1 = test_ep_first_asoc(ep1);
-
-	/* Get the primary transport. */	
 	t1 = asoc1->peer.primary_path;
-
-	if (0 != test_run_network()) { DUMP_CORE; }
 
 	/* We have two established associations.  Let's extract some
 	 * useful details.
@@ -141,166 +133,249 @@ main(int argc, char *argv[])
 	/* Get the communication up message from sk1.  */
 	test_frame_get_event(sk1, SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 
-	/* Get the first message which was sent.  */
-	test_frame_get_message(sk2, msg_buf);
-
-	/* Verify the initial Congestion Parameters. */
-	test_verify_congestion_parameters(t1, 3000, 32768, 0, 0);
-
-	free(msg_buf);
-	msg_buf = test_build_msg(1352);
+	msg_buf = test_build_msg(1024);
 	
-	/* To create the situation where the flight size would equal or
-	 * be greater than the possible cwnd value - the max of cwnd/2 or
-	 * 2*mtu - when we force a fast retransmit later.
-	 */
-
-	/* Send 2 messages. */
-	/* The SACK received for these messages will increase the cwnd by
-	 * 1 mtu. 
-	 */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-
-	test_verify_congestion_parameters(t1, 4500, 32768, 0, 1352);
-
-	if (0 != test_run_network()) { DUMP_CORE; }
-
-	test_verify_congestion_parameters(t1, 4500, 32768, 0, 0);
-
-	/* Send another 4 messages. */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-
-	if (0 != test_run_network()) { DUMP_CORE; }
-
-	/* At this point, the receiver has acked all the sent data and
-	 * the cwnd is increased again. */
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 0);
-
-	/* Send 6 more messages. */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-	test_frame_get_message(sk2, msg_buf);
-
-	if (0 != test_run_network()) { DUMP_CORE; }
-	test_verify_congestion_parameters(t1, 7500, 32768, 0, 0);
-
-	/* Send 4 messages and drop all of them.
-	 * This would make the flight size grow up to 5408.
-	 */
-	test_kill_next_packet(SCTP_CID_DATA);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (test_run_network_once(TEST_NETWORK0) < 0) { DUMP_CORE; }
-	test_kill_next_packet(SCTP_CID_DATA);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (test_run_network_once(TEST_NETWORK0) < 0) { DUMP_CORE; }
-	test_kill_next_packet(SCTP_CID_DATA);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (test_run_network_once(TEST_NETWORK0) < 0) { DUMP_CORE; }
-	test_kill_next_packet(SCTP_CID_DATA);
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (test_run_network_once(TEST_NETWORK0) < 0) { DUMP_CORE; }
-
-	/* No SACK is received, so the flight_size stays as 5408.
-	 * And the cwnd have been adjusted by the max burst value - 
-	 * by default, 4 * 1500 (MTU).
-	 */
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 5408);
-
-	/* Get a reference to the chunk from the transmitted list. */
-	lchunk1 = t1->transmitted.next;	
-	chunk1 = list_entry(lchunk1, struct sctp_chunk, transmitted_list);
-
-	/* Send another message so that the receiver sends back a SACK. */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 5408);
-	if (1 != chunk1->tsn_missing_report) { DUMP_CORE; }
-
-	/* Send another message so that the receiver sends back a SACK. */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	if (2 != chunk1->tsn_missing_report) { DUMP_CORE; }
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 5408);
-
-	/* Send another message so that the receiver sends back a SACK. */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	if (0 != test_run_network()) { DUMP_CORE; }
-	if (3 != chunk1->tsn_missing_report) { DUMP_CORE; }
-	test_verify_congestion_parameters(t1, 6000, 32768, 0, 5408);
-
-	/* Send another message so that the receiver sends back a SACK. */
-	/* This time, the tsn_missing_report will reach 4, which will 
-	 * trigger the fast retransmit right away.  
-	 */
-	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
-	/* Run network twice to get the 4th SACK processed. */
-	if (test_run_network_once(TEST_NETWORK0) < 0) 
-		{ DUMP_CORE; }
-	if (test_run_network_once(TEST_NETWORK0) < 0) 
-		{ DUMP_CORE; }
-
-
-	/* Let the fast retransmit do its work.  
-	 * chunk->fast_retransmit cannot be verified as it is reset afte the
-	 * chunk is sent. 
+	/* TEST 1:
+	 * Test fast retransmission of the very first data chunk
+	 * Force the following scenario (we send in pairs so as to not
+	 * wait for SACK timeouts)
 	 *
-	 * At this point, the cwnd would have been reset to 3000 as 
-	 * max(cwnd/2, 2*MTU).  As we try to generate packets for fast 
-	 * retransmit, if the cwnd rule is still applied, the flight size
-	 * can only grow up to 1352*3 = 4056, therefore, not all 4 chunks
-	 * can be sent as what the implementors guide says. 
+	 * DATA1 (kill) ----->
+	 * DATA2        ----->
+	 * DATA3        ----->
+	 * DATA4        ----->
+	 * 
+	 * DATA1 should be fast-retransmitted after we got SACK #3.
 	 */
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_run_network_once(TEST_NETWORK0);
 
-	/* Verify that 1 of the packets dropped should have been sent as
-	 * fast retranmit and 2 other packets dropped are sent because of
-	 * the avaialble window.
-	 */
-	count = 0;
-	SK_FOR(struct sk_buff *, skb, *(get_Internet(TEST_NETWORK0)), {
-		packet = test_get_sctp(skb->data);
-		if (SCTP_CID_DATA == packet->ch.type) {
-			count++;
-		}
-	});
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
 
-	if (count != 3) {
-		printk("Fast retransmit sent %d chunks out of 4\n", count);
+	/* Expecting the SACK for the last message, this will #3 */
+	if (test_step(SCTP_CID_SACK, TEST_NETWORK0) <= 0)
 		DUMP_CORE;
-	}
+
+	/* DATA will be fast-rtx'ed */
+	if (test_step(SCTP_CID_DATA, TEST_NETWORK0) <= 0)
+		DUMP_CORE;
+
+	/* process DATA */
+	if (test_run_network_once(TEST_NETWORK0) < 0)
+		DUMP_CORE;
+
+	/* Send one more message, to ellicit a SACK */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (test_step(SCTP_CID_SACK, TEST_NETWORK0) <= 0)
+		DUMP_CORE;
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+	
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+
+	/* TEST 2:
+	 * Test fast retransmission and subsequent timeouts
+	 * Force the following scenario (we send in pairs so as to not
+	 * wait for SACK timeouts)
+	 *
+	 * DATA1        ----->
+	 * DATA2 (kill) ----->
+	 * DATA3        ----->
+	 * DATA4        ----->
+	 * DATA5        ----->
+	 * 	        <---- SACK (CTSN=1)
+	 *              <---- SACK (CTSN=1, GAP = 3)
+	 *              <---- SACK (CTSN=1, GAP = 3-4)
+	 *              <---- SACK (CTSN=1, GAP = 3-5)
+	 * DATA2 (FAST) ----->
+	 *              <---- SACK (Kill)
+	 * 
+	 * DATA2 should be retransmitted again afater timeout.
+	 */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_run_network_once(TEST_NETWORK0);
+
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	/* Eat the first SACK */
+	test_run_network_once(TEST_NETWORK0);
+
+	jiffies += t1->rto - 1;
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network())
+		{ DUMP_CORE; }
+
+	if (0 != test_run_network())
+		{ DUMP_CORE; }
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	test_kill_next_packet(SCTP_CID_SACK);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	jiffies += 2;
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	jiffies += t1->rto + 1;
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Because of t3-timeout above, the cwnd got dropped to 1 MTU.
+	 * Restore it back to something we can work with
+	 */
+	t1->cwnd = 6000;
+	t1->ssthresh = 6000;
+
+	/* TEST 3:
+	 * Test fast retransmission followed by retrnasmission on
+	 * SACK which moves the cumulative tsn.
+	 * Force the following scenario (we send in pairs so as to not
+	 * wait for SACK timeouts)
+	 *
+	 * DATA1        ----->
+	 * DATA2 (kill) ----->
+	 * DATA3 (kill) ----->
+	 * DATA4        ----->
+	 * DATA5        ----->
+	 * DATA6        ----->
+	 * 	        <---- SACK (CTSN=1)
+	 *              <---- SACK (CTSN=1, GAP = 4)
+	 *              <---- SACK (CTSN=1, GAP = 4-5)
+	 *              <---- SACK (CTSN=1, GAP = 4-6)
+	 * DATA2 (FAST) ----->
+	 *              <---- SACK (CTSN=2, GAP = 4-6)
+	 * DATA3 (rtx flush) --->
+	 *              <---- SACK (CTSN=6)
+	 * 
+	 */
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_run_network_once(TEST_NETWORK0);
+
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_run_network_once(TEST_NETWORK0);
+
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_run_network_once(TEST_NETWORK0);
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	/* miss counter will be 1 */
+	if (0 != test_run_network()) 
+		{ DUMP_CORE; }
+	
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	/* miss counter will be 2 */
+	if (0 != test_run_network())
+		{ DUMP_CORE; }
+
+	jiffies += t1->rto - 2;
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network())
+		{ DUMP_CORE; }
+
+	if (0 != test_run_network())
+		{ DUMP_CORE; }
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+	test_frame_get_message(sk2, msg_buf);
+
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* Because of t3-timeout above, the cwnd got dropped to 1 MTU.
+	 * Restore it back to values we need for the next test.
+	 */
+	t1->cwnd = 14000;
+	t1->ssthresh = 16000;
+	asoc1->max_burst = 10;
+
+	/*
+	 * Test 4:
+	 *
+	 * Test when multiple chunks need to be fast retransmitted at
+	 * different times
+	 *
+	 * DATA - (lost) ->
+	 * DATA ---------->
+	 * DATA - (lost) ->
+	 * DATA ---------->
+	 * DATA ---------->
+	 * DATA ---------->
+	 * DATA ---------->
+	 */
+
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	jiffies++;
+	test_kill_next_packet(SCTP_CID_DATA);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	jiffies++;
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+	if (0 != test_run_network()) { DUMP_CORE; }
+
+	/* At this point we enter fast recovery */
+	if (!t1->fast_recovery || t1->cwnd < 7000)
+		DUMP_CORE;
+
+	test_frame_send_message(sk1, (struct sockaddr *)&loop2, msg_buf);
+
+	if (test_step(SCTP_CID_SACK, TEST_NETWORK0) <= 0)
+		DUMP_CORE;
+
+	if (test_step(SCTP_CID_DATA, TEST_NETWORK0) <= 0)
+		DUMP_CORE;
+
+	/* Make sure we dont' touch cwnd again */
+	if (t1->cwnd < 7000)
+		DUMP_CORE;
+
 	if (0 != test_run_network()) { DUMP_CORE; }
 
 	sctp_close(sk1, 0);
 	sctp_close(sk2, 0);
 
-	if (0 == error) {
-		printk("\n\n%s passed\n\n\n", argv[0]);
-	}
-
-	exit(0);
-
-} /* main() */
+	if (0 != test_run_network()) { DUMP_CORE; }
+	
+	printk("\n\n%s tests passed\n\n\n", argv[0]);
+	return 0;
+}

@@ -174,7 +174,8 @@ PASSING_FRAME_TESTS = \
 	ft_frame_cookie_ports \
 	ft_frame_hb_rtx \
 	ft_frame_frag_interleave \
-	ft_frame_bind
+	ft_frame_bind \
+	ft_frame_fast_rtx
 
 PASSING_V6_FRAME_TESTS = \
 	ft_frame_basic_v6 \
@@ -204,12 +205,11 @@ PASSING_V6_FRAME_TESTS = \
 	ft_frame_bind
 
 FAILING_TESTS = \
-	ft_frame_init_bomb \
-	ft_frame_fast_rtx \
+	ft_frame_init_bomb
 
 FAILING_V6_FRAME_TESTS = \
 	ft_frame_fragments_v6 \
-	ft_frame_maxseg_v6 \
+	ft_frame_maxseg_v6
 
 TARGETS = ${PASSING_UNIT_TESTS} ${PASSING_FRAME_TESTS}
 #ifdef CONFIG_IPV6
