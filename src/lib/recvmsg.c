@@ -74,7 +74,7 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 	inmsg.msg_control = incmsg;
 	inmsg.msg_controllen = sizeof(incmsg);
 
-	error = recvmsg(s, &inmsg, 0);
+	error = recvmsg(s, &inmsg, msg_flags ? *msg_flags : 0);
 	if (error < 0)
 		return error;
 
