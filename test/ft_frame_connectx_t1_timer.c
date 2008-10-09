@@ -62,6 +62,7 @@ main(int argc, char *argv[])
 	int svr_cntr[NUM_SRV_ADDR];
 	union sctp_addr clt_loop[4];
 	char addr_buf[sizeof(struct sockaddr_in6)*NUM_SRV_ADDR];
+	int next_init;
 	int pf_class;
 
 	/* Do all that random stuff needed to make a sensible universe. */
@@ -78,21 +79,21 @@ main(int argc, char *argv[])
 	svr_loop[0].v6.sin6_scope_id = 0;
 	svr_loop[0].v6.sin6_port = htons(SCTP_TESTPORT_1);
 	svr_netw[0] = TEST_NETWORK_ETH0;
-	svr_loop[2].v6.sin6_family = AF_INET6;
-	svr_loop[2].v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_SITELOCAL_ETH0;
-	svr_loop[2].v6.sin6_scope_id = 0;
-	svr_loop[2].v6.sin6_port = htons(SCTP_TESTPORT_1);
-	svr_netw[2] = TEST_NETWORK_ETH0;
 	svr_loop[1].v6.sin6_family = AF_INET6;
-	svr_loop[1].v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_SITELOCAL_ETH1;
+	svr_loop[1].v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_SITELOCAL_ETH0;
 	svr_loop[1].v6.sin6_scope_id = 0;
 	svr_loop[1].v6.sin6_port = htons(SCTP_TESTPORT_1);
-	svr_netw[1] = TEST_NETWORK_ETH1;
+	svr_netw[1] = TEST_NETWORK_ETH0;
+	svr_loop[2].v6.sin6_family = AF_INET6;
+	svr_loop[2].v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_SITELOCAL_ETH1;
+	svr_loop[2].v6.sin6_scope_id = 0;
+	svr_loop[2].v6.sin6_port = htons(SCTP_TESTPORT_1);
+	svr_netw[2] = TEST_NETWORK_ETH1;
 	svr_loop[3].v6.sin6_family = AF_INET6;
-	svr_loop[3].v6.sin6_addr = (struct in6_addr) SCTP_C_ADDR6_SITELOCAL_ETH0;
+	svr_loop[3].v6.sin6_addr = (struct in6_addr) SCTP_ADDR6_SITELOCAL_ETH2;
 	svr_loop[3].v6.sin6_scope_id = 0;
 	svr_loop[3].v6.sin6_port = htons(SCTP_TESTPORT_1);
-	svr_netw[3] = TEST_NETWORK_ETH0;
+	svr_netw[3] = TEST_NETWORK_ETH2;
 	svr_loop[4].v6.sin6_family = AF_INET6;
 	svr_loop[4].v6.sin6_addr = (struct in6_addr) SCTP_B_ADDR6_SITELOCAL_ETH0;
 	svr_loop[4].v6.sin6_scope_id = 0;
@@ -120,14 +121,14 @@ main(int argc, char *argv[])
 	svr_loop[0].v4.sin_addr.s_addr = SCTP_B_ETH0;
 	svr_loop[0].v4.sin_port = htons(SCTP_TESTPORT_1);
 	svr_netw[0] = TEST_NETWORK_ETH0;
-	svr_loop[2].v4.sin_family = AF_INET;
-	svr_loop[2].v4.sin_addr.s_addr = SCTP_ADDR_ETH0;
-	svr_loop[2].v4.sin_port = htons(SCTP_TESTPORT_1);
-	svr_netw[2] = TEST_NETWORK_ETH0;
 	svr_loop[1].v4.sin_family = AF_INET;
-	svr_loop[1].v4.sin_addr.s_addr = SCTP_ADDR_ETH1;
+	svr_loop[1].v4.sin_addr.s_addr = SCTP_ADDR_ETH0;
 	svr_loop[1].v4.sin_port = htons(SCTP_TESTPORT_1);
-	svr_netw[1] = TEST_NETWORK_ETH1;
+	svr_netw[1] = TEST_NETWORK_ETH0;
+	svr_loop[2].v4.sin_family = AF_INET;
+	svr_loop[2].v4.sin_addr.s_addr = SCTP_ADDR_ETH1;
+	svr_loop[2].v4.sin_port = htons(SCTP_TESTPORT_1);
+	svr_netw[2] = TEST_NETWORK_ETH1;
 	svr_loop[3].v4.sin_family = AF_INET;
 	svr_loop[3].v4.sin_addr.s_addr = SCTP_ADDR_ETH2;
 	svr_loop[3].v4.sin_port = htons(SCTP_TESTPORT_1);
@@ -301,10 +302,10 @@ main(int argc, char *argv[])
 		       NIPQUAD(addr->v4.sin_addr.s_addr),
 		       ntohs(addr->v4.sin_port));
 	}
-	if (!test_for_chunk(SCTP_CID_INIT, svr_netw[1])) {
+	if (!test_for_chunk(SCTP_CID_INIT, svr_netw[0])) {
 		DUMP_CORE;
 	}
-	if (test_for_chunk(SCTP_CID_INIT, svr_netw[0])) {
+	if (!test_for_chunk(SCTP_CID_INIT, svr_netw[1])) {
 		DUMP_CORE;
 	}
 	if (test_for_chunk(SCTP_CID_INIT, svr_netw[2])) {
@@ -313,7 +314,7 @@ main(int argc, char *argv[])
 	if (test_for_chunk(SCTP_CID_INIT, svr_netw[3])) {
 		DUMP_CORE;
 	}
-	if (test_for_chunk(SCTP_CID_INIT, svr_netw[4])) {
+	if (!test_for_chunk(SCTP_CID_INIT, svr_netw[4])) {
 		DUMP_CORE;
 	}
 	init_cnt = 1;
@@ -321,7 +322,7 @@ main(int argc, char *argv[])
 	init_to = msecs_to_jiffies(SCTP_RTO_INITIAL);
 	for (j = 1; j <= 7; j++) {	// this should be able to go to 8...
 		for (i = 1; i <= LAST_SRV_ADDR; i++) {
-			int next_init = i % LAST_SRV_ADDR + 1;
+			next_init = i % LAST_SRV_ADDR + 1;
 			addr = &svr_loop[next_init];
 
 			printk("----------------------------------------------\n");
@@ -394,6 +395,82 @@ main(int argc, char *argv[])
 #endif
 	}
 
+	init_cnt = 1;
+	init_to = msecs_to_jiffies(SCTP_RTO_INITIAL);
+	for (j = 1; j <= 3; j++) {	// this should be able to go to 8...
+		for (i = 1; i <= LAST_VALID_SRV_ADDR; i++) {
+			next_init = i % LAST_VALID_SRV_ADDR + 1;
+			addr = &svr_loop[next_init];
+
+			printk("----------------------------------------------\n");
+			printk("Timeout iteration j=%d i=%d\n", j, i);
+			if (i != LAST_SRV_ADDR) {
+				/* Now drop the INIT_ACK. */
+				printk("Drop COOKIE_ECHO %d\n", i);
+				test_kill_next_packet(SCTP_CID_COOKIE_ECHO);
+			} else {
+				/* Now drop the ABORT. */
+				printk("Drop ABORT %d\n", i);
+				test_kill_next_packet(SCTP_CID_ABORT);
+			}
+			error = test_run_network();
+			if (0 != error) { DUMP_CORE; }
+
+			if (init_to != clt_asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_COOKIE]) {
+				printk("Expected timeout to be: %d found: %d\n",
+				       init_to,
+				       clt_asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_COOKIE]);
+				DUMP_CORE;
+			}
+			printk("Allow T1 Timeout %d %d\n", i, clt_asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_COOKIE]);
+			jiffies += clt_asoc1->timeouts[SCTP_EVENT_TIMEOUT_T1_COOKIE] + 1;
+			test_run_timeout();
+
+#ifdef TEST_FAIL
+			if (init_cnt == clt_asoc1->max_init_attempts) {
+				printk("Don't expect an COOKIE_ECHO\n");
+				if (test_for_chunk(SCTP_CID_COOKIE_ECHO, svr_netw[next_init])) {
+					DUMP_CORE;
+				}
+
+				/* Indicate successful completion.  */
+				printk("\n\n%s passed\n\n\n", argv[0]);
+				exit(0);
+			}
+#endif
+
+			/* We should again have an INIT sitting on the Internet. */
+			if (addr->sa.sa_family == AF_INET6) {
+				printk("Expect an COOKIE_ECHO:"
+				       " addr: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
+				       " port: %d\n",
+				       NIP6(addr->v6.sin6_addr),
+				       ntohs(addr->v6.sin6_port));
+			} else {
+				printk("Expect an COOKIE_ECHO:"
+				       " addr: %u.%u.%u.%u port: %d\n",
+				       NIPQUAD(addr->v4.sin_addr.s_addr),
+				       ntohs(addr->v4.sin_port));
+			}
+			if (!test_for_chunk(SCTP_CID_COOKIE_ECHO, svr_netw[next_init])) {
+				DUMP_CORE;
+			}
+			svr_cntr[next_init]++;
+			init_cnt++;
+
+#ifndef TEST_FAIL
+			if (init_cnt == clt_asoc1->max_init_attempts)
+				break;
+#endif
+		}
+		init_to *= 2;
+		if (init_to > clt_asoc1->max_init_timeo)
+			init_to = clt_asoc1->max_init_timeo;
+#ifndef TEST_FAIL
+		if (init_cnt == clt_asoc1->max_init_attempts)
+			break;
+#endif
+	}
 	printk("Free run network to complete connection\n");
 	error = test_run_network();
 	if (0 != error) { DUMP_CORE; }
