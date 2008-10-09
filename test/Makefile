@@ -62,7 +62,11 @@ endif
 KERN_LIB_OBJECTS= \
 	scatterlist.o \
 	libcrc32c.o \
-	find_next_bit.o
+	find_next_bit.o \
+	bitmap.o \
+	hweight.o \
+	vsprintf.o \
+	ctype.o
 
 SCTP_HEADERS= \
 	${INCLUDE_LINUX}/sctp.h \

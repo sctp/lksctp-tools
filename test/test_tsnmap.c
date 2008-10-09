@@ -47,13 +47,14 @@
 #include <net/sctp/sctp.h>
 #include <net/sctp/sm.h>
 #include <funtest.h>
+#include <linux/ctype.h>
 
 #define TEST_TSNMAP_LEN 64
 #define MAGIC_NUMBER 0x42424242
 
 struct {
 	struct sctp_tsnmap global_map;
-	unsigned char storage[sctp_tsnmap_storage_size(TEST_TSNMAP_LEN)];
+	unsigned char storage[sizeof(struct sctp_tsnmap)];
 	uint32_t scribble;
 } storage;
 
@@ -95,7 +96,7 @@ void
 test_tsnmap(uint32_t initial_tsn, uint16_t size)
 {
 	struct sctp_tsnmap *map;
-	__u8 map_buf[sizeof(struct sctp_tsnmap) + sctp_tsnmap_storage_size(SCTP_TSN_MAP_SIZE)];
+	__u8 map_buf[sizeof(struct sctp_tsnmap)];
 	int i;
 	struct sctp_tsnmap_iter iter;
 	uint16_t start, end;
@@ -105,9 +106,9 @@ test_tsnmap(uint32_t initial_tsn, uint16_t size)
 	 */
 
 	printf("Testing new tsnmap\n");
-
+	memset(map_buf, 0, sizeof(map_buf));
 	map = sctp_tsnmap_init((struct sctp_tsnmap *)&map_buf, size,
-			       initial_tsn);
+			       initial_tsn, GFP_KERNEL);
 	if (NULL == map) { DUMP_CORE; }
 	
 	printf("Testing initial ctsn\n");
@@ -198,8 +199,9 @@ test_tsnmap(uint32_t initial_tsn, uint16_t size)
 	printf("Testing statically allocated map\n");
 
 	map = &storage.global_map;
+	memset(map, 0, sizeof(*map));
 	storage.scribble = MAGIC_NUMBER;
-	if (NULL == sctp_tsnmap_init(map, size, initial_tsn)){
+	if (NULL == sctp_tsnmap_init(map, size, initial_tsn, GFP_KERNEL)){
 		DUMP_CORE;
 	}
 	
@@ -266,14 +268,14 @@ test_tsnmap(uint32_t initial_tsn, uint16_t size)
 	 * is very specific to the implementation but this seems fair
 	 * given this is a unittest.
 	 */ 
-	if (0 <= sctp_tsnmap_check(map, initial_tsn + size*4)) {
+	if (0 <= sctp_tsnmap_check(map, map->base_tsn + SCTP_TSN_MAP_SIZE)) {
 		DUMP_CORE;
 	}
        
 	/* Now check one under the previously checked tsn.  This 
 	 * new tsn should show up as new 
 	 */
-	if (0 != sctp_tsnmap_check(map, initial_tsn+size*4-1)) {
+	if (0 != sctp_tsnmap_check(map, map->base_tsn+SCTP_TSN_MAP_SIZE-1)) {
 		DUMP_CORE;
 	}
 
@@ -284,7 +286,7 @@ test_tsnmap(uint32_t initial_tsn, uint16_t size)
 
 	/* Reinit the tsnmap back to sanity.  */
 	if (NULL == sctp_tsnmap_init(map,
-				     size, initial_tsn)) {
+				     size, initial_tsn, GFP_KERNEL)) {
 		DUMP_CORE;
 	}
 
@@ -442,7 +444,7 @@ test_tsnmap(uint32_t initial_tsn, uint16_t size)
 
 	/* Reinit the tsnmap back to sanity.  */
 	if (NULL == sctp_tsnmap_init(map,
-				     size, initial_tsn)) {
+				     size, initial_tsn, GFP_KERNEL)) {
 		DUMP_CORE;
 	}
 
