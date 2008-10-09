@@ -285,25 +285,25 @@ struct inet6_dev lo_ip6_ptr = {
 
 /* These are net_device definitions for the test frame. */
 struct net_device eth2_dev =
-	{"eth2", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+	{"eth2", {NULL, NULL}, NULL, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
 #ifdef CONFIG_NETPOLL
 	    {NULL, NULL},
 #endif
 	    NULL, 0, 4};
 struct net_device eth1_dev =
-	{"eth1", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+	{"eth1", {NULL, NULL}, NULL, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
 #ifdef CONFIG_NETPOLL
 	    {NULL, NULL},
 #endif
 	    NULL, 0, 3};
 struct net_device eth0_dev =
-	{"eth0", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+	{"eth0", {NULL, NULL}, NULL, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
 #ifdef CONFIG_NETPOLL
 	    {NULL, NULL},
 #endif
 	    NULL, 0, 2};
 struct net_device loopback_dev =
-	{"lo", {NULL, NULL}, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
+	{"lo", {NULL, NULL}, NULL, 0, 0, 0, 0, 0, 0, 0, {NULL, NULL},
 #ifdef CONFIG_NETPOLL
 	    {NULL, NULL},
 #endif
@@ -1572,7 +1572,7 @@ int ip6_xmit(struct sock *sk, struct sk_buff *skb, struct flowi *fl, struct ipv6
 
 } /* ip6_xmit() */
 
-int ipv6_dev_get_saddr(struct net_device *dst_dev,
+int ipv6_dev_get_saddr(struct net *net, struct net_device *dst_dev,
 		       const struct in6_addr *daddr, unsigned int prefs,
 		       struct in6_addr *saddr)
 {
