@@ -113,7 +113,7 @@ main(int argc, char *argv[])
 
 	/*sctp_connectx () TEST1: Bad socket descriptor, EBADF Expected error*/
 	len = sizeof(struct sockaddr_in);
-	error = sctp_connectx(-1, (struct sockaddr *) &conn_addr, 1);
+	error = sctp_connectx(-1, (struct sockaddr *) &conn_addr, 1, NULL);
 	if (error != -1 || errno != EBADF)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx with bad socket "
 			 "descriptor error:%d, errno:%d", error, errno);
@@ -121,7 +121,7 @@ main(int argc, char *argv[])
 	tst_resm(TPASS, "sctp_connectx() with bad socket descriptor - EBADF");
 	
 	/*sctp_connectx () TEST2: Invalid socket, ENOTSOCK Expected error*/
-	error = sctp_connectx(0, (struct sockaddr *) &conn_addr, 1);
+	error = sctp_connectx(0, (struct sockaddr *) &conn_addr, 1, NULL);
 	if (error != -1 || errno != ENOTSOCK)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx with invalid socket "
 	                 "error:%d, errno:%d", error, errno);
@@ -131,7 +131,7 @@ main(int argc, char *argv[])
 	/*sctp_connectx () TEST3: Invalid address, EINVAL Expected error*/
 	tmp_addr = (struct sockaddr *) malloc(sizeof(struct sockaddr) - 1);
 	tmp_addr->sa_family = AF_INET;
-	error = sctp_connectx(sk, tmp_addr, 1);
+	error = sctp_connectx(sk, tmp_addr, 1, NULL);
 	if (error != -1 || errno != EINVAL)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx with invalid address "
 	                 "error:%d, errno:%d", error, errno);
@@ -139,7 +139,7 @@ main(int argc, char *argv[])
 	tst_resm(TPASS, "sctp_connectx() with invalid address - EINVAL");
 
 	/*sctp_connectx () TEST4: Invalid address length, EINVAL Expected error*/
-	error = sctp_connectx(sk, (struct sockaddr *) &conn_addr, 0);
+	error = sctp_connectx(sk, (struct sockaddr *) &conn_addr, 0, NULL);
 	if (error != -1 || errno != EINVAL)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx with invalid address length "
 	                 "error:%d, errno:%d", error, errno);
@@ -148,7 +148,7 @@ main(int argc, char *argv[])
 
 	/*sctp_connectx () TEST5: Invalid address family, EINVAL Expect error*/
 	conn_addr.sin_family = 9090; /*Assigning invalid address family*/
-	error = sctp_connectx(sk, (struct sockaddr *) &conn_addr, 1);
+	error = sctp_connectx(sk, (struct sockaddr *) &conn_addr, 1, NULL);
 	if (error != -1 || errno != EINVAL)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx with invalid address family "
 	                 "error:%d, errno:%d", error, errno);
@@ -162,7 +162,7 @@ main(int argc, char *argv[])
 	listening SK_MAX clients*/
 	for (i = 0 ; i < SK_MAX ; i++) {
 		error = sctp_connectx(clnt_sk[i], (struct sockaddr *)&conn_addr,
-			      1);
+			      1, NULL);
 		if (error < 0)
 			tst_brkm(TBROK, tst_exit, "valid blocking sctp_connectx "
 				 "error:%d, errno:%d", error, errno);
@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 	/*sctp_connectx () TEST7: sctp_connectx when accept queue is full, ECONNREFUSED
 	Expect error*/
 	/*Now that accept queue is full, the below sctp_connectx should fail*/
-	error = sctp_connectx(clnt2_sk, (struct sockaddr *) &conn_addr, 1);
+	error = sctp_connectx(clnt2_sk, (struct sockaddr *) &conn_addr, 1, NULL);
 	if (error != -1 || errno != ECONNREFUSED)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx when accept queue is full "
 	                 "error:%d, errno:%d", error, errno);
@@ -186,7 +186,7 @@ main(int argc, char *argv[])
 					 (struct sockaddr *) &acpt_addr, &len);
 
 	/*sctp_connectx () TEST8: from a listening socket, EISCONN Expect error*/
-	error = sctp_connectx(lstn_sk, (struct sockaddr *) &lstn_addr, 1);
+	error = sctp_connectx(lstn_sk, (struct sockaddr *) &lstn_addr, 1, NULL);
 	if (error != -1 || errno != EISCONN)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx on a listening socket "
 	                 "error:%d, errno:%d", error, errno);
@@ -195,7 +195,7 @@ main(int argc, char *argv[])
 
 	/*sctp_connectx() TEST9: On established socket, EISCONN Expect error*/
 	i=0;
-	error = sctp_connectx(acpt_sk[i], (struct sockaddr *) &lstn_addr, 1);
+	error = sctp_connectx(acpt_sk[i], (struct sockaddr *) &lstn_addr, 1, NULL);
 	if (error != -1 || errno != EISCONN)
 		tst_brkm(TBROK, tst_exit, "sctp_connectx on an established socket "
 	                 "error:%d, errno:%d", error, errno);
@@ -210,7 +210,7 @@ main(int argc, char *argv[])
 	/* sctp_connectx() TEST10: Re-establish an association that is closed.
 	 * should succeed.
 	 */
-	error = sctp_connectx(sk1, (struct sockaddr *)&conn_addr, 1);
+	error = sctp_connectx(sk1, (struct sockaddr *)&conn_addr, 1, NULL);
 	if (error < 0)
 		tst_brkm(TBROK, tst_exit, "Re-establish an association that "
 				 "is closed error:%d, errno:%d", error, errno);

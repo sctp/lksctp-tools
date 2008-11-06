@@ -1857,7 +1857,7 @@ connectx_func(char *argv0, int sk, struct sockaddr *addrs, int count)
 		}
 	}
 
-	error = sctp_connectx(sk, addrs, count);
+	error = sctp_connectx(sk, addrs, count, NULL);
 
 	if (error != 0) {
 		if (errno == ECONNREFUSED)
