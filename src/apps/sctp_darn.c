@@ -720,7 +720,6 @@ command_listen(char *argv0, int sk)
 			}
 			break;
 		}
-		test_print_message(sk, &inmessage, error);
 
 		/* Update the associd when a notification is received on a
 		 * UDP-style socket.
@@ -730,12 +729,13 @@ command_listen(char *argv0, int sk)
 
 		if (echo) {
 			if( !(MSG_NOTIFICATION & inmessage.msg_flags)) {
-				sendto(sk, inmessage.msg_iov->iov_base,
+				sendto(recvsk, inmessage.msg_iov->iov_base,
 				       error, 0, (struct sockaddr *)&msgname,
 				       sizeof(msgname));
 			}
 		}
 
+		test_print_message(sk, &inmessage, error);
 
 		inmessage.msg_control = incmsg;
 		inmessage.msg_controllen = sizeof(incmsg);
