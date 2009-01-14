@@ -8,8 +8,8 @@ include $(top_srcdir)/Makefile.dirs
 INCLUDES = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib 
 AM_CFLAGS = -g -Wall -Wstrict-prototypes -Wimplicit-function-declaration
 AM_LDFLAGS = 
-LDADD = $(top_builddir)/src/lib/libsctp.la \
-	$(top_builddir)/src/testlib/libsctputil.la
+LDADD = $(top_builddir)/src/testlib/libsctputil.la \
+	$(top_builddir)/src/lib/libsctp.la
 
 # programs to be installed with the distriubution
 bin_PROGRAMS = sctp_darn sctp_test

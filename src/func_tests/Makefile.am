@@ -8,8 +8,8 @@ include $(top_srcdir)/Makefile.dirs
 INCLUDES = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib 
 AM_CFLAGS = -g -Wall -Wstrict-prototypes -Wimplicit-function-declaration
 AM_LDFLAGS = -lpthread
-LDADD = $(top_builddir)/src/lib/libsctp.la \
-	$(top_builddir)/src/testlib/libsctputil.la
+LDADD = $(top_builddir)/src/testlib/libsctputil.la \
+	$(top_builddir)/src/lib/libsctp.la
 
 V6FLAGS = -DCONFIG_IPV6=1 -DTEST_V6=1 ${DEFS} ${INCLUDES} ${CFLAGS}
 
