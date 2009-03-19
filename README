@@ -1,3 +1,4 @@
+(C) Copyright 2007 Hewlett-Packard Development Company, L.P.
 (C) Copyright IBM Corp. 2001, 2003
 Copyright 2001 Motorola, Cisco, Intel, Nokia, La Monte Yarroll.
 Copyright 2002 Nokia, La Monte Yarroll, Intel. 
@@ -21,9 +22,10 @@ For SCTP application developers, this package provides the user-level
 C language header files and a library for accessing SCTP specific
 application programming interfaces not provided by the standard sockets.
 
-For LKSCTP project developers, this package provides the test 
-framework, or testframe, a test suite running the LKSCTP code in
-userspace.  
+For LKSCTP project developers, this package provides the API
+regression and functional tests.  Developers should also check
+lksctp_tests package that provides low level kernel tests.  These
+are available from git.kernel.org.
 
 For either role, this project provides sample code, utilities, and
 tests that one may find useful.  
@@ -65,18 +67,13 @@ MANIFEST
 |-- doc
 |-- man
 |-- src
-|   |-- apps
-|   |-- func_tests
-|   |-- include
-|   |   `-- netinet
-|   |-- lib
-|   |-- testlib
-|   `-- withsctp
-`-- test
-    `-- linux
-        `-- include
-            |-- asm
-            `-- linux
+    |-- apps
+    |-- func_tests
+    |-- include
+    |   `-- netinet
+    |-- lib
+    |-- testlib
+    `-- withsctp
 
 You may want to check the following files:
 
@@ -136,9 +133,9 @@ extend the SCTP Kernel Implementation we ask that you do the following:
 	6) Submit the feature and the unit tests as a separate
 	SourceForge patch.
 	
-Look in kernel/test for examples of both kinds of tests.  Please do
-not submit code that fails its own tests or any of the unit tests.  If
-it fails a functional test, please document that with the submission.
+Look in src/func_tests and in lksctp-tests package for examples of of tests.
+Please do not submit code that fails its own tests or any of the unit tests.
+If it fails a functional test, please document that with the submission.
 
 Another XP requirement is to code only what is you need to make the
 current test work.  Where this means omitting required features, we

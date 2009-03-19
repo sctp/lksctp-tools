@@ -12,8 +12,8 @@ For SCTP application developers, this package provides the user-level
 C language header files and a library for accessing SCTP specific
 application programming interfaces not provided by the standard sockets. 
 
-For LKSCTP project developers, this package provides the test framework or
-testframe, a test suite running the LKSCTP code in userspace.  
+For LKSCTP project developers, this package provides the functional
+and API regression tests.
 
 For either role, this project provides sample code, utilities, and
 tests that one may find useful.  
@@ -24,12 +24,6 @@ NOTE:  To build, run and install the lksctp-tools package, your system is
 required to be running with linux-2.5.36, or a later version of the 
 kernel, configured with the Network options "SCTP Configuration" 
 support enabled.  
-
-WARNING:  The testframe is _very_ specific to a level of LKSCTP kernel code.
-Once we reach maturation, it is likely that the version independent code
-may be split into its own package, but for now LKSCTP developers should
-be highly aware that they need to keep both their kernel source and
-lksctp-tools source current.
 
 ______________________________________________________________________
 
@@ -96,83 +90,3 @@ To install/build the lksctp-tools utilities/tests do the following:
 
 8) Run other SCTP test tools/applications in src/apps directory to verify the
    running SCTP.
-
-9) If you are not a lksctp project developer, you can skip the rest of
-   the instructions. 
-
-
-INSTALLATION for lksctp developers
-----------------------------------
-
-7) Have a 2.6 kernel source tree ready on the system for build and development.
-   The latest stable version can be obtained from
-	http://www.kernel.org
-   If you use git, the latest linux 2.6 development tree can be obtained from
-	http://www.kernel.org/git
-
-8) Set environment variable "LKSCTP_LINUX" to point to the kernel source tree 
-   where you are going to develop SCTP with.  For example, 
-	
-	export LKSCTP_LINUX=~/lksctp-2.6
-
-9) Go to the kernel source tree, e.g. 
-	cd ~/lksctp-2.6
-
-10) make xconfig
-   [Select Code Maturity->Development->Yes,
-	Networking->SCTP Configuration->SCTP Protocol-> y,  (or m)
-	Let us know if you discover something else...]
-
-You now have a complete source tree.  You will do most of your
-compiling while in either src/ (for functional tests or apps), tests/ (for
-user-space frame tests) or your kernel tree (for real kernels).
-
-Read on for more advanced directions relevant to both application and
-lksctp developers. 
-
-______________________________________________________________________
-
-
-Appendix A:  Advanced
----------------------
-
-To build all the frametests or a single frametest
--------------------------------------------------
-$ cd test
-
-Make sure that the environment variable "LKSCTP_LINUX" is set to a kernel 
-source tree where you are running tests with.  For example, 
-	
-	export LKSCTP_LINUX=~/lksctp-2.6
-
-Default is "../../lksctp-2.6".
-
-$ make
-
-or 
-
-$ make <TESTNAME>	# to build individual test TESTNAME
-
-To run functional tests in test/
----------------------------------
-$ make frametest
-
-and
-
-$ make frame6		# functional test for IPv6 support
-
-To run unit tests in test/
----------------------------
-$ make unittest
-
-To build a kernel 
------------------
-Go to your kernel source tree and do a usual kernel compile.
-
-Any patches can be submitted to the lksctp SourceForge website at
-	http://www.sf.net/projects/lksctp
-or to the lksctp mailing list
-	lksctp-developers@lists.sourceforge.net
-
-HOWEVER, lksctp and lksctp-tools patches should be submitted as two
-files since their respective sources reside in two separate repositories.
