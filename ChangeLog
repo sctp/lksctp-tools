@@ -1,8 +1,25 @@
-Version 2.6.26-1.0.9 of the Developers' Release of the SCTP
+Version 2.6.28-1.0.10 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
-        http://sf.net/projects/lksctp/
+        http://www.kernel.org
 
+lksctp-2.6.28-1.0.10: Fri Mar 27 11:15:25 EDT 2009
+T:TEST	      Split the kernel frame test framework from lksctp-tools.  The
+              framework is very sensitive to all kernel changes, not just ones
+	      related to SCTP.  As such, it has been a gating fractor to the
+	      releases of the new tools.
+T:APP	      New tool sctp_status to be used with SCTP conformance tests.
+              http://networktest.sourceforge.net/
+T:APP	      Add -T option to sctp_test
+T:APP	      Fix the -e option to sctp_darn
+T:LIB	      Fix building of static libraries.
+T:LIB         Fix compile warning in addrs.c
+T:APP	      Update the application useage of sctp_connectx
+T:TEST        Update the sctp_connectx() functional tests.
+T:API         Update to the sctp_connectx().  Now takes additional argument.
+T:API         Let sctp_recvmsg() honor passed in MSG_ flags
+K:	      See kernel change log for details.  We'll track only tools
+              changes here from now on.
 lksctp-2.6.26-1.0.9: Sun Jul 13 14:51:29 PDT 2008
 T:Patch	      Make frame tests work with 2.6.26 kernel.
 T:Patch       Implement and export SCTP-AUTH API extensions based on
