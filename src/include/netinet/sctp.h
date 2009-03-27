@@ -95,8 +95,9 @@ enum sctp_optname {
 #define SCTP_STATUS SCTP_STATUS
 	SCTP_GET_PEER_ADDR_INFO,
 #define SCTP_GET_PEER_ADDR_INFO SCTP_GET_PEER_ADDR_INFO
-	SCTP_DELAYED_ACK_TIME,
-#define SCTP_DELAYED_ACK_TIME SCTP_DELAYED_ACK_TIME
+	SCTP_DELAYED_ACK,
+#define SCTP_DELAYED_ACK_TIME SCTP_DELAYED_ACK
+#define SCTP_DELAYED_ACK SCTP_DELAYED_ACK
 	SCTP_CONTEXT,	/* Receive Context */
 #define SCTP_CONTEXT SCTP_CONTEXT
 	SCTP_FRAGMENT_INTERLEAVE,
@@ -119,6 +120,8 @@ enum sctp_optname {
 #define SCTP_PEER_AUTH_CHUNKS SCTP_PEER_AUTH_CHUNKS
 	SCTP_LOCAL_AUTH_CHUNKS,		/* Read only */
 #define SCTP_LOCAL_AUTH_CHUNKS SCTP_LOCAL_AUTH_CHUNKS
+	SCTP_GET_ASSOC_NUMBER,		/* Read only */
+#define SCTP_GET_ASSOC_NUMBER SCTP_GET_ASSOC_NUMBER
 
 
 	/* Internal Socket Options. Some of the sctp library functions are 
@@ -640,13 +643,26 @@ struct sctp_authkeyid {
 };
 
 
-/* 7.1.23. Delayed Ack Timer (SCTP_DELAYED_ACK_TIME)
+/*
+ * 7.1.23.  Get or set delayed ack timer (SCTP_DELAYED_SACK)
  *
- *   This options will get or set the delayed ack timer.  The time is set
- *   in milliseconds.  If the assoc_id is 0, then this sets or gets the
- *   endpoints default delayed ack timer value.  If the assoc_id field is
- *   non-zero, then the set or get effects the specified association.
+ * This option will effect the way delayed acks are performed.  This
+ * option allows you to get or set the delayed ack time, in
+ * milliseconds.  It also allows changing the delayed ack frequency.
+ * Changing the frequency to 1 disables the delayed sack algorithm.  If
+ * the assoc_id is 0, then this sets or gets the endpoints default
+ * values.  If the assoc_id field is non-zero, then the set or get
+ * effects the specified association for the one to many model (the
+ * assoc_id field is ignored by the one to one model).  Note that if
+ * sack_delay or sack_freq are 0 when setting this option, then the
+ * current values will remain unchanged.
  */
+struct sctp_sack_info {
+	sctp_assoc_t	sack_assoc_id;
+	uint32_t	sack_delay;
+	uint32_t	sack_freq;
+};
+
 struct sctp_assoc_value {
     sctp_assoc_t            assoc_id;
     uint32_t                assoc_value;
@@ -716,9 +732,13 @@ struct sctp_status {
  */
 struct sctp_authchunks {
 	sctp_assoc_t	gauth_assoc_id;
-	__u32		guth_number_of_chunks;
-	uint8_t        	gauth_chunks[];
+	__u32		gauth_number_of_chunks;
+	uint8_t		gauth_chunks[];
 };
+/* The broken spelling has been released already,
+ * so don't break anyone, now that it's fixed.
+ */
+#define guth_number_of_chunks gauth_number_of_chunks
 
 /* Association states.  */
 enum sctp_sstat_state {
