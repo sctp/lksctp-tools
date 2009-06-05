@@ -19,10 +19,10 @@ noinst_PROGRAMS = bindx_test nagle_snd nagle_rcv myftp sctp_xconnect \
 	peel_server peel_client sctp_test sctp_status
 
 $(top_builddir)/src/lib/libsctp.la:
-	make -C $(top_builddir)/src/lib libsctp.la
+	$(MAKE) -C $(top_builddir)/src/lib libsctp.la
 
 $(top_builddir)/src/testlib/libsctputil.la:
-	make -C $(top_builddir)/src/testlib libsctputil.la
+	$(MAKE) -C $(top_builddir)/src/testlib libsctputil.la
 
 # Specifying the sources
 bindx_test_SOURCES = bindx_test.c

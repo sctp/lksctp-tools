@@ -62,10 +62,10 @@ PASSING_V6_KERN_TESTS = \
 noinst_PROGRAMS = ${PASSING_KERN_TESTS} ${PASSING_V6_KERN_TESTS}
 
 $(top_builddir)/src/lib/libsctp.la:
-	make -C $(top_builddir)/src/lib libsctp.la
+	$(MAKE) -C $(top_builddir)/src/lib libsctp.la
 
 $(top_builddir)/src/testlib/libsctputil.la:
-	make -C $(top_builddir)/src/testlib libsctputil.la
+	$(MAKE) -C $(top_builddir)/src/testlib libsctputil.la
 
 # These are tests for live kernels which pass.
 v4test: ${PASSING_KERN_TESTS}
