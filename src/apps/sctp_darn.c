@@ -363,8 +363,7 @@ parse_arguments(int argc, char *argv[]) {
 				 * from trying to allocate more.
 				 */
 				fprintf(stderr, "No memory to add ");
-				fprintf(stderr, optarg);
-				fprintf(stderr, "\n");
+				fprintf(stderr, "%s\n", optarg);
 				exit(2);
 			}
 			bindx_add_addrs = tmp_addrs;
@@ -381,8 +380,7 @@ parse_arguments(int argc, char *argv[]) {
 				 * from trying to allocate more.
 				 */
 				fprintf(stderr, "No memory to add ");
-				fprintf(stderr, optarg);
-				fprintf(stderr, "\n");
+				fprintf(stderr, "%s\n", optarg);
 				exit(2);
 			}
 			bindx_rem_addrs = tmp_addrs;
@@ -397,8 +395,7 @@ parse_arguments(int argc, char *argv[]) {
 				 * from trying to allocate more.
 				 */
 				fprintf(stderr, "No memory to add ");
-				fprintf(stderr, optarg);
-				fprintf(stderr, "\n");
+				fprintf(stderr, "%s\n", optarg);
 				exit(2);
 			}
 			connectx_addrs = tmp_addrs;
@@ -1755,8 +1752,7 @@ get_bindx_addr(char *in, int *count)
 		 * from trying to allocate more.
 		 */
 		fprintf(stderr, "No memory to add ");
-		fprintf(stderr, in);
-		fprintf(stderr, "\n");
+		fprintf(stderr, "%s\n", in);
 		exit(2);
 	}
 	return tmp_addrs;
