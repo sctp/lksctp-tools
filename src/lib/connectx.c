@@ -33,16 +33,16 @@
  * tunnel the request through setsockopt().
  */
 static int __connectx_addrsize(const struct sockaddr *addrs,
-				     const int addrcnt)
+				const int addrcnt)
 {
-	void *addrbuf;
-	struct sockaddr *sa_addr;
+	const void *addrbuf;
+	const struct sockaddr *sa_addr;
 	int addrs_size = 0;
 	int i;
 
 	addrbuf = addrs;
 	for (i = 0; i < addrcnt; i++) {
-		sa_addr = (struct sockaddr *)addrbuf;
+		sa_addr = (const struct sockaddr *)addrbuf;
 		switch (sa_addr->sa_family) {
 		case AF_INET:
 			addrs_size += sizeof(struct sockaddr_in);
