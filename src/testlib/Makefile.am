@@ -9,4 +9,4 @@ INCLUDES = -I$(top_srcdir)/src/include
 
 noinst_LTLIBRARIES = libsctputil.la
 libsctputil_la_SOURCES = sctputil.c sctputil.h
-libsctputil_la_LDFLAGS = -version-info 1:10:0
+libsctputil_la_LDFLAGS = -version-info 1:11:0

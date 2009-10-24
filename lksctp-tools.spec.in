@@ -4,7 +4,7 @@
 # Author          : Francois-Xavier Kowalski
 # Created On      : Sat Jan 10 14:53:53 2004
 # Last Modified By: Vlad Yasevich
-# Last Modified On: Fri Mar  27 12:38:42 EDT 2009
+# Last Modified On: Wed Oct  21 16:59:31 EDT 2009
 # 
 #   (c) Copyright Hewlett-Packard Company 2004
 #   (C) Copyright IBM Corp. 2004
@@ -129,6 +129,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Wed Oct 21 2009 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.11-1
+- 1.0.11 Release
+
 * Fri Mar 27 2009 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.10-1
 - 1.0.10 Release
 

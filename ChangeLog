@@ -1,7 +1,14 @@
-Version 2.6.28-1.0.10 of the Developers' Release of the SCTP
+Version 2.6.28-1.0.11 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+
+lksctp-2.6.28-1.0.11: Wed Oct 21 16:53:41 EDT 2009
+T:BUILD       fix parallel build warning
+T:BUILD       fix make distcheck for lksctp-tools
+T:BUILD       fix compiler warnings in the libraray, apps and tests
+T:API         Update the sctp.h header to match the kernel.
 
 lksctp-2.6.28-1.0.10: Fri Mar 27 11:15:25 EDT 2009
 T:TEST	      Split the kernel frame test framework from lksctp-tools.  The
@@ -855,4 +862,3 @@ Post messages for the developers (including bug reports) to
 
 If you wish to participate in development, please subscribe to the
 developers' list, drop a note to lksctp-developers.
-
