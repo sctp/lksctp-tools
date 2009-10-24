@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	struct sctp_sndrcvinfo sinfo;
 	struct sctp_sndrcvinfo snd_sinfo;
 	sctp_assoc_t associd1, associd2;
-	int len, oldlen;
+	socklen_t len, oldlen;
 	struct sctp_status gstatus;
 
 	/* Rather than fflush() throughout the code, set stdout to
