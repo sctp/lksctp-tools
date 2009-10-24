@@ -20,3 +20,7 @@ VERS_1 {
 VERS_2 {
 	global:	sctp_connectx;
 } VERS_1;
+
+VERS_3 {
+	global:	sctp_connectx;
+} VERS_2;

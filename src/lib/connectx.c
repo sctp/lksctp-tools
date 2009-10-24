@@ -23,7 +23,9 @@
 #include <netinet/in.h>
 #include <netinet/sctp.h> /* SCTP_SOCKOPT_CONNECTX_* */
 #include <errno.h>
-#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
 
 /* Support the sctp_connectx() interface.
  *
@@ -76,36 +78,113 @@ int __sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
 extern int sctp_connectx_orig (int)
 	__attribute ((alias ("__sctp_connectx")));
 
-int sctp_connectx_new(int fd, struct sockaddr *addrs, int addrcnt,
-		      sctp_assoc_t *id)
-{
-	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
-	int status;
 
-	if (addrs_size < 0)
-		return addrs_size;
+static int __connectx(int fd, struct sockaddr *addrs, socklen_t addrs_size,
+			sctp_assoc_t *id)
+{
+	int status;
 
 	if (id)
 		*id = 0;
 
-	status =  setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX, addrs,
-			     addrs_size);
-
-	/* the kernel doesn't support the new connectx interface */
-	if (status < 0 && errno == ENOPROTOOPT)
-		return setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX_OLD,
-				  addrs, addrs_size);
+	status = setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX, addrs,
+			    addrs_size);
 
 	/* Normalize status and set association id */
 	if (status > 0) {
 		if (id)
 			*id = status;
-		status = 0;
+		return 0;
 	}
 
-	return status;
+	/* The error is something other then "Option not supported" */
+	if (status < 0 && errno != ENOPROTOOPT)
+		return status;
+
+	/* At this point, if the application wanted the id, we can't
+	 * really provide it, so we can return ENOPROTOOPT.
+	 */
+	if (id) {
+		errno = ENOPROTOOPT;
+		return -1;
+	}
+
+	/* Finally, try the old API */
+	return setsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX_OLD,
+			  addrs, addrs_size);
+}
+
+int sctp_connectx2(int fd, struct sockaddr *addrs, int addrcnt,
+		      sctp_assoc_t *id)
+{
+	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
+
+	if (addrs_size < 0)
+		return addrs_size;
+
+	return __connectx(fd, addrs, addrs_size, id);
+}
+
+int sctp_connectx3(int fd, struct sockaddr *addrs, int addrcnt,
+		      sctp_assoc_t *id)
+{
+	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
+	int status;
+	char *new_api_buffer;
+
+	if (addrs_size < 0)
+		return addrs_size;
+
+	/* First try the new socket api
+	 * Because the id is returned in the option buffer we have prepend
+	 * 32bit to it for the returned association id
+	 */
+	new_api_buffer = (char*) malloc(sizeof(sctp_assoc_t) + addrs_size);
+	if (new_api_buffer) {
+		socklen_t option_len = addrs_size + sizeof(sctp_assoc_t);
+
+		memset(new_api_buffer, 0, sizeof(sctp_assoc_t));
+		memcpy(new_api_buffer + sizeof(sctp_assoc_t), addrs,
+			addrs_size);
+		status = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX3,
+		                    new_api_buffer, &option_len);
+		if (status == 0 || errno == EINPROGRESS) {
+			/* Succeeded immediately, or initiated on non-blocking
+			 * socket.
+			 */
+			if (id)
+				*id = *(uint32_t*)new_api_buffer;
+		}
+
+		free(new_api_buffer);
+		if (errno != ENOPROTOOPT) {
+			/* No point in trying the fallbacks*/
+			return status;
+		}
+	}
+
+	/* The first incarnation of updated connectx api didn't work for
+	 * non-blocking sockets.  So if the application wants the association
+	 * id and the socket is non-blocking, we can't really do anything.
+	 */
+	if (id) {
+		/* Program wants the association-id returned. We can only do
+		 * that if the socket is blocking */
+		status = fcntl(fd, F_GETFL);
+		if (status < 0)
+			return status;
+
+		if (status & O_NONBLOCK) {
+			/* Socket is non-blocking. Fail */
+			errno = ENOPROTOOPT;
+			return -1;
+		}
+	}
+
+	return __connectx(fd, addrs, addrs_size, id);
 }
 
 __asm__(".symver __sctp_connectx, sctp_connectx@");
 __asm__(".symver sctp_connectx_orig, sctp_connectx@VERS_1");
-__asm__(".symver sctp_connectx_new, sctp_connectx@@VERS_2");
+__asm__(".symver sctp_connectx2, sctp_connectx@VERS_2");
+__asm__(".symver sctp_connectx3, sctp_connectx@@VERS_3");
