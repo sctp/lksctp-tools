@@ -135,15 +135,10 @@ enum sctp_optname {
 	SCTP_SOCKOPT_PEELOFF, 	/* peel off association. */
 #define SCTP_SOCKOPT_PEELOFF	SCTP_SOCKOPT_PEELOFF
 	SCTP_GET_PEER_ADDRS_NUM_OLD, 	/* Get number of peer addresss. */
-#define SCTP_GET_PEER_ADDRS_NUM_OLD	SCTP_GET_PEER_ADDRS_NUM_OLD
 	SCTP_GET_PEER_ADDRS_OLD, 	/* Get all peer addresss. */
-#define SCTP_GET_PEER_ADDRS_OLD	SCTP_GET_PEER_ADDRS_OLD
 	SCTP_GET_LOCAL_ADDRS_NUM_OLD, 	/* Get number of local addresss. */
-#define SCTP_GET_LOCAL_ADDRS_NUM_OLD	SCTP_GET_LOCAL_ADDRS_NUM_OLD
 	SCTP_GET_LOCAL_ADDRS_OLD, 	/* Get all local addresss. */
-#define SCTP_GET_LOCAL_ADDRS_OLD	SCTP_GET_LOCAL_ADDRS_OLD
 	SCTP_SOCKOPT_CONNECTX_OLD, /* CONNECTX requests. OLD implementation */
-#define SCTP_SOCKOPT_CONNECTX_OLD	SCTP_SOCKOPT_CONNECTX_OLD
 	SCTP_GET_PEER_ADDRS, 	/* Get all peer addresss. */
 #define SCTP_GET_PEER_ADDRS	SCTP_GET_PEER_ADDRS
 	SCTP_GET_LOCAL_ADDRS, 	/* Get all local addresss. */
