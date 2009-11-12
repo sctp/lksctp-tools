@@ -130,7 +130,8 @@ int sctp_connectx3(int fd, struct sockaddr *addrs, int addrcnt,
 {
 	socklen_t addrs_size = __connectx_addrsize(addrs, addrcnt);
 	int status;
-	char *new_api_buffer;
+	struct sctp_getaddrs_old param;
+	socklen_t opt_len = sizeof(param);
 
 	if (addrs_size < 0)
 		return addrs_size;
@@ -139,28 +140,22 @@ int sctp_connectx3(int fd, struct sockaddr *addrs, int addrcnt,
 	 * Because the id is returned in the option buffer we have prepend
 	 * 32bit to it for the returned association id
 	 */
-	new_api_buffer = (char*) malloc(sizeof(sctp_assoc_t) + addrs_size);
-	if (new_api_buffer) {
-		socklen_t option_len = addrs_size + sizeof(sctp_assoc_t);
+	param.assoc_id = 0;
+	param.addr_num = addrs_size;
+	param.addrs = addrs;
+	status = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX3,
+		            &param, &opt_len);
+	if (status == 0 || errno == EINPROGRESS) {
+		/* Succeeded immediately, or initiated on non-blocking
+		 * socket.
+		 */
+		if (id)
+			*id = param.assoc_id;
+	}
 
-		memset(new_api_buffer, 0, sizeof(sctp_assoc_t));
-		memcpy(new_api_buffer + sizeof(sctp_assoc_t), addrs,
-			addrs_size);
-		status = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_CONNECTX3,
-		                    new_api_buffer, &option_len);
-		if (status == 0 || errno == EINPROGRESS) {
-			/* Succeeded immediately, or initiated on non-blocking
-			 * socket.
-			 */
-			if (id)
-				*id = *(uint32_t*)new_api_buffer;
-		}
-
-		free(new_api_buffer);
-		if (errno != ENOPROTOOPT) {
-			/* No point in trying the fallbacks*/
-			return status;
-		}
+	if (errno != ENOPROTOOPT) {
+		/* No point in trying the fallbacks*/
+		return status;
 	}
 
 	/* The first incarnation of updated connectx api didn't work for
