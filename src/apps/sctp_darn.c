@@ -142,7 +142,8 @@ enum inter_cmd_num {
 	INTER_SHUTDOWN,
 	INTER_ABORT,
 	INTER_NODELAY,
-	INTER_MAXSEG
+	INTER_MAXSEG,
+	INTER_HEARTBEAT
 };
 
 enum shutdown_type {
@@ -168,6 +169,7 @@ struct inter_entry inter_commands[] = {
 	{"abort", INTER_ABORT},
 	{"nodelay", INTER_NODELAY},
 	{"maxseg", INTER_MAXSEG},
+	{"heartbeat", INTER_HEARTBEAT},
 	{NULL, -1},
 };
 
@@ -189,6 +191,7 @@ static int bindx_func(char *, int, struct sockaddr *, int, int, int);
 static int connectx_func(char *, int, struct sockaddr *, int);
 static void  primary_func(char *, int, char *, int);
 static void  peer_primary_func(char *, int, char *, int);
+static void  spp_hb_demand_func(char *, int, char *, int);
 static int nodelay_func(char *, int, int val, int set);
 static int maxseg_func(char *, int, int val, int set);
 static int shutdown_func(char *argv0, int *skp, int shutdown_type);
@@ -1520,6 +1523,7 @@ parse_inter_commands(char *argv0, char *input, int snd_only)
 		printf("sndbuf=<int>     - Get/Set send buffer size.\n");
 		printf("primary=<addr>   - Get/Set association's primary\n");
 		printf("peer_primary=addr- Set association's peer_primary\n");
+		printf("heartbeat=<addr> - Request a user initiated heartbeat\n");
 		printf("maxseg=<int>     - Get/Set Maximum fragment size.\n");
 		printf("nodelay=<0|1>    - Get/Set NODELAY option.\n");
 		printf("shutdown         - Shutdown the association.\n");
@@ -1599,6 +1603,9 @@ parse_inter_commands(char *argv0, char *input, int snd_only)
 				break;
 			case INTER_SET_PEER_PRIM:
 				peer_primary_func(argv0, inter_sk, p, set);
+				break;
+			case INTER_HEARTBEAT:
+				spp_hb_demand_func(argv0, inter_sk, p, set);
 				break;
 			case INTER_SHUTDOWN:
 				shutdown_func(argv0, &inter_sk, SHUTDOWN_SHUTDOWN);
@@ -1987,6 +1994,56 @@ err:
 	if (!errno)
 		errno = EINVAL;
 	fprintf(stderr, "%s: error %s peer_primary: %s.\n", argv0,
+	        (set)?"setting":"getting", strerror(errno));
+}
+
+static void
+spp_hb_demand_func(char *argv0, int sk, char *cp, int set)
+{
+	struct sctp_paddrparams params;
+	struct sockaddr_in *in_addr;
+	struct sockaddr_in6 *in6_addr;
+	int ret;
+	char *p = cp;
+
+	memset(&params, 0, sizeof(struct sctp_paddrparams));
+	params.spp_assoc_id = associd;
+	params.spp_flags = SPP_HB_DEMAND;
+
+	if (set) {
+		/* Set the buffer for address parsing.  */
+		while ('\n' != *p)
+			p++;
+		*p = '\0';
+
+		if (strchr(cp, '.')) {
+			in_addr = (struct sockaddr_in *)&params.spp_address;
+			in_addr->sin_port = htons(remote_port);
+			in_addr->sin_family = AF_INET;
+			ret = inet_pton(AF_INET, cp, &in_addr->sin_addr);
+			if (ret <= 0)
+				goto err;
+		} else if (strchr(cp, ':')) {
+			in6_addr = (struct sockaddr_in6 *)&params.spp_address;
+			in6_addr->sin6_port = htons(remote_port);
+			in6_addr->sin6_family = AF_INET6;
+			ret = inet_pton(AF_INET6, cp, &in6_addr->sin6_addr);
+			if (ret <= 0)
+				goto err;
+		} else
+			goto err;
+	}
+
+	ret = setsockopt(sk, IPPROTO_SCTP, SCTP_PEER_ADDR_PARAMS,
+			    &params, sizeof(struct sctp_paddrparams));
+	if (ret < 0)
+		goto err;
+
+	return;
+err:
+	if (!errno)
+		errno = EINVAL;
+	fprintf(stderr, "%s: error %s peer_addr_params: %s.\n", argv0,
 	        (set)?"setting":"getting", strerror(errno));
 }
 
