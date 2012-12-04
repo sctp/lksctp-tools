@@ -143,7 +143,8 @@ enum inter_cmd_num {
 	INTER_ABORT,
 	INTER_NODELAY,
 	INTER_MAXSEG,
-	INTER_HEARTBEAT
+	INTER_HEARTBEAT,
+	INTER_GET_STATS
 };
 
 enum shutdown_type {
@@ -170,6 +171,7 @@ struct inter_entry inter_commands[] = {
 	{"nodelay", INTER_NODELAY},
 	{"maxseg", INTER_MAXSEG},
 	{"heartbeat", INTER_HEARTBEAT},
+	{"stats", INTER_GET_STATS},
 	{NULL, -1},
 };
 
@@ -195,6 +197,7 @@ static void  spp_hb_demand_func(char *, int, char *, int);
 static int nodelay_func(char *, int, int val, int set);
 static int maxseg_func(char *, int, int val, int set);
 static int shutdown_func(char *argv0, int *skp, int shutdown_type);
+static int get_assocstats_func(int, sctp_assoc_t);
 static int test_sk_for_assoc(int sk, sctp_assoc_t assoc_id);
 static char * gen_message(int);
 static sctp_assoc_t test_recv_assoc_change(int);
@@ -1528,6 +1531,7 @@ parse_inter_commands(char *argv0, char *input, int snd_only)
 		printf("nodelay=<0|1>    - Get/Set NODELAY option.\n");
 		printf("shutdown         - Shutdown the association.\n");
 		printf("abort            - Abort the association.\n");
+		printf("stats            - Print GET_ASSOC_STATS (if available in kernel).\n");
 		printf("?                - Help. Display this message.\n");
 		return -1;
 	}
@@ -1630,6 +1634,9 @@ parse_inter_commands(char *argv0, char *input, int snd_only)
 				}
 				val = (set) ? atoi(p) : 0;
 				maxseg_func(argv0, inter_sk, val, set);
+				break;
+			case INTER_GET_STATS:
+				get_assocstats_func(inter_sk, associd);
 				break;
 			default:
 				goto err_input;
@@ -2226,6 +2233,49 @@ shutdown_func(char *argv0, int *skp, int shutdown_type)
 		printf("%s failed\n", sd_type);
 		exit(1);
 	}
+
+	return 0;
+}
+
+static int
+get_assocstats_func(int sk, sctp_assoc_t assoc_id)
+{
+	int error = 0;
+	struct sctp_assoc_stats stats;
+	socklen_t len;
+
+	if (assoc_id == 0) {
+		printf("No association present yet\n");
+		return -1;
+	}
+
+	memset(&stats, 0, sizeof(struct sctp_assoc_stats));
+	stats.sas_assoc_id = assoc_id;
+	len = sizeof(struct sctp_assoc_stats);
+	error = getsockopt(sk, SOL_SCTP, SCTP_GET_ASSOC_STATS,
+			(char *)&stats, &len);
+	if (error != 0) {
+		printf("get_assoc_stats() failed %s\n", strerror(errno));
+		return error;
+	}
+
+	printf("Retransmitted Chunks: %llu\n",              stats.sas_rtxchunks);
+	printf("Gap Acknowledgements Received: %llu\n",     stats.sas_gapcnt);
+	printf("TSN received > next expected: %llu\n",      stats.sas_outofseqtsns);
+	printf("SACKs sent: %llu\n",                        stats.sas_osacks);
+	printf("SACKs received: %llu\n",                    stats.sas_isacks);
+	printf("Control chunks sent : %llu\n",              stats.sas_octrlchunks);
+	printf("Control chunks received : %llu\n",          stats.sas_ictrlchunks);
+	printf("Ordered data chunks sent: %llu\n",          stats.sas_oodchunks);
+	printf("Ordered data chunks received: %llu\n",      stats.sas_iodchunks);
+	printf("Unordered data chunks sent: %llu\n",        stats.sas_ouodchunks);
+	printf("Unordered data chunks received: %llu\n",    stats.sas_iuodchunks);
+	printf("Dups received (ordered+unordered): %llu\n", stats.sas_idupchunks);
+	printf("Packets sent: %llu\n",                      stats.sas_opackets);
+	printf("Packets received: %llu\n",                  stats.sas_ipackets);
+	printf("Maximum Observed RTO this period: %llu - Transport: ", stats.sas_maxrto);
+	print_sockaddr((struct sockaddr *)&stats.sas_obs_rto_ipaddr);
+	printf("\n");
 
 	return 0;
 }

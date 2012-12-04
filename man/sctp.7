@@ -389,6 +389,11 @@ of an association, including its reachability state, congestion window,
 and retransmission timer values.  This information is read-only. The structure
 sctp_paddr_info defined in /usr/include/netinet/sctp.h is used to access this
 information.
+.TP
+.B SCTP_GET_ASSOC_STATS
+Applications can retrieve current statistics about an association, including
+SACKs sent and received, SCTP packets sent and received. The complete list can
+be found in /usr/include/netinet/sctp.h in struct sctp_assoc_stats.
 .SH AUTHORS
 Sridhar Samudrala <sri@us.ibm.com>
 .SH "SEE ALSO"
