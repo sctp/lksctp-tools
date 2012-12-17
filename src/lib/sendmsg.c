@@ -76,6 +76,7 @@ sctp_send(int s, const void *msg, size_t len,
 {
 	struct msghdr outmsg;
 	struct iovec iov;
+	char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
 
 	outmsg.msg_name = NULL;
 	outmsg.msg_namelen = 0;
@@ -86,7 +87,6 @@ sctp_send(int s, const void *msg, size_t len,
 	outmsg.msg_controllen = 0;
 
 	if (sinfo) {	
-		char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
 		struct cmsghdr *cmsg;
 
 		outmsg.msg_control = outcmsg;
