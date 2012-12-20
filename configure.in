@@ -19,6 +19,7 @@ AM_INIT_AUTOMAKE(lksctp-tools,1.0.12)
 AC_CONFIG_SRCDIR([config.h.in])
 AM_CONFIG_HEADER([config.h])
 AC_REVISION($Revision: 1.1.1.2 $)
+AM_SILENT_RULES([yes])
 
 dnl Set defaults
 dnl CFLAGS="$CFLAGS -g -Wall"
