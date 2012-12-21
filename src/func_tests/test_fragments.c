@@ -224,7 +224,7 @@ main(int argc, char *argv[])
 	/* Try to send a messsage that exceeds association fragmentation point
 	 * and verify that it fails.
 	 */
-	msg_len = 30000;
+	msg_len = 100000;
 	msg_buf = test_build_msg(msg_len);
 	outmessage.msg_iov->iov_base = msg_buf;
 	outmessage.msg_iov->iov_len = msg_len;
