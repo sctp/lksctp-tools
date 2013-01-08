@@ -4,7 +4,7 @@
 # Author          : Francois-Xavier Kowalski
 # Created On      : Sat Jan 10 14:53:53 2004
 # Last Modified By: Vlad Yasevich
-# Last Modified On: Wed Oct  21 16:59:31 EDT 2009
+# Last Modified On: Tue Jan 08 10:56 EDT 2013
 # 
 #   (c) Copyright Hewlett-Packard Company 2004
 #   (C) Copyright IBM Corp. 2004
@@ -25,15 +25,10 @@
 #   Free Software Foundation, Inc., 675 Mass Ave, Cambridge,
 #   MA 02139, USA.
 
-%define kernel_version 2.6.28
-%define kernel_extraflags
 %define lksctp_version @VERSION@
 
 # older lksctp-tools file name did not conform to RPM file naming
 # conventions
-
-#%define pack_version %{kernel_version}_%{kernel_extraflags}_%{lksctp_version}
-#%define file_version %{kernel_version}-%{kernel_extraflags}-%{lksctp_version}
 
 %define pack_version %{lksctp_version}
 %define file_version %{lksctp_version}
@@ -129,6 +124,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Tue Jan 08 2012 Vlad Yasevich <vyasevich@gmail.com> 1.0.12-1
+- 1.0.12 Release
+
 * Wed Oct 21 2009 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.11-1
 - 1.0.11 Release
 

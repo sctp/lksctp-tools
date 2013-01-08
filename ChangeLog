@@ -1,9 +1,19 @@
-Version 2.6.28-1.0.11 of the Developers' Release of the SCTP
+Version 1.0.12 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
 
 
+lksctp-1.0.12: Tue Jan 08 10:45 EDT 2013
+T:API         Add needed definitions for DTLS/SCTP.
+T:API         Fix data corruption in sctp_send
+T:API         Implement private SCTP_GET_ASSOC_STATS option to fetch addition
+              association data.
+T:TEST        Add more options to conformace test tool.
+T:APP         Add HEARTBEAT command to sctp_darn
+T:API         Obsolete interefaces have been removed
+T:API         Suport for SCTP_SACK_IMMEDIATELY options
+T:API         Support for non-blocking sctp-connectx
 lksctp-2.6.28-1.0.11: Wed Oct 21 16:53:41 EDT 2009
 T:BUILD       fix parallel build warning
 T:BUILD       fix make distcheck for lksctp-tools
