@@ -73,6 +73,7 @@ char *remote_host = NULL;
 sockaddr_storage_t client_loop,
 		server_loop;
 struct hostent *hst;
+char big_buffer[REALLY_BIG];
 
 void usage(char *argv0);
 void parse_arguments(int argc, char*argv[]);
@@ -380,13 +381,8 @@ void server_mode() {
 	int assoc_num =0;
 	struct msghdr inmessage;
 	struct iovec iov;
-	char *big_buffer;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 
-	if ((big_buffer = malloc(REALLY_BIG)) == NULL) {
-		printf("malloc failure: %s\n", strerror(errno));
-		DUMP_CORE;
-	}
 
 	printf("Running in Server Mode...\n");
 
@@ -530,14 +526,8 @@ void process_ready_sockets(int client_socket[], int assoc_num, fd_set *rfds) {
         int i, stream, error;
 	struct msghdr inmessage;
 	struct iovec iov;
-	char *big_buffer;
 	char incmsg[CMSG_SPACE(sizeof (sctp_cmsg_data_t))];
 	sockaddr_storage_t msgname;
-
-	if ((big_buffer = malloc(REALLY_BIG)) == NULL) {
-		printf("malloc failure: %s\n", strerror(errno));
-		DUMP_CORE;
-	}
 
         /* Setup inmessage to be able to receive in incomming message */
 	memset(&inmessage, 0, sizeof (inmessage));
