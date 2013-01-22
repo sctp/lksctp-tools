@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 	int pf_class;
 	uint32_t ppid;
 	uint32_t stream;
-	sctp_assoc_t associd1, associd2;
+	sctp_assoc_t associd1;
 	struct sctp_assoc_change *sac;
 	struct sctp_event_subscribe subscribe;
 	char *big_buffer;
@@ -226,8 +226,10 @@ int main(int argc, char *argv[])
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+#if 0
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	associd2 = sac->sac_assoc_id;
+#endif
 
         /* Get the communication up message on sk1.  */
         inmessage.msg_controllen = sizeof(incmsg);

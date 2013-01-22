@@ -62,7 +62,7 @@ int
 main(int argc, char *argv[])
 {
 	int svr_sk, clt_sk[MAX_CLIENTS], peeloff_sk[MAX_CLIENTS];
-	sctp_assoc_t svr_associd[MAX_CLIENTS], clt_associd[MAX_CLIENTS]; 
+	sctp_assoc_t svr_associd[MAX_CLIENTS];
 	sockaddr_storage_t svr_loop, clt_loop[MAX_CLIENTS];
 	struct iovec iov;
 	struct msghdr inmessage;
@@ -167,9 +167,11 @@ main(int argc, char *argv[])
 		error = test_recvmsg(clt_sk[i], &inmessage, MSG_WAITALL);
 		test_check_msg_notification(&inmessage, error,
 					    sizeof(struct sctp_assoc_change),
-					    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+					    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+#if 0
 		sac = (struct sctp_assoc_change *)iov.iov_base;
 		clt_associd[i] = sac->sac_assoc_id;
+#endif
 	}
 
 	/* Get the communication up message and the data message on the

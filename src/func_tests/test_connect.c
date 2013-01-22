@@ -58,12 +58,12 @@ int
 main(int argc, char *argv[])
 {
 	int svr_sk, clt_sk1, clt_sk2, peeloff_sk;
-	sctp_assoc_t svr_associd1, svr_associd2, clt_associd1, clt_associd2; 
+	sctp_assoc_t svr_associd1;
 	sockaddr_storage_t svr_loop, clt_loop1, clt_loop2, clt_loop3;
+	struct sctp_assoc_change *sac;
 	struct iovec iov;
 	struct msghdr inmessage;
 	int error;
-	struct sctp_assoc_change *sac;
 	char *big_buffer;
 	int flags;
 
@@ -145,15 +145,17 @@ main(int argc, char *argv[])
 	error = test_recvmsg(clt_sk1, &inmessage, MSG_WAITALL);
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
-				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+#if 0
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	clt_associd1 = sac->sac_assoc_id;
+#endif
 
 	/* Get COMM_UP on svr_sk */
 	error = test_recvmsg(svr_sk, &inmessage, MSG_WAITALL);
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
-				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	svr_associd1 = sac->sac_assoc_id;
 
@@ -167,17 +169,21 @@ main(int argc, char *argv[])
 	error = test_recvmsg(clt_sk2, &inmessage, MSG_WAITALL);
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
-				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+#if 0
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	clt_associd2 = sac->sac_assoc_id;
+#endif
 
 	/* Get COMM_UP on svr_sk */
 	error = test_recvmsg(svr_sk, &inmessage, MSG_WAITALL);
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
-				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
+				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
+#if 0
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	svr_associd2 = sac->sac_assoc_id;
+#endif
 
 	tst_resm(TPASS, "blocking connect");
 

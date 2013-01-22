@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	struct sctp_send_failed *ssf;
 	struct sctp_sndrcvinfo sinfo;
 	struct sctp_sndrcvinfo snd_sinfo;
-	sctp_assoc_t associd1, associd2;
+	sctp_assoc_t associd1;
 	socklen_t len, oldlen;
 	struct sctp_status gstatus;
 
@@ -177,8 +177,10 @@ int main(int argc, char *argv[])
 	msgname_len = sizeof(msgname);
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
-				  &sinfo, &msg_flags); 
+				  &sinfo, &msg_flags);
+#if 0
 	associd2 = ((struct sctp_assoc_change *)big_buffer)->sac_assoc_id;
+#endif
 	test_check_buf_notification(big_buffer, error, msg_flags,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
