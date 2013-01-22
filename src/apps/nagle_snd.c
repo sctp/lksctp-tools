@@ -93,8 +93,7 @@ main(int argc, char *argv[])
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
         char *message;
-        int error, bytes_sent;
-	int pf_class, af_family;
+	int error, bytes_sent, pf_class;
         sctp_assoc_t associd;
 	uint32_t ppid;
 	uint32_t stream;
@@ -218,8 +217,6 @@ main(int argc, char *argv[])
         target.v6.sin6_port = htons(remote_port);
 
         pf_class = PF_INET6;
-        af_family = AF_INET6;
-
 #else
         hst = gethostbyname(local_host);
         if (hst == NULL || hst->h_length < 1) {
@@ -241,8 +238,6 @@ main(int argc, char *argv[])
         target.v4.sin_port = htons(remote_port);
 
         pf_class = PF_INET;
-        af_family = AF_INET;
-
 #endif /* TEST_V6 */
 
         sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);

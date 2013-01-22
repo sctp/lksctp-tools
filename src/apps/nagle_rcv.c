@@ -81,8 +81,7 @@ main(int argc, char *argv[])
         struct iovec iov;
         struct msghdr inmessage;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
-        int error;
-	int pf_class, af_family;
+	int error, pf_class;
 	char *big_buffer;
 	char *local_host = NULL;
 	int local_port = SCTP_TESTPORT_1; 
@@ -161,7 +160,6 @@ main(int argc, char *argv[])
                 exit(1);
         }
 	pf_class = PF_INET6;
-	af_family = AF_INET6;
 
         host.v6.sin6_family = AF_INET6;
         memcpy(&host.v6.sin_addr, hst->h_addr_list[0], hst->h_length);
@@ -174,7 +172,6 @@ main(int argc, char *argv[])
                 exit(1);
         }
 	pf_class = PF_INET;
-	af_family = AF_INET;
 
         host.v4.sin_family = AF_INET;
         memcpy(&host.v4.sin_addr, hst->h_addr_list[0], hst->h_length);
