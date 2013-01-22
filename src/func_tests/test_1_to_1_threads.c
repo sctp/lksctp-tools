@@ -90,14 +90,11 @@ void
 t_send(int id) {
         struct msghdr outmessage;
         struct sctp_sndrcvinfo *sinfo;
-        char *buffer_snd;
         struct cmsghdr *cmsg;
         struct iovec out_iov;
         char outcmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 
         memset(&outmessage, 0, sizeof(outmessage));
-        buffer_snd = malloc(100);
-
         outmessage.msg_name = &conn_addr;
         outmessage.msg_namelen = sizeof(conn_addr);
         outmessage.msg_iov = &out_iov;
@@ -120,7 +117,10 @@ t_send(int id) {
         test_sendmsg(client_sk, &outmessage, 0, strlen(message)+1);
 }
 
-void * relay (int id) {
+void *relay(void *arg)
+{
+	int id = *(int *) arg;
+
 	if (id == 0) {
 		t_send(id);
 	} else if (id == THREADS -1) {
@@ -130,9 +130,8 @@ void * relay (int id) {
 		t_send(id);
 	}
 
-	return 0;
+	pthread_exit(NULL);
 }
-	
 
 int 
 main(void) 
@@ -173,8 +172,7 @@ main(void)
 
 	for ( i = 0; i < THREAD_SND_RCV_LOOPS; i++ ) {
 		for (cnt = 1; cnt < THREADS; cnt++) {
-			status = pthread_create(&thread[cnt], &attr,
-						(void *)relay, (void*)cnt);
+			status = pthread_create(&thread[cnt], &attr, relay, &cnt);
 			if (status)
 				tst_brkm(TBROK, tst_exit, "pthread_create "
                          		 "failed status:%d, errno:%d", status,
@@ -194,5 +192,5 @@ main(void)
 	tst_resm(TPASS, "send and receive data across multiple threads - "
 		 "SUCCESS");
 
-	pthread_exit(NULL);
+	return 0;
 }
