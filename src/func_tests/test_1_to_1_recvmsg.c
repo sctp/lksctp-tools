@@ -65,7 +65,6 @@ int
 main(int argc, char *argv[])
 {
         socklen_t len;
-	int ret;
 	int sk,pf_class,lstn_sk,acpt_sk;
 	int flag = 0;
 	struct msghdr inmessage;
@@ -165,7 +164,7 @@ main(int argc, char *argv[])
 
 	count = test_send(acpt_sk, message1, strlen(message), 0);
 
-	ret = test_shutdown(sk, SHUT_WR);
+	test_shutdown(sk, SHUT_WR);
 
 	flag = MSG_NOSIGNAL;
 	/*recvmsg () TEST6:reading on a socket that received SHUTDOWN*/

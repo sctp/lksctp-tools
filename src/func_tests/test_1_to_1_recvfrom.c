@@ -63,7 +63,7 @@ int TST_CNT = 0;
 int
 main(int argc, char *argv[])
 {
-        int ret, msg_count;
+        int msg_count;
 	socklen_t len;
 	int sk,pf_class,lstn_sk,acpt_sk, flag;
         char *message = "hello, world!\n";
@@ -150,7 +150,7 @@ main(int argc, char *argv[])
 
 	count = test_send(acpt_sk, message, msg_count, flag);
 
-	ret = test_shutdown(sk, SHUT_WR);
+	test_shutdown(sk, SHUT_WR);
 
 	/*recvfrom () TEST5:reading on a socket that received SHUTDOWN*/
 	count = recvfrom(acpt_sk, message_rcv, msg_count, flag,
