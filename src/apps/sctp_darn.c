@@ -2258,21 +2258,21 @@ get_assocstats_func(int sk, sctp_assoc_t assoc_id)
 		return error;
 	}
 
-	printf("Retransmitted Chunks: %" PRIu64 "\n", stats.sas_rtxchunks);
-	printf("Gap Acknowledgements Received: %" PRIu64 "\n", stats.sas_gapcnt);
-	printf("TSN received > next expected: %" PRIu64 "\n", stats.sas_outofseqtsns);
-	printf("SACKs sent: %" PRIu64 "\n", stats.sas_osacks);
-	printf("SACKs received: %" PRIu64 "\n", stats.sas_isacks);
-	printf("Control chunks sent: %" PRIu64 "\n", stats.sas_octrlchunks);
-	printf("Control chunks received: %" PRIu64 "\n", stats.sas_ictrlchunks);
-	printf("Ordered data chunks sent: %" PRIu64 "\n", stats.sas_oodchunks);
-	printf("Ordered data chunks received: %" PRIu64 "\n", stats.sas_iodchunks);
-	printf("Unordered data chunks sent: %" PRIu64 "\n", stats.sas_ouodchunks);
-	printf("Unordered data chunks received: %" PRIu64 "\n", stats.sas_iuodchunks);
-	printf("Dups received (ordered+unordered): %" PRIu64 "\n", stats.sas_idupchunks);
-	printf("Packets sent: %" PRIu64 "\n", stats.sas_opackets);
-	printf("Packets received: %" PRIu64 "\n", stats.sas_ipackets);
-	printf("Maximum Observed RTO this period: %" PRIu64 " - Transport: ", stats.sas_maxrto);
+	printf("Retransmitted Chunks: %" PRIu64 "\n", (uint64_t) stats.sas_rtxchunks);
+	printf("Gap Acknowledgements Received: %" PRIu64 "\n", (uint64_t) stats.sas_gapcnt);
+	printf("TSN received > next expected: %" PRIu64 "\n", (uint64_t) stats.sas_outofseqtsns);
+	printf("SACKs sent: %" PRIu64 "\n", (uint64_t) stats.sas_osacks);
+	printf("SACKs received: %" PRIu64 "\n", (uint64_t) stats.sas_isacks);
+	printf("Control chunks sent: %" PRIu64 "\n", (uint64_t) stats.sas_octrlchunks);
+	printf("Control chunks received: %" PRIu64 "\n", (uint64_t) stats.sas_ictrlchunks);
+	printf("Ordered data chunks sent: %" PRIu64 "\n", (uint64_t) stats.sas_oodchunks);
+	printf("Ordered data chunks received: %" PRIu64 "\n", (uint64_t) stats.sas_iodchunks);
+	printf("Unordered data chunks sent: %" PRIu64 "\n", (uint64_t) stats.sas_ouodchunks);
+	printf("Unordered data chunks received: %" PRIu64 "\n", (uint64_t) stats.sas_iuodchunks);
+	printf("Dups received (ordered+unordered): %" PRIu64 "\n", (uint64_t) stats.sas_idupchunks);
+	printf("Packets sent: %" PRIu64 "\n", (uint64_t) stats.sas_opackets);
+	printf("Packets received: %" PRIu64 "\n", (uint64_t) stats.sas_ipackets);
+	printf("Maximum Observed RTO this period: %" PRIu64 " - Transport: ", (uint64_t) stats.sas_maxrto);
 	print_sockaddr((struct sockaddr *)&stats.sas_obs_rto_ipaddr);
 	printf("\n");
 
