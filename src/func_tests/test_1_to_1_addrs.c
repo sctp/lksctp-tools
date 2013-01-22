@@ -79,18 +79,16 @@ main(int argc, char *argv[])
 {
         int error;
 	socklen_t len;
-	int sk,lstn_sk,clnt_sk,acpt_sk,pf_class,sk1;
+	int lstn_sk,clnt_sk,acpt_sk,pf_class,sk1;
 	struct msghdr outmessage;
         struct msghdr inmessage;
         char *message = "hello, world!\n";
-        struct iovec iov;
         struct iovec iov_rcv;
         struct sctp_sndrcvinfo *sinfo;
         int msg_count;
         char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
         struct cmsghdr *cmsg;
         struct iovec out_iov;
-        char * buffer_snd;
         char * buffer_rcv;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 	struct sockaddr *laddrs, *paddrs;
@@ -105,8 +103,6 @@ main(int argc, char *argv[])
         setvbuf(stderr, NULL, _IONBF, 0);
 
         pf_class = PF_INET;
-
-        sk = test_socket(pf_class, SOCK_STREAM, IPPROTO_SCTP);
 
 	/*Creating a regular socket*/
 	clnt_sk = test_socket(pf_class, SOCK_STREAM, IPPROTO_SCTP);
@@ -147,8 +143,6 @@ main(int argc, char *argv[])
         msg_count = strlen(message) + 1;
 
 	memset(&outmessage, 0, sizeof(outmessage));
-        buffer_snd = malloc(REALLY_BIG);
-
         outmessage.msg_name = &lstn_addr;
         outmessage.msg_namelen = sizeof(lstn_addr);
         outmessage.msg_iov = &out_iov;
@@ -165,11 +159,9 @@ main(int argc, char *argv[])
         sinfo = (struct sctp_sndrcvinfo *)CMSG_DATA(cmsg);
         memset(sinfo, 0x00, sizeof(struct sctp_sndrcvinfo));
 
-        iov.iov_base = buffer_snd;
-	iov.iov_len = REALLY_BIG;
         outmessage.msg_iov->iov_base = message;
-
         outmessage.msg_iov->iov_len = msg_count;
+
 	test_sendmsg(clnt_sk, &outmessage, MSG_NOSIGNAL, msg_count);
 
 	test_recvmsg(acpt_sk, &inmessage, MSG_NOSIGNAL);
