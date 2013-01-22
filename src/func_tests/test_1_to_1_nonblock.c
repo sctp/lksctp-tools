@@ -69,14 +69,11 @@ main(int argc, char *argv[])
 	struct msghdr outmessage;
 	struct msghdr inmessage;
         char *message = "hello, world!\n";
-        struct iovec iov;
         struct iovec iov_rcv;
 	struct sctp_sndrcvinfo *sinfo;
-        int count;
 	char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
 	struct cmsghdr *cmsg;
         struct iovec out_iov;
-        char * buffer_snd;
 	char * buffer_rcv;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 	
@@ -158,8 +155,6 @@ main(int argc, char *argv[])
 	tst_resm(TPASS, "accept() after a non-blocking connect - SUCCESS");
 
 	memset(&outmessage, 0, sizeof(outmessage));
-        buffer_snd = malloc(REALLY_BIG);
-
         outmessage.msg_name = &svr_addr;
         outmessage.msg_namelen = sizeof(svr_addr);
         outmessage.msg_iov = &out_iov;
@@ -176,10 +171,7 @@ main(int argc, char *argv[])
 	sinfo = (struct sctp_sndrcvinfo *)CMSG_DATA(cmsg);
         memset(sinfo, 0x00, sizeof(struct sctp_sndrcvinfo));
 
-	iov.iov_base = buffer_snd;
-        iov.iov_len = REALLY_BIG;
         outmessage.msg_iov->iov_base = message;
-
         outmessage.msg_iov->iov_len = strlen(message) + 1;
 
 	memset(&inmessage, 0, sizeof(inmessage));
@@ -202,7 +194,7 @@ main(int argc, char *argv[])
 
 	tst_resm(TPASS, "non-blocking recvmsg() - EAGAIN");
 
-	count = test_sendmsg(acpt_sk, &outmessage, flag, msg_count);
+	test_sendmsg(acpt_sk, &outmessage, flag, msg_count);
 
 	/* TEST5: recvmsg() should succeed now as data is available. */
 	error = test_recvmsg(sk, &inmessage, flag);
