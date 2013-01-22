@@ -93,7 +93,7 @@ main(int argc, char *argv[])
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
         char *message;
-	int error, bytes_sent, pf_class;
+	int error, pf_class;
         sctp_assoc_t associd;
 	uint32_t ppid;
 	uint32_t stream;
@@ -287,7 +287,7 @@ main(int argc, char *argv[])
 	       remote_port);
 
         /* Send the first message.  This will create the association.  */
-        bytes_sent = test_sendmsg(sk, &outmessage, 0, size+1);
+        test_sendmsg(sk, &outmessage, 0, size+1);
 
         memset(&inmessage, 0, sizeof(inmessage));	
 	big_buffer = test_malloc(REALLY_BIG);
@@ -346,7 +346,8 @@ main(int argc, char *argv[])
 
 		outmessage.msg_iov->iov_base = message;
 	        outmessage.msg_iov->iov_len = size + 1;
-		bytes_sent = test_sendmsg(sk, &outmessage, 0, size+1);
+
+		test_sendmsg(sk, &outmessage, 0, size+1);
 	}
         
         printf("\n\n\t\tComplete all the data sendings to receiver...\n\n\n");
