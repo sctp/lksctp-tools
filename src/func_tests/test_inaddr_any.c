@@ -79,7 +79,7 @@ main(void)
         char *telephone = "Watson, come here!  I need you!\n";
         char *telephone_resp = "I already brought your coffee...\n";
         int error;
-	int pf_class, af_family;
+	int pf_class;
 	uint32_t ppid;
 	uint32_t stream;
 	socklen_t namelen;
@@ -92,7 +92,6 @@ main(void)
 	/* Set some basic values which depend on the address family. */
 #if TEST_V6
 	pf_class = PF_INET6;
-	af_family = AF_INET6;
 
         loop.v6.sin6_family = AF_INET6;
         loop.v6.sin6_addr = (struct in6_addr)SCTP_IN6ADDR_LOOPBACK_INIT;
@@ -103,7 +102,6 @@ main(void)
         anyaddr.v6.sin6_port = 0;
 #else
 	pf_class = PF_INET;
-	af_family = AF_INET;
 
         loop.v4.sin_family = AF_INET;
         loop.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;

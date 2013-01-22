@@ -86,7 +86,7 @@ main(int argc, char *argv[])
 	struct sctp_sndrcvinfo *sinfo;
         struct iovec out_iov;
         int error, bytes_sent;
-	int pf_class, af_family;
+	int pf_class;
 	uint32_t ppid;
 	uint32_t stream;
 	sctp_assoc_t associd1, associd2;
@@ -105,7 +105,6 @@ main(int argc, char *argv[])
 	/* Set some basic values which depend on the address family. */
 #if TEST_V6
 	pf_class = PF_INET6;
-	af_family = AF_INET6;
 
         loop1.v6.sin6_family = AF_INET6;
         loop1.v6.sin6_addr = in6addr_loopback;
@@ -116,7 +115,6 @@ main(int argc, char *argv[])
         loop2.v6.sin6_port = htons(SCTP_TESTPORT_2);
 #else
 	pf_class = PF_INET;
-	af_family = AF_INET;
 
         loop1.v4.sin_family = AF_INET;
         loop1.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;

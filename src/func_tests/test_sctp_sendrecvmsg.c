@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	sockaddr_storage_t loop2;
 	sockaddr_storage_t msgname;
 	int error;
-	int pf_class, af_family;
+	int pf_class;
 	uint32_t ppid;
 	uint32_t stream;
 	struct sctp_event_subscribe subscribe;
@@ -100,7 +100,6 @@ int main(int argc, char *argv[])
 	/* Set some basic values which depend on the address family. */
 #if TEST_V6
 	pf_class = PF_INET6;
-	af_family = AF_INET6;
 
 	loop1.v6.sin6_family = AF_INET6;
 	loop1.v6.sin6_addr = in6addr_loopback;
@@ -111,7 +110,6 @@ int main(int argc, char *argv[])
 	loop2.v6.sin6_port = htons(SCTP_TESTPORT_2);
 #else
 	pf_class = PF_INET;
-	af_family = AF_INET;
 
 	loop1.v4.sin_family = AF_INET;
 	loop1.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;

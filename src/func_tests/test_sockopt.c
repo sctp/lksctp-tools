@@ -78,7 +78,7 @@ main(void)
         struct iovec out_iov;
         char *message = "hello, world!\n";
         int error;
-	int pf_class, af_family;
+	int pf_class;
 	uint32_t ppid;
 	uint32_t stream;
 	sctp_assoc_t udp_svr_associd, udp_clt_associd;
@@ -109,7 +109,6 @@ main(void)
 	/* Set some basic values which depend on the address family. */
 #if TEST_V6
 	pf_class = PF_INET6;
-	af_family = AF_INET6;
 
         udp_svr_loop.v6.sin6_family = AF_INET6;
         udp_svr_loop.v6.sin6_addr = in6addr_loopback;
@@ -128,7 +127,6 @@ main(void)
         tcp_clt_loop.v6.sin6_port = htons(SCTP_TESTPORT_1+3);
 #else
 	pf_class = PF_INET;
-	af_family = AF_INET;
 
         udp_svr_loop.v4.sin_family = AF_INET;
         udp_svr_loop.v4.sin_addr.s_addr = SCTP_IP_LOOPBACK;
