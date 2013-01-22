@@ -1960,14 +1960,13 @@ peer_primary_func(char *argv0, int sk, char *cp, int set)
 	struct sctp_setpeerprim setpeerprim;
 	struct sockaddr_in *in_addr;
 	struct sockaddr_in6 *in6_addr;
-	int peer_prim_len, ret;
+	int ret;
 	char *p = cp;
 
 	if (!set) {
 		goto err;
 	}
 
-	peer_prim_len = sizeof(struct sctp_setpeerprim);
 	/* Set the buffer for address parsing.  */
 	while ('\n' != *p)
 		p++;
