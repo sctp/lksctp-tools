@@ -1378,7 +1378,7 @@ user_test_check_message(struct msghdr *msg,
 
 	if (msg->msg_controllen != controllen) {
 		fprintf(stderr,
-			"Got control structure of length %d, not %d\n",
+			"Got control structure of length %zu, not %d\n",
 			msg->msg_controllen, controllen);
 		exit(1);
 	}

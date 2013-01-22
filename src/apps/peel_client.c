@@ -453,7 +453,7 @@ my_sctpReadInput(int fd)
 	errno = 0;
 	sz = recvmsg(fd,&msg,0);
 	if(sz <= 0){
-		printf("Read returns %d errno:%d control len is %d msgflg:%x\n",
+		printf("Read returns %d errno:%d control len is %zu msgflg:%x\n",
 		       sz,errno,
 		       msg.msg_controllen,msg.msg_flags);
 	}

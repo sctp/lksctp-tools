@@ -66,13 +66,13 @@ int main (int argc, char **argv)
 	cnt = 2;    /* argument iterator */
 	buf_ptr = addr_buf;
 	while (cnt < argc) {
-		printf("bindx_test: INFO: Arg %d: %s", cnt, argv[cnt]);
+		printf("bindx_test: INFO: Arg %zu: %s", cnt, argv[cnt]);
 		fflush(stderr);
 		if (strchr(argv[cnt], ':')) {
 			struct sockaddr_in6 *sa6; 
 
 			sa6 = (struct sockaddr_in6 *)buf_ptr;
-			printf(" IPv6 address number %d", addrs);
+			printf(" IPv6 address number %zu", addrs);
 			sa6->sin6_family = AF_INET6;
 			sa6->sin6_port = port;
 			if (inet_pton(AF_INET6, argv[cnt], &sa6->sin6_addr)) {
@@ -85,7 +85,7 @@ int main (int argc, char **argv)
 			struct sockaddr_in *sa; 
 
 			sa = (struct sockaddr_in *)buf_ptr;
-			printf (" IPv4 address number %d", addrs);
+			printf (" IPv4 address number %zu", addrs);
 			sa->sin_family = AF_INET;
 			sa->sin_port = port;
 			if (inet_pton (AF_INET, argv[cnt], &sa->sin_addr)) {
@@ -100,7 +100,7 @@ int main (int argc, char **argv)
 		cnt++;
 	}
 
-	printf ("bindx_test: INFO: Got %d addrs\n", addrs);
+	printf ("bindx_test: INFO: Got %zu addrs\n", addrs);
   
 	/* Create the socket */
 	sd = socket(PF_INET6, SOCK_SEQPACKET, IPPROTO_SCTP);

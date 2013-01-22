@@ -436,7 +436,7 @@ my_sctpReadInput(int fd,int maxread)
 	msg.msg_controllen = sizeof(controlVector);
 	errno = 0;
 	sz = recvmsg(fd,&msg,0);
-	printf("Read fd:%d returns %d errno:%d control len is %d msgflg:%x\n",
+	printf("Read fd:%d returns %d errno:%d control len is %zu msgflg:%x\n",
 	       fd,
 	       sz,errno,
 	       msg.msg_controllen,

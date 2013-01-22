@@ -341,9 +341,8 @@ print_message(const int sk, struct msghdr *msg, size_t msg_len) {
         if (!(MSG_NOTIFICATION & msg->msg_flags)) {
                 int index = 0;
 
-		DEBUG_PRINT(DEBUG_MIN, "Data %d bytes.", msg_len);
-
-		DEBUG_PRINT(DEBUG_MAX, " First %d bytes: ",
+		DEBUG_PRINT(DEBUG_MIN, "Data %zu bytes.", msg_len);
+		DEBUG_PRINT(DEBUG_MAX, " First %zu bytes: ",
 				    (msg_len < BODYSIZE)?msg_len:BODYSIZE);
                 /* Make sure that everything is printable and that we
                  * are NUL terminated...
