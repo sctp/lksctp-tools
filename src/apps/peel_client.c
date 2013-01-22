@@ -429,17 +429,13 @@ my_sctpReadInput(int fd)
 	/* receive some number of datagrams and
 	 * act on them.
 	 */
-	struct sctp_sndrcvinfo *s_info;
-	int sz,i,disped;
+	int sz;
 	struct msghdr msg;
 	struct iovec iov[2];
 	unsigned char from[200];
 	char readBuffer[65535];
 	char controlVector[65535];
   
-	disped = i = 0;
-
-	s_info = NULL;
 	iov[0].iov_base = readBuffer;
 	iov[0].iov_len = sizeof(readBuffer);
 	iov[1].iov_base = NULL;
