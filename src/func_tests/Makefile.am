@@ -6,7 +6,7 @@ include $(top_srcdir)/Makefile.dirs
 
 # General compilation flags
 INCLUDES = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib 
-AM_CFLAGS = -g -Wall -Wstrict-prototypes -Wimplicit-function-declaration
+AM_CFLAGS = -g -O2 -fno-strict-aliasing -Wall -Wstrict-prototypes -Wimplicit-function-declaration
 AM_LDFLAGS = -lpthread
 LDADD = $(top_builddir)/src/testlib/libsctputil.la \
 	$(top_builddir)/src/lib/libsctp.la
