@@ -2,7 +2,7 @@
 # -*- sh -*-
 LIBDIR=@libdir@/@PACKAGE@
 BINDIR=@bindir@
-export LD_PRELOAD=${LIBDIR}/libwithsctp.so.1.0.12
+export LD_PRELOAD=${LIBDIR}/libwithsctp.so.1.0.13
 if ! ${BINDIR}/checksctp 2> /dev/null
 then
     ${BINDIR}/checksctp;

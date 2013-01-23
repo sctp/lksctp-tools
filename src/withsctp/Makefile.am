@@ -14,7 +14,7 @@ AM_CPPFLAGS=-I../include
 pkglib_LTLIBRARIES = libwithsctp.la
 libwithsctp_la_SOURCES = sctp_load_libs.c sctp_socket.c sctp_bind.c \
 	sctp_sockopt.c sctp_socket.h
-libwithsctp_la_LDFLAGS = -version-info 1:12:0 -ldl
+libwithsctp_la_LDFLAGS = -version-info 1:13:0 -ldl
 
 pkgdoc_DATA = sctp_load_libs.c sctp_socket.c sctp_bind.c \
 	sctp_sockopt.c sctp_socket.h checksctp.c

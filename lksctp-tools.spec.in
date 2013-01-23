@@ -124,7 +124,10 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
-* Tue Jan 08 2012 Vlad Yasevich <vyasevich@gmail.com> 1.0.12-1
+* Wed Jan 23 2013 Daniel Borkmann <dborkman@redhat.com> 1.0.13-1
+- 1.0.13 Release
+
+* Tue Jan 08 2013 Vlad Yasevich <vyasevich@gmail.com> 1.0.12-1
 - 1.0.12 Release
 
 * Wed Oct 21 2009 Vlad Yasevich <vladislav.yasevich@hp.com> 1.0.11-1

@@ -1,8 +1,14 @@
-Version 1.0.12 of the Developers' Release of the SCTP
+Version 1.0.13 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
 
+
+lksctp-1.0.13: Wed Jan 23 12:13 EDT 2013
+T:BUILD       Use silent rules
+T:BUILD       Fix build warnings all over the place
+T:APP         Fix memory leak in sctp_xconnect
+T:TEST        Fix deprecated values in test cases
 
 lksctp-1.0.12: Tue Jan 08 10:45 EDT 2013
 T:API         Add needed definitions for DTLS/SCTP.
@@ -14,6 +20,7 @@ T:APP         Add HEARTBEAT command to sctp_darn
 T:API         Obsolete interefaces have been removed
 T:API         Suport for SCTP_SACK_IMMEDIATELY options
 T:API         Support for non-blocking sctp-connectx
+
 lksctp-2.6.28-1.0.11: Wed Oct 21 16:53:41 EDT 2009
 T:BUILD       fix parallel build warning
 T:BUILD       fix make distcheck for lksctp-tools
@@ -37,6 +44,7 @@ T:API         Update to the sctp_connectx().  Now takes additional argument.
 T:API         Let sctp_recvmsg() honor passed in MSG_ flags
 K:	      See kernel change log for details.  We'll track only tools
               changes here from now on.
+
 lksctp-2.6.26-1.0.9: Sun Jul 13 14:51:29 PDT 2008
 T:Patch	      Make frame tests work with 2.6.26 kernel.
 T:Patch       Implement and export SCTP-AUTH API extensions based on
