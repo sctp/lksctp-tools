@@ -5,7 +5,7 @@ include $(top_srcdir)/Makefile.rules
 include $(top_srcdir)/Makefile.dirs
 
 # General compilation flags
-INCLUDES = -I$(top_srcdir)/src/include
+AM_CPPFLAGS = -I$(top_srcdir)/src/include
 
 noinst_LTLIBRARIES = libsctputil.la
 libsctputil_la_SOURCES = sctputil.c sctputil.h

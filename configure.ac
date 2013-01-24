@@ -1,7 +1,7 @@
 dnl -*-autoconf-*-
 
 dnl lksctp-tools: Autoconf script
-dnl 
+dnl
 dnl $Id: configure.in,v 1.1.1.2 2002/08/06 23:55:45 inaky Exp $
 
 dnl (C) 2002 Intel Corporation
@@ -13,12 +13,13 @@ dnl (CONFIG_AUX_DIR is for putting stuff in $TOPSRCDIR/bin, so we
 dnl reduce clutter in the root; if we put it below AM_INIT_AUTOMAKE,
 dnl configure will fail ...)
 
-AC_INIT([src/apps/sctp_darn.c])
+AC_INIT([lksctp-tools], [1.0.13], [], [], [http://www.lksctp.org/])
 AC_CONFIG_AUX_DIR(bin)
-AM_INIT_AUTOMAKE(lksctp-tools,1.0.13)
-AC_CONFIG_SRCDIR([config.h.in])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_SRCDIR([src/apps/sctp_darn.c])
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 AC_REVISION($Revision: 1.1.1.2 $)
+AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
 
 dnl Set defaults
@@ -63,12 +64,12 @@ AC_CONFIG_FILES([lksctp-tools.spec
 		bin/Makefile
 		man/Makefile
 		src/Makefile
-        	src/apps/Makefile
-        	src/func_tests/Makefile
-        	src/include/Makefile
-        	src/include/netinet/Makefile
-        	src/lib/Makefile
-        	src/testlib/Makefile
-        	src/withsctp/Makefile
-        	doc/Makefile])
+		src/apps/Makefile
+		src/func_tests/Makefile
+		src/include/Makefile
+		src/include/netinet/Makefile
+		src/lib/Makefile
+		src/testlib/Makefile
+		src/withsctp/Makefile
+		doc/Makefile])
 AC_OUTPUT

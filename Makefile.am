@@ -12,6 +12,8 @@ EXTRA_DIST += ChangeLog AUTHORS COPYING COPYING.lib INSTALL \
 # bin or src products may be required to generate stuff in test/
 SUBDIRS = man bin src doc
 
+ACLOCAL_AMFLAGS=-I m4
+
 # Libtool support
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 libtool: $(LIBTOOL_DEPS)
