@@ -1,13 +1,15 @@
 # Include these two in all the Makefile.am's!!!
 include $(top_srcdir)/Makefile.vars
 include $(top_srcdir)/Makefile.rules
-
 include $(top_srcdir)/Makefile.dirs
 
 # General compilation flags
-AM_CPPFLAGS = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib
-AM_CFLAGS = -g -O2 -fno-strict-aliasing -Wall -Wstrict-prototypes -Wimplicit-function-declaration
+AM_CPPFLAGS = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib \
+              -g -O2 -fno-strict-aliasing -Wall -Wstrict-prototypes \
+              -Wimplicit-function-declaration
+
 AM_LDFLAGS = 
+
 LDADD = $(top_builddir)/src/testlib/libsctputil.la \
 	$(top_builddir)/src/lib/libsctp.la
 
