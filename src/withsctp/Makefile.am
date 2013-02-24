@@ -10,7 +10,7 @@ include $(top_srcdir)/Makefile.rules
 bin_PROGRAMS = checksctp
 bin_SCRIPTS = withsctp
 
-AM_CPPFLAGS=-I../include
+AM_CPPFLAGS=-I$(top_srcdir)/src/include
 pkglib_LTLIBRARIES = libwithsctp.la
 libwithsctp_la_SOURCES = sctp_load_libs.c sctp_socket.c sctp_bind.c \
 	sctp_sockopt.c sctp_socket.h
