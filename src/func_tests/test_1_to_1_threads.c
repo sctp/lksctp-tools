@@ -123,8 +123,6 @@ void *relay(void *arg)
 
 	if (id == 0) {
 		t_send(id);
-	} else if (id == THREADS -1) {
-		t_send(id);	
 	} else {
 		t_recv (id);
 		t_send(id);
@@ -138,6 +136,7 @@ main(void)
 {
 
 	int      cnt,i;
+	int      pth[THREADS];
 	pthread_t       thread[THREADS];
 	int  status;
 	int  exit_status;
@@ -171,8 +170,9 @@ main(void)
 	acpt_sk = test_accept(server_sk, (struct sockaddr *)&svr_addr, &len);
 
 	for ( i = 0; i < THREAD_SND_RCV_LOOPS; i++ ) {
-		for (cnt = 1; cnt < THREADS; cnt++) {
-			status = pthread_create(&thread[cnt], &attr, relay, &cnt);
+		for (cnt = 0; cnt < THREADS; cnt++) {
+			pth[cnt] = cnt;
+			status = pthread_create(&thread[cnt], &attr, relay, &pth[cnt]);
 			if (status)
 				tst_brkm(TBROK, tst_exit, "pthread_create "
                          		 "failed status:%d, errno:%d", status,
@@ -180,7 +180,7 @@ main(void)
 		}
 
 		pthread_attr_destroy(&attr);
-		for (cnt = 1; cnt < THREADS ; cnt++) {
+		for (cnt = 0; cnt < THREADS ; cnt++) {
 			exit_status = pthread_join (thread[cnt], &result);
 			if (exit_status == -1)
 				tst_brkm(TBROK, tst_exit, "pthread_join "
