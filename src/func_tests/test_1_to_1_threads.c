@@ -64,7 +64,7 @@ struct sockaddr_in  conn_addr;
 char *message = "hello, world!\n";
 
 void 
-t_recv (int id) {
+t_recv(void) {
 	int cnt;
 	struct msghdr inmessage;
 	struct iovec iov;
@@ -87,7 +87,7 @@ t_recv (int id) {
 }
 
 void
-t_send(int id) {
+t_send(void) {
         struct msghdr outmessage;
         struct sctp_sndrcvinfo *sinfo;
         struct cmsghdr *cmsg;
@@ -122,10 +122,10 @@ void *relay(void *arg)
 	int id = *(int *) arg;
 
 	if (id == 0) {
-		t_send(id);
+		t_send();
 	} else {
-		t_recv (id);
-		t_send(id);
+		t_recv();
+		t_send();
 	}
 
 	pthread_exit(NULL);
