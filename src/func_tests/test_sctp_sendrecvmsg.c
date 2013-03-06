@@ -175,6 +175,7 @@ int main(int argc, char *argv[])
 	buflen = REALLY_BIG;
 	big_buffer = test_malloc(buflen);
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags);
@@ -197,6 +198,7 @@ int main(int argc, char *argv[])
 	/* Get the communication up message on sk1.  */
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk1, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags); 
@@ -210,6 +212,7 @@ int main(int argc, char *argv[])
 	/* Get the first message which was sent.  */
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags); 
@@ -271,6 +274,7 @@ int main(int argc, char *argv[])
 	do {
 		buflen = REALLY_BIG;
 		msgname_len = sizeof(msgname);
+		msg_flags = 0;
 		test_sctp_recvmsg(sk2, big_buffer, buflen,
 			  (struct sockaddr *)&msgname, &msgname_len,
 			  &sinfo, &msg_flags); 
@@ -279,6 +283,7 @@ int main(int argc, char *argv[])
 	/* Get the message that did NOT time out. */
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 			  (struct sockaddr *)&msgname, &msgname_len,
 			  &sinfo, &msg_flags); 
@@ -294,6 +299,7 @@ int main(int argc, char *argv[])
 	 */
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk1, big_buffer, buflen,
 			  (struct sockaddr *)&msgname, &msgname_len,
 			  &sinfo, &msg_flags); 
@@ -315,6 +321,7 @@ int main(int argc, char *argv[])
 	do {
 		buflen = REALLY_BIG;
 		msgname_len = sizeof(msgname);
+		msg_flags = 0;
 		error = test_sctp_recvmsg(sk1, big_buffer, buflen,
 			  (struct sockaddr *)&msgname, &msgname_len,
 			  &sinfo, &msg_flags); 
@@ -342,6 +349,7 @@ int main(int argc, char *argv[])
 
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 				  (struct sockaddr *)&msgname, &msgname_len,
 				  &sinfo, &msg_flags); 
@@ -357,6 +365,7 @@ int main(int argc, char *argv[])
 	/* Get the shutdown complete notification. */
 	buflen = REALLY_BIG;
 	msgname_len = sizeof(msgname);
+	msg_flags = 0;
 	error = test_sctp_recvmsg(sk2, big_buffer, buflen,
 		  (struct sockaddr *)&msgname, &msgname_len,
 		  &sinfo, &msg_flags); 
