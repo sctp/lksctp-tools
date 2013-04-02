@@ -676,8 +676,10 @@ struct sctp_paddrinfo {
  */
 enum sctp_spinfo_state {
 	SCTP_INACTIVE,
+	SCTP_PF,
 	SCTP_ACTIVE,
-	SCTP_UNCONFIRMED
+	SCTP_UNCONFIRMED,
+	SCTP_UNKNOWN = 0xffff
 };
 
 /*
