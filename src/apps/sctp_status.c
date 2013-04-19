@@ -860,6 +860,12 @@ void printstatus(int sk) {
 	struct sctp_status status;
 	socklen_t optlen;
 	FILE * fp;
+	const char *state_to_str[] = {
+		[SCTP_INACTIVE]		=	"INACTIVE",
+		[SCTP_PF]		=	"PF",
+		[SCTP_ACTIVE]		=	"ACTIVE",
+		[SCTP_UNCONFIRMED]	=	"UNCONFIRMED",
+	};
 
 	optlen = sizeof(struct sctp_status);
 	if(getsockopt(sk, IPPROTO_SCTP, SCTP_STATUS, &status, &optlen) < 0) {
@@ -889,7 +895,7 @@ void printstatus(int sk) {
 				status.sstat_assoc_id, get_sstat_state(status.sstat_state),
 				status.sstat_rwnd, status.sstat_unackdata, status.sstat_penddata,
 				status.sstat_instrms, status.sstat_outstrms, status.sstat_fragmentation_point,
-				(status.sstat_primary.spinfo_state == 1) ? "ACTIVE" : "INACTIVE",
+				state_to_str[status.sstat_primary.spinfo_state],
 				status.sstat_primary.spinfo_cwnd, status.sstat_primary.spinfo_srtt,
 				status.sstat_primary.spinfo_rto, status.sstat_primary.spinfo_mtu);
 	}
@@ -901,7 +907,7 @@ void printstatus(int sk) {
 	if (fp != stdout)
 		fclose(fp);
 
-	if (status.sstat_primary.spinfo_state != 1) {
+	if (status.sstat_primary.spinfo_state != SCTP_ACTIVE) {
 		close_r(sk);
 		exit(1);
 	}
