@@ -20,6 +20,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_REVISION($Revision: 1.1.1.2 $)
 AM_INIT_AUTOMAKE
+m4_ifndef([AM_SILENT_RULES], [m4_define([AM_SILENT_RULES],[])])
 AM_SILENT_RULES([yes])
 
 dnl Set defaults
