@@ -13,7 +13,7 @@ dnl (CONFIG_AUX_DIR is for putting stuff in $TOPSRCDIR/bin, so we
 dnl reduce clutter in the root; if we put it below AM_INIT_AUTOMAKE,
 dnl configure will fail ...)
 
-AC_INIT([lksctp-tools], [1.0.14], [], [], [http://www.lksctp.org/])
+AC_INIT([lksctp-tools], [1.0.15], [], [], [http://www.lksctp.org/])
 AC_CONFIG_AUX_DIR(bin)
 AC_CONFIG_SRCDIR([src/apps/sctp_darn.c])
 AC_CONFIG_HEADERS([config.h])

@@ -1,7 +1,12 @@
-Version 1.0.14 of the Developers' Release of the SCTP
+Version 1.0.15 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.15: Sun May 12 11:01 EDT 2013
+T:BUILD       Allow build with no AM_SILENT_RULES support
+T:APP         Fix sctp_status
+T:APP         Fix quoted command line arguments
 
 lksctp-1.0.14: Wed Apr 05 11:54 EDT 2013
 T:BUILD       Modernize and fix autotool's build system

@@ -124,6 +124,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Sun May 12 2013 Daniel Borkmann <dborkman@redhat.com> 1.0.15-1
+- 1.0.15 Release
+
 * Wed Apr 05 2013 Daniel Borkmann <dborkman@redhat.com> 1.0.14-1
 - 1.0.14 Release
 
