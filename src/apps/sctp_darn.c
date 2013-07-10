@@ -60,7 +60,6 @@
 #include <sys/socket.h>
 #include <sys/uio.h>
 #include <netinet/in.h>
-#include <sys/errno.h>
 #include <sys/param.h>
 #include <sys/poll.h>
 #include <arpa/inet.h>
