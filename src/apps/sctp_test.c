@@ -551,7 +551,7 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	if (NULL != hst4) {
 		for (j = 0; j < i4; ++j) {
 			b4ap = (struct sockaddr_in *)aptr;
-			bzero(b4ap, sizeof(*b4ap));
+			memset(b4ap, 0x00, sizeof(*b4ap));
 			b4ap->sin_family = AF_INET;
 			b4ap->sin_port = htons(local_port);
 			bcopy(hst4->h_addr_list[j], &b4ap->sin_addr,
@@ -564,7 +564,7 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	if (NULL != hst6) {
 		for (j = 0; j < i6; ++j) {
 			b6ap = (struct sockaddr_in6 *)aptr;
-			bzero(b6ap, sizeof(*b6ap));
+			memset(b6ap, 0x00, sizeof(*b6ap));
 			b6ap->sin6_family = AF_INET6;
 			b6ap->sin6_port =  htons(local_port);
 			b6ap->sin6_scope_id = if_index;
