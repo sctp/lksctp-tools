@@ -299,7 +299,7 @@ main(void)
 	tst_resm(TPASS, "getsockopt() SCTP_STATUS - SUCCESS");
 
 	/* Reducing the SO_RCVBUF value using setsockopt() */
-	/*Minimum value is 128 and hence I am using it*/
+	/* Upstream has changed the MIN_RCVBUF (2048 + sizeof(struct sk_buff)) */
 	len = sizeof(int);
 	rcvbuf_val_set = 2048;
 	/* TEST16: Test case for setsockopt SO_RCVBUF */
