@@ -547,6 +547,8 @@ int receive_r(int sk)
 } /* receive_r () */
 
 void server(int sk) {
+	int i;
+
 	if (max_msgsize > DEFAULT_MAX_WINDOW) {
 		if (setsockopt(sk, IPPROTO_SCTP, SO_RCVBUF, &max_msgsize,
 			       sizeof(max_msgsize)) < 0) {
@@ -555,7 +557,10 @@ void server(int sk) {
 		}
 	}
 
-	receive_r(sk);
+	for (i = 0; i < msg_cnt; i++) {
+		receive_r(sk);
+		DEBUG_PRINT(DEBUG_MIN, "count %d\n", i+1);
+	}
 } /* server() */
 
 void * build_msg(int len) {
