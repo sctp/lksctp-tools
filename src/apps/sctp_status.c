@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 	struct sockaddr_in6 *t_addr6;
 
 	/* Parse the arguments.  */
-	while ((c = getopt(argc, argv, ":H:L:P:h:p:c:d:lm:sx:X:o:M:r:Di:I:f:")) >= 0 ) {
+	while ((c = getopt(argc, argv, ":H:L:P:h:p:c:d:lm:sx:X:o:M:Di:I:f:")) >= 0 ) {
 		switch (c) {
 		case 'H':
 			local_host = optarg;
@@ -812,6 +812,7 @@ void usage(char *argv0) {
 	fprintf(stderr, "\t-c value = Packets of specifed size.\n");
 	fprintf(stderr, "\t-m msgsize(1500-65515, default value 32768)\n");
 	fprintf(stderr, "\t-x number of repeats\n");
+	fprintf(stderr, "\t-X number of messages\n");
 	fprintf(stderr, "\t-o order-pattern\n");
 	fprintf(stderr, "\t   0 = all unordered(default) \n");
 	fprintf(stderr, "\t   1 = all ordered \n");
@@ -819,6 +820,7 @@ void usage(char *argv0) {
 	fprintf(stderr, "\t   3 = random\n");
 	fprintf(stderr, "\t-M max-stream (default value 0)\n");
 	fprintf(stderr, "\t-D drain. If in client mode do a read following send.\n");
+	fprintf(stderr, "\t-I receive after <n> times of send, default value 1.\n");
 	fprintf(stderr, "\n");
 	fflush(stderr);
 
