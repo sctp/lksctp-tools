@@ -675,11 +675,11 @@ int next_stream(int state, int pattern)
 {
 	switch (pattern){
 	case STREAM_PATTERN_RANDOM:
-		state = rand() % (max_stream + 1);
+		state = rand() % max_stream;
 		break;
 	case STREAM_PATTERN_SEQUENTIAL:
 		state = state + 1;
-		if (state > max_stream)
+		if (state >= max_stream)
 			state = 0;
 		break;
 	}
@@ -723,7 +723,7 @@ void client(int sk) {
 } /* client() */
 
 void start_test(int role) {
-	int sk, pid;
+	int sk, pid, ret;
 	int i = 0;
 
 	DEBUG_PRINT(DEBUG_NONE, "\nStarting tests...\n");
@@ -745,6 +745,22 @@ void start_test(int role) {
 		listen_r(sk, 1);
 		accept_r(sk);
 	} else {
+		if (max_stream > 0) {
+			struct sctp_initmsg initmsg;
+
+			memset(&initmsg, 0, sizeof(initmsg));
+			initmsg.sinit_num_ostreams = max_stream;
+			initmsg.sinit_max_instreams = max_stream;
+			initmsg.sinit_max_attempts = 3;
+
+			ret = setsockopt(sk, IPPROTO_SCTP, SCTP_INITMSG,
+					 &initmsg, sizeof(initmsg));
+			if (ret < 0) {
+				perror("setsockopt(SCTP_INITMSG)");
+				exit(0);
+			}
+		}
+
 		connect_r(sk, (struct sockaddr *)&s_rem, r_len);
 	}
 
