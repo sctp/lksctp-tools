@@ -142,7 +142,6 @@ int main(int argc, char *argv[])
 
 	/*
 	 * Set the RWND small so we can fill it up easily.
-	 * then reset RCVBUF to avoid frame droppage
 	 */
 	len = sizeof(int);
 	error = getsockopt(sk2, SOL_SOCKET, SO_RCVBUF, &oldlen, &len);
@@ -185,14 +184,6 @@ int main(int argc, char *argv[])
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 
-
-	/* restore the rcvbuffer size for the receiving socket */
-	error = setsockopt(sk2, SOL_SOCKET, SO_RCVBUF, &oldlen,
-			   sizeof(oldlen));
-
-	if (error)
-		tst_brkm(TBROK, tst_exit, "setsockopt(SO_RCVBUF): %s",
-			 strerror(errno));
 
 	/* Get the communication up message on sk1.  */
 	buflen = REALLY_BIG;

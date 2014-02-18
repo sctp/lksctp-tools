@@ -172,10 +172,8 @@ int main(int argc, char *argv[])
 	 * This code sets the associations RWND very small so we can
 	 * fill it.  It does this by manipulating the rcvbuf as follows:
 	 * 1) Reduce the rcvbuf size on the socket
-	 * 2) create an association so that we advertize rcvbuf/2 as
+	 * 2) create an association so that we advertise rcvbuf/2 as
 	 *    our initial rwnd
-	 * 3) raise the rcvbuf value so that we don't drop data wile 
-	 *    receiving later data
 	 */
 	len = SMALL_RCVBUF;
 	error = setsockopt(sk2, SOL_SOCKET, SO_RCVBUF, &len,
@@ -238,14 +236,6 @@ int main(int argc, char *argv[])
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);
 	sac = (struct sctp_assoc_change *)iov.iov_base;
 	associd1 = sac->sac_assoc_id;
-
-	/* restore the rcvbuffer size for the receiving socket */
-	error = setsockopt(sk2, SOL_SOCKET, SO_RCVBUF, &orig_len,
-			   sizeof(orig_len));
-
-	if (error)
-		tst_brkm(TBROK, tst_exit, "setsockopt(SO_RCVBUF): %s",
-			strerror(errno));
 
         /* Get the first data message which was sent.  */
         inmessage.msg_controllen = sizeof(incmsg);
