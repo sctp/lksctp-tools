@@ -1,7 +1,14 @@
-Version 1.0.15 of the Developers' Release of the SCTP
+Version 1.0.16 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.16: Tue Feb 18 11:01 EDT 2014
+T:APP         Code cleanups
+T:APP         Various sctp_status fixes
+T:TEST        Avoid using file descriptor 0 to get ENOTSOCK
+T:TEST        Various fixes
+T:LIB         Fix build for prefixed architectures
 
 lksctp-1.0.15: Sun May 12 11:01 EDT 2013
 T:BUILD       Allow build with no AM_SILENT_RULES support
