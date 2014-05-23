@@ -42,6 +42,7 @@ int main (int argc, char **argv)
 	void *addr_buf_size = 0;
 	size_t addrs, cnt;
 	int sd, result, port;
+	int domain = PF_INET6;
 
 	if (argc < 3) {
 		fprintf(stderr,
@@ -84,6 +85,7 @@ int main (int argc, char **argv)
 		} else if (strchr(argv[cnt], '.')) {
 			struct sockaddr_in *sa; 
 
+			domain = PF_INET;
 			sa = (struct sockaddr_in *)buf_ptr;
 			printf (" IPv4 address number %zu", addrs);
 			sa->sin_family = AF_INET;
@@ -103,7 +105,7 @@ int main (int argc, char **argv)
 	printf ("bindx_test: INFO: Got %zu addrs\n", addrs);
   
 	/* Create the socket */
-	sd = socket(PF_INET6, SOCK_SEQPACKET, IPPROTO_SCTP);
+	sd = socket(domain, SOCK_SEQPACKET, IPPROTO_SCTP);
 	if (sd == -1) {
 		perror("bindx_test: ERROR: Cannot open socket");
 		return 1;
