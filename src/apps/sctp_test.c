@@ -204,7 +204,7 @@ void usage(char *argv0)
 	fprintf(stderr, "  client:\n");
 	fprintf(stderr, "  %8s -H local-addr -P local-port -h remote-addr\n"
 		"\t      -p remote-port -s [-c case ] [-d level]\n"
-		"\t      [-x repeat] [-o order-pattern] ream-pattern]\n"
+		"\t      [-x repeat] [-o order-pattern] [-t stream-pattern]\n"
 		"\t      [-M max-stream] [-r rand-seed]\n"
 		"\t      [-m max-msgsize]\n"
 		"\t      [-L num-ports] [-S num-ports]\n"
