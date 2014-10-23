@@ -225,7 +225,7 @@ server_loop.v4.sin_port = htons(remote_port);
 	}
 } /* parse_arguments() */
 
-/* Handle data recieved */
+/* Handle data received */
 void data_received(struct msghdr *inmessage, int len, int stream, int socket) {
 
 	int ppid, error;
@@ -269,7 +269,7 @@ void data_received(struct msghdr *inmessage, int len, int stream, int socket) {
 	}
 }
 
-/* This will print what type of SCTP_ASSOC_CHANGE state that was recieved */
+/* This will print what type of SCTP_ASSOC_CHANGE state that was received */
 void print_sctp_sac_state(struct msghdr *msg) {
 
 	char *data;

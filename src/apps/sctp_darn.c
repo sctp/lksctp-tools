@@ -2351,19 +2351,19 @@ test_verify_assoc_change(struct msghdr *msg)
 	switch(sn->sn_assoc_change.sac_state)
 	{
 	case SCTP_COMM_UP:
-		printf("Recieved SCTP_COMM_UP\n");
+		printf("Received SCTP_COMM_UP\n");
 		break;
 	case SCTP_COMM_LOST:
-		printf("Recieved SCTP_COMM_LOST\n");
+		printf("Received SCTP_COMM_LOST\n");
 		break;
 	case SCTP_RESTART:
-		printf("Recieved SCTP_RESTART\n");
+		printf("Received SCTP_RESTART\n");
 		break;
 	case SCTP_SHUTDOWN_COMP:
-		printf("Recieved SCTP_SHUTDOWN_COMP\n");
+		printf("Received SCTP_SHUTDOWN_COMP\n");
 		break;
 	case SCTP_CANT_STR_ASSOC:
-		printf("Recieved SCTP_CANT_STR_ASSOC\n");
+		printf("Received SCTP_CANT_STR_ASSOC\n");
 		break;
 	}
 
