@@ -160,13 +160,13 @@ http://www.sourceforge.net/projects/lksctp
 
 	This is the lksctp project webpage.  
 
-lksctp-developers@lists.sourceforge.net
+linux-sctp@vger.kernel.org
 	
 	This is the discussion list for developers.  Join this list if	
 	you are interested in following the day-to-day activities of
 	the SCTP Kernel Reference Implementation development community. 
 	See subscription directions at:  
-		http://lists.sourceforge.net/lists/listinfo/lksctp-developers
+		http://vger.kernel.org/vger-lists.html#linux-sctp
 
 http://www.sctp.org
 
