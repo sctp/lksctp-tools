@@ -175,13 +175,15 @@ main(int argc, char *argv[])
 	/*Calling accept to establish the connection*/
 	acpt_sk = test_accept(lstn_sk, (struct sockaddr *) &acpt_addr, &len);
 
-	/*accept() TEST5: On a established socket EINVAL, Expected error*/
+	/* accept() TEST5: On a established socket EINVAL or EACCES when
+	 * SELinux set to enforcing, Expected error. */
 	error = accept(acpt_sk, (struct sockaddr *) &acpt_addr, &len);
-	if (error != -1 || errno != EINVAL)
+	if (error != -1 || (errno != EINVAL && errno != EACCES)) {
 		tst_brkm(TBROK, tst_exit, "accept on an established socket"
-                         "error:%d, errno:%d", error, errno);
+			"error:%d, errno:%d", error, errno);
+	}
 
-	tst_resm(TPASS, "accept() on an established socket - EINVAL");
+	tst_resm(TPASS, "accept() on an established socket - %d", errno);
 
 	/*Closing the previously established association*/
 	close(acpt_sk);
