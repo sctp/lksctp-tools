@@ -111,78 +111,7 @@ files or with the
 interface.  In addition, most IP sysctls also apply to SCTP. See
 .BR ip (7). 
 .TP
-.B addip_enable
-Enable SCTP ADDIP(Dynamic Address Reconfiguration) Support. This is off
-by default.
-.TP
-.B association_max_retrans
-Maximum number of consecutive retransmissions to a peer before an endpoint 
-considers that the peer is unreachable and closes the association. The default
-value is 10.
-.TP 
-.B cookie_preserve_enable 
-Handle COOKIE PRESERVATIVE parameter in the INIT chunk. This is on by default.
-.TP
-.B hb_interval
-This is the interval when a HEARTBEAT chunk is sent to a destination transport
-address to monitor the reachability of an idle destination transport address.
-The default is 30 seconds and is maintained in msecs.
-.TP
-.B max_burst
-Maximum number of new data packets that can be sent in a burst. The default
-value is 4.
-.TP
-.B max_init_retransmits
-Maximum number of times an INIT chunk or a COOKIE ECHO chunk is retransmitted
-before an endpoint aborts the initialization process and closes the association.
-The default value is 8.
-.TP
-.B path_max_retrans 
-Maximum number of consecutive retransmissions over a destination transport
-address of a peer endpoint before it is marked as inactive. The default value
-is 5. 
-.TP
-.B prsctp_enable
-Enable PR-SCTP. This is on by default.
-.TP
-.B rcvbuf_policy
-This controls the socket receive buffer accounting policy. The default value
-is 0 and indicates that all the associations belonging to a socket share the
-same receive buffer space. When set to 1, each association will have its own
-receive buffer space.
-.TP
-.B rto_alpha_exp_divisor
-This is the RTO.Alpha value when expressed in right shifts and is used in
-RTO calculations. The default value is 3.
-.TP
-.B rto_beta_exp_divisor
-This is the RTO.Beta value when expressed in right shifts and is used in
-RTO calculations. The default value is 2.
-.TP
-.B rto_initial
-This is the initial value of RTO(retransmission timeout) that is used in RTO
-calculations. The default value is 3 seconds and is maintained in msecs.
-.TP
-.B rto_max
-This is the maximum value of RTO(retransmission timeout) that is used in RTO
-calculations. The default value is 60 seconds and is maintained in msecs.
-.TP
-.B rto_min
-This is the minimum value of RTO(retransmission timeout) that is used in RTO
-calculations. The default value is 1 second and is maintained in msecs.
-.TP
-.B sack_timeout
-Delayed SACK timeout. The default value is 200msecs.
-.TP
-.B sndbuf_policy
-This controls the socket sendbuffer accounting policy. The default value is
-0 and indicates that all the associations belonging to a socket share the
-same send buffer space. When set to 1, each association will have its own
-send buffer space. 
-.TP 
-.B valid_cookie_life
-This is the maximum lifespan of the Cookie sent in an INIT ACK chunk. The
-default value is 60 secs and is maintained in msecs. 
+Please check kernel documentation for this, at Documentation/networking/ip-sysctl.txt.
 .SH "STATISTICS"
 These variables can be accessed by the 
 .B /proc/net/sctp/* 
