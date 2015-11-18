@@ -30,6 +30,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -39,7 +40,7 @@
  */
 #define SHOULD_IPPROTO_SCTP 132
 
-main()
+int main(void)
 {
     int fd;
 
@@ -53,5 +54,5 @@ main()
     }
 
     close(fd);
-    exit(0);
+    return 0;
 }
