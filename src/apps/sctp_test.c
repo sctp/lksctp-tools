@@ -721,7 +721,7 @@ int listen_r(int sk, int listen_count)
 		    sk, listen_count);
 
  	/* Mark sk as being able to accept new associations */
-        error = listen(sk, 1);
+        error = listen(sk, listen_count);
         if (error != 0) {
         	if (do_exit) {
                 	fprintf(stderr, "\n\n\t\t*** listen:  %s ***\n\n\n",
