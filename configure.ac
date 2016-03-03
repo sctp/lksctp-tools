@@ -74,4 +74,12 @@ AC_CONFIG_FILES([lksctp-tools.spec
 		src/withsctp/Makefile
 		doc/Makefile
 		libsctp.pc])
+
+# Build options
+AC_ARG_ENABLE(tests,
+	AS_HELP_STRING([--disable-tests],
+	[Build tests (default: yes)]),,
+	[enable_tests=yes])
+AM_CONDITIONAL(BUILD_TESTS, [test $enable_tests != no])
+
 AC_OUTPUT
