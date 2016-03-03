@@ -72,5 +72,6 @@ AC_CONFIG_FILES([lksctp-tools.spec
 		src/lib/Makefile
 		src/testlib/Makefile
 		src/withsctp/Makefile
-		doc/Makefile])
+		doc/Makefile
+		libsctp.pc])
 AC_OUTPUT

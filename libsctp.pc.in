@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: sctp
+Description: User-level SCTP API library
+Version: @VERSION@
+Libs: -L${libdir} -lsctp
+Cflags: -I${includedir}
