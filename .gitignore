@@ -18,3 +18,4 @@ autom4te.cache/
 *.la
 *.lo
 *.o
+tags
