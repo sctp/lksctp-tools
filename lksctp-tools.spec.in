@@ -124,6 +124,9 @@ rm -rf $RPM_BUILD_ROOT
 %doc doc/*.txt
 
 %changelog
+* Mon May 09 2016 Marcelo Ricardo Leitner <marcelo.leitner@gmail.com> 1.0.17-1
+- 1.0.17 Release
+
 * Tue Feb 18 2014 Daniel Borkmann <dborkman@redhat.com> 1.0.16-1
 - 1.0.16 Release
 

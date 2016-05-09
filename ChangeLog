@@ -1,7 +1,16 @@
-Version 1.0.16 of the Developers' Release of the SCTP
+Version 1.0.17 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.17: Mon May  9 16:19 EDT 2016
+T:APP         Various sctp_test fixes
+T:TEST        also expect EACCES when accept on an established socket
+T:LIB         Make use of 'extern "C"'
+T:NA          Make use .git_ignore
+T:NA          Removed sysctl listing from man page
+T:BUILD       Added support for pkg-config
+T:BUILD       Allow not building tests
 
 lksctp-1.0.16: Tue Feb 18 11:01 EDT 2014
 T:APP         Code cleanups
