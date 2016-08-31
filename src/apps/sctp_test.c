@@ -221,8 +221,10 @@ void usage(char *argv0)
 	fprintf(stderr, "\t   2 = max\n");
 	fprintf(stderr, "\t-c testcase\n");
 	fprintf(stderr, "\t   0 = 1 byte packets.\n");
-	fprintf(stderr, "\t   1 = 1452 byte packets.\n");
-	fprintf(stderr, "\t       (fragmentation point for an i/f with ");
+	fprintf(stderr, "\t   1 = Sequence of following size packets.\n");
+	fprintf(stderr, "\t       (1452, 2904, 4356, 1452, 2904, 4356, ");
+	fprintf(stderr, "1452, 2904, 4356, 1452)\n");
+	fprintf(stderr, "\t       (1452 is fragmentation point for an i/f with ");
 	fprintf(stderr, "1500 as mtu.)\n");
 	fprintf(stderr, "\t   2 = 1453 byte packets.\n");
 	fprintf(stderr, "\t       (min. size at which fragmentation occurs\n");
@@ -235,7 +237,7 @@ void usage(char *argv0)
 	fprintf(stderr, "\t       (default max receive window size.)\n");
 	fprintf(stderr, "\t   6 = random size packets.\n");
 	fprintf(stderr, "\t   -ve value = Packets of specifed size.\n");
-	fprintf(stderr, "\t-m msgsize(1500-65515, default value 32768)\n");
+	fprintf(stderr, "\t-m max msgsize for option -c 6 (1500-65515, default value 32768)\n");
 	fprintf(stderr, "\t-x number of repeats\n");
 	fprintf(stderr, "\t-o order-pattern\n");
 	fprintf(stderr, "\t   0 = all unordered(default) \n");
