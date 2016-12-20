@@ -221,9 +221,7 @@ void usage(char *argv0)
 	fprintf(stderr, "\t   2 = max\n");
 	fprintf(stderr, "\t-c testcase\n");
 	fprintf(stderr, "\t   0 = 1 byte packets.\n");
-	fprintf(stderr, "\t   1 = Sequence of following size packets.\n");
-	fprintf(stderr, "\t       (1452, 2904, 4356, 1452, 2904, 4356, ");
-	fprintf(stderr, "1452, 2904, 4356, 1452)\n");
+	fprintf(stderr, "\t   1 = Sequence of multiples of 1452 byte packets.\n");
 	fprintf(stderr, "\t       (1452 is fragmentation point for an i/f with ");
 	fprintf(stderr, "1500 as mtu.)\n");
 	fprintf(stderr, "\t   2 = 1453 byte packets.\n");
