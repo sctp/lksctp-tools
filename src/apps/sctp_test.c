@@ -616,11 +616,10 @@ int socket_r(void)
         	struct sctp_initmsg initmsg;
         	memset(&initmsg, 0, sizeof(struct sctp_initmsg));
         	initmsg.sinit_num_ostreams = max_stream;
-                int i 
                 error = setsockopt(sk, IPPROTO_SCTP, SCTP_INITMSG, &initmsg, sizeof(struct sctp_initmsg));
-		if (error) {
-			fprintf(stderr, "SCTP_INITMSG: error: %d\n", error);
-			exit(1);
+                if (error) {
+                	fprintf(stderr, "SCTP_INITMSG: error: %d\n", error);
+                	exit(1);
 		}
         }
 	return sk;
