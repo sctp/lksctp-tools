@@ -171,6 +171,7 @@ int bindx_add_count = 0;
 struct sockaddr *connectx_addrs = NULL;
 int connectx_count = 0;
 int if_index = 0;
+int if_ext_index = 0;
 
 unsigned char msg[] = "012345678901234567890123456789012345678901234567890";
 
@@ -209,7 +210,8 @@ void usage(char *argv0)
 		"\t      [-m max-msgsize]\n"
 		"\t      [-L num-ports] [-S num-ports]\n"
 		"\t      [-a assoc-pattern]\n"
-		"\t      [-i interface]\n",
+		"\t      [-i interface]\n"
+		"\t      [-I ext-interface]\n",
 		argv0);
 	fprintf(stderr, "\n");
 	fprintf(stderr, "\t-a assoc_pattern in the mixed mode\n");
@@ -694,6 +696,9 @@ bindx_r(int sk, struct sockaddr *addrs, int count, int flag)
 		case AF_INET6:
 			((struct sockaddr_in6 *)sa_addr)->sin6_port =
 				htons(local_port);
+			if(if_ext_index) {
+				((struct sockaddr_in6 *)sa_addr)->sin6_scope_id = if_ext_index;
+			}
 			aptr += sizeof(struct sockaddr_in6);
 			break;
 		default:
@@ -1415,12 +1420,13 @@ main(int argc, char *argv[])
 {
 	int c;
 	char *interface = NULL;
+	char *interface_ext = NULL;
 	struct sockaddr_in *t_addr;
 	struct sockaddr_in6 *t_addr6;
 	struct sockaddr *tmp_addrs = NULL;
 	
         /* Parse the arguments.  */
-        while ((c = getopt(argc, argv, ":H:L:P:S:a:h:p:c:d:lm:sx:X:o:t:M:r:w:Di:TB:C:O:")) >= 0 ) {
+        while ((c = getopt(argc, argv, ":H:L:P:S:a:h:p:c:d:lm:sx:X:o:t:M:r:w:Di:I:TB:C:O:")) >= 0 ) {
 
                 switch (c) {
 		case 'H':
@@ -1561,6 +1567,14 @@ main(int argc, char *argv[])
 			if_index = if_nametoindex(interface);
 			if (!if_index) {
 				printf("Interface %s unknown\n", interface);
+				exit(1);
+			}
+			break;
+		case 'I':
+			interface_ext = optarg;
+			if_ext_index = if_nametoindex(interface_ext);
+			if (!if_ext_index) {
+				printf("interface_ext %s unknown\n", interface_ext);
 				exit(1);
 			}
 			break;
