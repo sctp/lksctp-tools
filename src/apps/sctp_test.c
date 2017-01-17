@@ -472,7 +472,7 @@ print_message(const int sk, struct msghdr *msg, size_t msg_len) {
         for (scmsg = CMSG_FIRSTHDR(msg);
              scmsg != NULL;
              scmsg = CMSG_NXTHDR(msg, scmsg)) {
-             	
+
 		data = (sctp_cmsg_data_t *)CMSG_DATA(scmsg);
 		if (debug_level) print_cmsg(scmsg->cmsg_type, data);
 	}
@@ -498,21 +498,21 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	int j;
 	int orig_count = *ret_count;
 	int count = orig_count;
-  char *ipaddr = strdup(parm);
-  char *ifname;
-  int ifindex = 0;
+	char *ipaddr = strdup(parm);
+	char *ifname;
+	int ifindex = 0;
 
-  /* check the interface. */
-  ifname = strchr(ipaddr,'%');
-  if (ifname) {
-    *ifname=0;
-    ifname++;
-    ifindex = if_nametoindex(ifname);
-    if (!ifindex) {
-      fprintf(stderr, "bad interface name: %s\n", ifname);
-      goto finally;
-    }
-  }
+	/* check the interface. */
+	ifname = strchr(ipaddr,'%');
+	if (ifname) {
+		*ifname=0;
+		ifname++;
+		ifindex = if_nametoindex(ifname);
+		if (!ifindex) {
+			fprintf(stderr, "bad interface name: %s\n", ifname);
+			goto finally;
+		}
+	}
 
 	/* Get the entries for this host.  */
 	hst4 = gethostbyname(ipaddr);
@@ -587,9 +587,9 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 			b6ap->sin6_scope_id = if_index;
 			bcopy(hst6->h_addr_list[j], &b6ap->sin6_addr,
 			      hst6->h_length);
-      if (!ifindex) {
-        b6ap->sin6_scope_id = ifindex;
-      }
+			if (!ifindex) {
+				b6ap->sin6_scope_id = ifindex;
+			}
 
 			aptr += sizeof(struct sockaddr_in6);
 		} /* for (loop through the new v6 addresses) */
