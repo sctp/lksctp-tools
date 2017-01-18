@@ -255,6 +255,8 @@ void usage(char *argv0)
 	fprintf(stderr, "\t   addresses of the local socket. Multiple addresses can\n");
 	fprintf(stderr, "\t   be specified by using this argument multiple times.\n");
 	fprintf(stderr, "\t   For example, '-B 10.0.0.1 -B 20.0.0.2'.\n");
+	fprintf(stderr, "\t   In case of IPv6 linklocal address, interface name can be set in following way \n");
+	fprintf(stderr, "\t   For example, '-B fe80::f8c3:b77f:698e:4506\%eth2'.\n");
 	fprintf(stderr, "\t-C use the specified address(es) for connection to the\n");
 	fprintf(stderr, "\t   peer socket. Multiple addresses can be specified by\n");
 	fprintf(stderr, "\t   using this argument multiple times.\n");
@@ -470,7 +472,7 @@ print_message(const int sk, struct msghdr *msg, size_t msg_len) {
         for (scmsg = CMSG_FIRSTHDR(msg);
              scmsg != NULL;
              scmsg = CMSG_NXTHDR(msg, scmsg)) {
-             	
+
 		data = (sctp_cmsg_data_t *)CMSG_DATA(scmsg);
 		if (debug_level) print_cmsg(scmsg->cmsg_type, data);
 	}
@@ -496,14 +498,29 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	int j;
 	int orig_count = *ret_count;
 	int count = orig_count;
+	char *ipaddr = strdup(parm);
+	char *ifname;
+	int ifindex = 0;
+
+	/* check the interface. */
+	ifname = strchr(ipaddr,'%');
+	if (ifname) {
+		*ifname=0;
+		ifname++;
+		ifindex = if_nametoindex(ifname);
+		if (!ifindex) {
+			fprintf(stderr, "bad interface name: %s\n", ifname);
+			goto finally;
+		}
+	}
 
 	/* Get the entries for this host.  */
-	hst4 = gethostbyname(parm);
-	hst6 = gethostbyname2(parm, AF_INET6);
+	hst4 = gethostbyname(ipaddr);
+	hst6 = gethostbyname2(ipaddr, AF_INET6);
 
 	if ((NULL == hst4 || hst4->h_length < 1)
 	    && (NULL == hst6 || hst6->h_length < 1)) {
-		fprintf(stderr, "bad hostname: %s\n", parm);
+		fprintf(stderr, "bad hostname: %s\n", ipaddr);
 		goto finally;
 	}
 
@@ -570,6 +587,9 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 			b6ap->sin6_scope_id = if_index;
 			bcopy(hst6->h_addr_list[j], &b6ap->sin6_addr,
 			      hst6->h_length);
+			if (!ifindex) {
+				b6ap->sin6_scope_id = ifindex;
+			}
 
 			aptr += sizeof(struct sockaddr_in6);
 		} /* for (loop through the new v6 addresses) */
