@@ -170,6 +170,7 @@ struct sockaddr *bindx_add_addrs = NULL;
 int bindx_add_count = 0;
 struct sockaddr *connectx_addrs = NULL;
 int connectx_count = 0;
+int send_interval = 0;
 int if_index = 0;
 
 unsigned char msg[] = "012345678901234567890123456789012345678901234567890";
@@ -1140,6 +1141,9 @@ client(int sk)
 			close(sk);
 			break;
 		}
+    if(send_interval){
+      usleep(send_interval);
+    }
 		/* The sender is echoing so do discard the echoed data. */
 		if (drain) {
 			receive_r(sk, 1);
@@ -1385,6 +1389,12 @@ void start_test(int role)
 {
 	int sk;
 	int i = 0;
+  char *pSendInterval;
+  pSendInterval = getenv("SCTP_TEST_SEND_INTERVAL");
+  if(pSendInterval){
+    send_interval = atoi(pSendInterval);
+    DEBUG_PRINT(DEBUG_NONE, "send interval = %d\n", send_interval);
+  }
 	
 	DEBUG_PRINT(DEBUG_NONE, "\nStarting tests...\n");
 
