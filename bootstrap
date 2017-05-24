@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # -*- sh -*-
 set -ex					# exit on error
-libtoolize --force --copy
+case `uname` in 
+    Darwin*) glibtoolize --force --copy ;;
+    *) libtoolize --force --copy ;; 
+esac
 aclocal
 autoheader
 automake --foreign --add-missing --copy
