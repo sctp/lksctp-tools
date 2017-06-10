@@ -37,12 +37,12 @@
 static int __connectx_addrsize(const struct sockaddr *addrs,
 				const int addrcnt)
 {
-	const void *addrbuf;
+	const char *addrbuf;
 	const struct sockaddr *sa_addr;
 	int addrs_size = 0;
 	int i;
 
-	addrbuf = addrs;
+	addrbuf = (char *)addrs;
 	for (i = 0; i < addrcnt; i++) {
 		sa_addr = (const struct sockaddr *)addrbuf;
 		switch (sa_addr->sa_family) {

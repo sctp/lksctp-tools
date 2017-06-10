@@ -39,7 +39,7 @@ int
 sctp_bindx(int fd, struct sockaddr *addrs, int addrcnt, int flags)
 {
 	int setsock_option = 0;
-	void *addrbuf;
+	const char *addrbuf;
 	struct sockaddr *sa_addr;
 	socklen_t addrs_size = 0;
 	int i;
@@ -56,7 +56,7 @@ sctp_bindx(int fd, struct sockaddr *addrs, int addrcnt, int flags)
 		return -1;
 	}
 
-	addrbuf = addrs;
+	addrbuf = (char*)addrs;
 	for (i = 0; i < addrcnt; i++) {
 		sa_addr = (struct sockaddr *)addrbuf;
 		switch (sa_addr->sa_family) {
