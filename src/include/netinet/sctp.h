@@ -111,6 +111,7 @@ typedef __s32 sctp_assoc_t;
 
 /* SCTP socket option used to read per endpoint association statistics. */
 #define SCTP_GET_ASSOC_STATS    112      /* Read only */
+#define SCTP_SOCKOPT_PEELOFF_FLAGS 122
 
 /*
  * 5.2.1 SCTP Initiation Structure (SCTP_INIT)
@@ -802,6 +803,10 @@ typedef struct {
 	int sd;
 } sctp_peeloff_arg_t;
 
+typedef struct {
+	sctp_peeloff_arg_t p_arg;
+	unsigned flags;
+} sctp_peeloff_flags_arg_t;
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
@@ -809,6 +814,7 @@ int sctp_connectx(int sd, struct sockaddr *addrs, int addrcnt,
 		  sctp_assoc_t *id);
 
 int sctp_peeloff(int sd, sctp_assoc_t assoc_id);
+int sctp_peeloff_flags(int sd, sctp_assoc_t assoc_id, unsigned flags);
 
 /* Prototype for the library function sctp_opt_info defined in
  * API 7. Socket Options.
