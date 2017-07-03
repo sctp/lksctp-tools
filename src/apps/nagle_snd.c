@@ -80,7 +80,7 @@ int
 main(int argc, char *argv[])
 {
         int sk, i;
-        struct hostent *hst, *tgt;
+        struct addrinfo *hst_res, *tgt_res;
         sockaddr_storage_t host, target;
 	sockaddr_storage_t msgname;
         struct iovec iov;
@@ -105,6 +105,7 @@ main(int argc, char *argv[])
 	int nodelay = 0;
         int option_index = 0;
 	char *big_buffer;
+        char port_buffer[10];
         int c;
         static struct option long_options[] = {
                 {"local",        1, 0, 1},
@@ -196,48 +197,44 @@ main(int argc, char *argv[])
         }
 
 	/* Set some basic values which depend on the address family. */
-#if TEST_V6
-        hst = gethostbyname2(local_host, AF_INET6);
-        if (hst == NULL || hst->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], local_host);
-                exit(1);
-        }
-        host.v6.sin6_family = AF_INET6;
-        memcpy(&host.v6.sin_addr, hst->h_addr_list[0], hst->h_length);
-        host.v6.sin6_port = htons(local_port);
+        if (!strcmp(local_host, "0"))
+                local_host = "0.0.0.0";
 
-        tgt = gethostbyname2(remote_host, AF_INET6);
-        if (tgt == NULL || tgt->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], remote_host);
-                exit(1);
-        }
-        target.v6.sin6_family = AF_INET6;
-        memcpy(&target.v6.sin_addr, tgt->h_addr_list[0], tgt->h_length);
-        target.v6.sin6_port = htons(remote_port);
-
-        pf_class = PF_INET6;
-#else
-        hst = gethostbyname(local_host);
-        if (hst == NULL || hst->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], local_host);
+        snprintf(port_buffer, 10, "%d", local_port);
+        error = getaddrinfo(local_host, port_buffer, NULL, &hst_res);
+        if (error) {
+                fprintf(stderr, "%s: getaddrinfo failed: %s\n", argv[0], local_host);
                 exit(1);
         }
 
-        host.v4.sin_family = AF_INET;
-        memcpy(&host.v4.sin_addr, hst->h_addr_list[0], hst->h_length);
-        host.v4.sin_port = htons(local_port);
-
-        tgt = gethostbyname(remote_host);
-        if (tgt == NULL || tgt->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], remote_host);
+        snprintf(port_buffer, 10, "%d", remote_port);
+        error = getaddrinfo(remote_host, port_buffer, NULL, &tgt_res);
+        if (error) {
+                fprintf(stderr, "%s: getaddrinfo failed: %s\n", argv[0], remote_host);
                 exit(1);
         }
-        target.v4.sin_family = AF_INET;
-        memcpy(&target.v4.sin_addr, tgt->h_addr_list[0], tgt->h_length);
-        target.v4.sin_port = htons(remote_port);
 
-        pf_class = PF_INET;
-#endif /* TEST_V6 */
+        if ( hst_res->ai_family != tgt_res->ai_family) {
+                fprintf(stderr, "local and reomte hosts should be the " 
+                        "same address family\n");
+                exit(1);
+        }
+
+        pf_class = hst_res->ai_family;
+        switch (pf_class) {
+        case AF_INET:
+        case AF_INET6:
+                memcpy(&host.sa, hst_res->ai_addr, hst_res->ai_addrlen);
+                memcpy(&target.sa, tgt_res->ai_addr, tgt_res->ai_addrlen);
+                break;
+        default:
+                fprintf(stderr, "Invalid address type.\n");
+                exit(1);
+                break;
+        }
+
+        freeaddrinfo(hst_res);
+        freeaddrinfo(tgt_res);
 
         sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
 
