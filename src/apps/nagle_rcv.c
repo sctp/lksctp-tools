@@ -74,7 +74,7 @@ int
 main(int argc, char *argv[])
 {
         int sk, i;
-        struct hostent *hst;
+        struct addrinfo *hst_res;
         sockaddr_storage_t host;
 	sockaddr_storage_t msgname;
         struct iovec iov;
@@ -84,6 +84,7 @@ main(int argc, char *argv[])
 	char *big_buffer;
 	char *local_host = NULL;
 	int local_port = SCTP_TESTPORT_1; 
+	char port_buffer[10];
         int option_index = 0;
 	time_t from, to;
 	int bytes_received = 0;	
@@ -152,31 +153,29 @@ main(int argc, char *argv[])
 	}
 	
 	/* Set some basic values which depend on the address family. */
-#if TEST_V6
-        hst = gethostbyname2(local_host, AF_INET6);
-        if (hst == NULL || hst->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], local_host);
+        if (!strcmp(local_host, "0"))
+                local_host = "0.0.0.0";
+
+        snprintf(port_buffer, 10, "%d", local_port);
+        error = getaddrinfo(local_host, port_buffer, NULL, &hst_res);
+        if (error) {
+                fprintf(stderr, "%s: getaddrinfo failed: %s\n", argv[0], local_host);
                 exit(1);
         }
-	pf_class = PF_INET6;
 
-        host.v6.sin6_family = AF_INET6;
-        memcpy(&host.v6.sin_addr, hst->h_addr_list[0], hst->h_length);
-        host.v6.sin6_port = htons(local_port);
-
-#else
-	hst = gethostbyname(local_host);
-        if (hst == NULL || hst->h_length < 1) {
-                fprintf(stderr, "%s: bad hostname: %s\n", argv[0], local_host);
+        pf_class = hst_res->ai_family;
+        switch (pf_class) {
+        case AF_INET:
+        case AF_INET6:
+                memcpy(&host.sa, hst_res->ai_addr, hst_res->ai_addrlen);
+                break;
+        default:
+                fprintf(stderr, "Invalid address type.\n");
                 exit(1);
+                break;
         }
-	pf_class = PF_INET;
 
-        host.v4.sin_family = AF_INET;
-        memcpy(&host.v4.sin_addr, hst->h_addr_list[0], hst->h_length);
-        host.v4.sin_port = htons(local_port);
-
-#endif /* TEST_V6 */
+        freeaddrinfo(hst_res);
 
         /* Create the endpoint which will talk to nagle_snd.  */
         sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
