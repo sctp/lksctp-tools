@@ -66,151 +66,151 @@ void
 usage(char *progname)
 {
 	fprintf(stderr, "Usage: %s -H hostname [-P port]\n", progname);
-        fprintf(stderr, " -H, --local\t\t local hostname,\n");
+	fprintf(stderr, " -H, --local\t\t local hostname,\n");
 	fprintf(stderr, " -P, --local-port\t local port,\n");
 }
 
 int
 main(int argc, char *argv[])
 {
-        int sk, i;
-        struct addrinfo *hst_res;
-        sockaddr_storage_t host;
+	int sk, i;
+	struct addrinfo *hst_res;
+	sockaddr_storage_t host;
 	sockaddr_storage_t msgname;
-        struct iovec iov;
-        struct msghdr inmessage;
+	struct iovec iov;
+	struct msghdr inmessage;
 	char incmsg[CMSG_SPACE(sizeof(sctp_cmsg_data_t))];
 	int error, pf_class;
 	char *big_buffer;
 	char *local_host = NULL;
 	int local_port = SCTP_TESTPORT_1; 
 	char port_buffer[10];
-        int option_index = 0;
+	int option_index = 0;
 	time_t from, to;
-	int bytes_received = 0;	
-        int c;
-        static struct option long_options[] = {
-                {"local",	1, 0, 1},
+	int bytes_received = 0; 
+	int c;
+	static struct option long_options[] = {
+		{"local",	1, 0, 1},
 		{"local-port",	1, 0, 2},
-                {0,		0, 0, 0}
-        };
+		{0,		0, 0, 0}
+	};
 
-        /* Rather than fflush() throughout the code, set stdout to 
+	/* Rather than fflush() throughout the code, set stdout to 
 	 * be unbuffered. 
 	 */
 	setvbuf(stdout, NULL, _IONBF, 0); 
 
-        /* Parse the arguments.  */
+	/* Parse the arguments.  */
 	while (1) {
 		c = getopt_long (argc, argv, "H:P:",
-                                 long_options, &option_index);
+				 long_options, &option_index);
 		if (c == -1)
-                        break;
+			break;
 
-                switch (c) {
-                case 0:
-                        printf("option %s", long_options[option_index].name);
-                        if (optarg) {
-                                printf(" with arg %s", optarg);
-                        }
-                        printf("\n");
-                        break;
-                case 1:         /* local host */
-                case 'H':
-                        local_host = optarg;
-                        break;
-                case 2:         /* local port */
-                case 'P':
-                        local_port = atoi(optarg);
-                        break;
-                case '?':
+		switch (c) {
+		case 0:
+			printf("option %s", long_options[option_index].name);
+			if (optarg) {
+				printf(" with arg %s", optarg);
+			}
+			printf("\n");
+			break;
+		case 1:		/* local host */
+		case 'H':
+			local_host = optarg;
+			break;
+		case 2:		/* local port */
+		case 'P':
+			local_port = atoi(optarg);
+			break;
+		case '?':
 			usage(argv[0]);
-                        exit(0);
+			exit(0);
 
-                default:
-                        printf ("%s: unrecognized option 0%c\n", argv[0], c);
+		default:
+			printf ("%s: unrecognized option 0%c\n", argv[0], c);
 			usage(argv[0]);
-                        exit(1);
-                }
-        }
+			exit(1);
+		}
+	}
 
-        if (optind < argc)
-        {
-                fprintf(stderr, "%s: non-option arguments are illegal: ",
-                        argv[0]);
-                while (optind < argc)
-                        fprintf(stderr, "%s ", argv[optind++]);
-                fprintf (stderr, "\n");
+	if (optind < argc)
+	{
+		fprintf(stderr, "%s: non-option arguments are illegal: ",
+			argv[0]);
+		while (optind < argc)
+			fprintf(stderr, "%s ", argv[optind++]);
+		fprintf (stderr, "\n");
 		usage(argv[0]);
-                exit(1);
-        }
+		exit(1);
+	}
 
 	if (!local_host) {
-                fprintf(stderr, "%s: : option -H, --local is required\n",
-                        argv[0]);
+		fprintf(stderr, "%s: : option -H, --local is required\n",
+			argv[0]);
 		usage(argv[0]);
-                exit(1);
+		exit(1);
 	}
-	
+
 	/* Set some basic values which depend on the address family. */
-        if (!strcmp(local_host, "0"))
-                local_host = "0.0.0.0";
+	if (!strcmp(local_host, "0"))
+		local_host = "0.0.0.0";
 
-        snprintf(port_buffer, 10, "%d", local_port);
-        error = getaddrinfo(local_host, port_buffer, NULL, &hst_res);
-        if (error) {
-                fprintf(stderr, "%s: getaddrinfo failed: %s\n", argv[0], local_host);
-                exit(1);
-        }
+	snprintf(port_buffer, 10, "%d", local_port);
+	error = getaddrinfo(local_host, port_buffer, NULL, &hst_res);
+	if (error) {
+		fprintf(stderr, "%s: getaddrinfo failed: %s\n", argv[0], local_host);
+		exit(1);
+	}
 
-        pf_class = hst_res->ai_family;
-        switch (pf_class) {
-        case AF_INET:
-        case AF_INET6:
-                memcpy(&host.sa, hst_res->ai_addr, hst_res->ai_addrlen);
-                break;
-        default:
-                fprintf(stderr, "Invalid address type.\n");
-                exit(1);
-                break;
-        }
+	pf_class = hst_res->ai_family;
+	switch (pf_class) {
+	case AF_INET:
+	case AF_INET6:
+		memcpy(&host.sa, hst_res->ai_addr, hst_res->ai_addrlen);
+		break;
+	default:
+		fprintf(stderr, "Invalid address type.\n");
+		exit(1);
+		break;
+	}
 
-        freeaddrinfo(hst_res);
+	freeaddrinfo(hst_res);
 
-        /* Create the endpoint which will talk to nagle_snd.  */
-        sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
+	/* Create the endpoint which will talk to nagle_snd.  */
+	sk = test_socket(pf_class, SOCK_SEQPACKET, IPPROTO_SCTP);
 
 	/* Enable ASSOC_CHANGE and SNDRCVINFO notifications. */
 	test_enable_assoc_change(sk);
 
-        /* Bind the sockets to the test port.  */
-        test_bind(sk, &host.sa, sizeof(host));
-        
-       /* Mark sk as being able to accept new associations.  */
+	/* Bind the sockets to the test port.  */
+	test_bind(sk, &host.sa, sizeof(host));
+
+	/* Mark sk as being able to accept new associations.  */
 	test_listen(sk, 1);
-       
+
 	printf("Listening on port:%d\n", local_port);
- 
-        /* Initialize inmessage for receives. */
-        memset(&inmessage, 0, sizeof(inmessage));	
+
+	/* Initialize inmessage for receives. */
+	memset(&inmessage, 0, sizeof(inmessage));
 	big_buffer = test_malloc(REALLY_BIG);
-        iov.iov_base = big_buffer;
-        iov.iov_len = REALLY_BIG;
-        inmessage.msg_iov = &iov;
-        inmessage.msg_iovlen = 1;
-        inmessage.msg_control = incmsg;
-        inmessage.msg_controllen = sizeof(incmsg);
+	iov.iov_base = big_buffer;
+	iov.iov_len = REALLY_BIG;
+	inmessage.msg_iov = &iov;
+	inmessage.msg_iovlen = 1;
+	inmessage.msg_control = incmsg;
+	inmessage.msg_controllen = sizeof(incmsg);
 	inmessage.msg_name = &msgname;
 	inmessage.msg_namelen = sizeof(msgname);
 	memset(&msgname, 0, sizeof(msgname));
 
-        /* Get the communication up message on sk.  */
-        error = test_recvmsg(sk, &inmessage, MSG_WAITALL);
+	/* Get the communication up message on sk.  */
+	error = test_recvmsg(sk, &inmessage, MSG_WAITALL);
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_COMM_UP);	
 
-	printf("Established connection with ");	
+	printf("Established connection with "); 
 	if (AF_INET == msgname.sa.sa_family)
 		printf("%d.%d.%d.%d(%d)\n", NIPQUAD(msgname.v4.sin_addr),
 		       ntohs(msgname.v4.sin_port));
@@ -220,9 +220,9 @@ main(int argc, char *argv[])
 
 	time(&from);
 	for (i=0; i<1000000; i++) {
-	        inmessage.msg_controllen = sizeof(incmsg);
+		inmessage.msg_controllen = sizeof(incmsg);
 		inmessage.msg_namelen = sizeof(msgname);
-	        error = test_recvmsg(sk, &inmessage, MSG_WAITALL);
+		error = test_recvmsg(sk, &inmessage, MSG_WAITALL);
 		if (inmessage.msg_flags & MSG_NOTIFICATION)
 			break;
 		printf("Received %d bytes of data\n", error);
@@ -230,14 +230,14 @@ main(int argc, char *argv[])
 	}
 	time(&to);
 
-        printf("\t%d messages(%d bytes) successfully received in %ld "
+	printf("\t%d messages(%d bytes) successfully received in %ld "
 	       "seconds.\n", i, bytes_received, to - from);
-        printf("The receive rate is %ld bytes/second\n",
+	printf("The receive rate is %ld bytes/second\n",
 	       bytes_received/(to - from));
 
-        /* Shut down the link.  */
+	/* Shut down the link.	*/
 	error = 0;
-        close(sk);
+	close(sk);
 
 	return 0;
 }
