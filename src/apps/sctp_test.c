@@ -941,11 +941,11 @@ int next_stream(int state, int pattern)
 {
 	switch (pattern){
 	case STREAM_PATTERN_RANDOM:
-		state = rand() % (max_stream + 1);
+		state = rand() % (max_stream);
 		break;
 	case STREAM_PATTERN_SEQUENTIAL:
 		state = state + 1;
-		if (state > max_stream)
+		if (state >= max_stream)
 			state = 0;
 		break;
 	}
