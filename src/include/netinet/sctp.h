@@ -111,7 +111,32 @@ typedef __s32 sctp_assoc_t;
 
 /* SCTP socket option used to read per endpoint association statistics. */
 #define SCTP_GET_ASSOC_STATS    112      /* Read only */
+#define SCTP_PR_SUPPORTED	113
+#define SCTP_DEFAULT_PRINFO	114
+#define SCTP_PR_ASSOC_STATUS	115
 #define SCTP_SOCKOPT_PEELOFF_FLAGS 122
+
+/* PR-SCTP policies */
+#define SCTP_PR_SCTP_NONE	0x0000
+#define SCTP_PR_SCTP_TTL	0x0010
+#define SCTP_PR_SCTP_RTX	0x0020
+#define SCTP_PR_SCTP_PRIO	0x0030
+#define SCTP_PR_SCTP_MAX	SCTP_PR_SCTP_PRIO
+#define SCTP_PR_SCTP_MASK	0x0030
+
+#define __SCTP_PR_INDEX(x)	((x >> 4) - 1)
+#define SCTP_PR_INDEX(x)	__SCTP_PR_INDEX(SCTP_PR_SCTP_ ## x)
+
+#define SCTP_PR_POLICY(x)	((x) & SCTP_PR_SCTP_MASK)
+#define SCTP_PR_SET_POLICY(flags, x)	\
+	do {				\
+		flags &= ~SCTP_PR_SCTP_MASK;	\
+		flags |= x;		\
+	} while (0)
+
+#define SCTP_PR_TTL_ENABLED(x)	(SCTP_PR_POLICY(x) == SCTP_PR_SCTP_TTL)
+#define SCTP_PR_RTX_ENABLED(x)	(SCTP_PR_POLICY(x) == SCTP_PR_SCTP_RTX)
+#define SCTP_PR_PRIO_ENABLED(x)	(SCTP_PR_POLICY(x) == SCTP_PR_SCTP_PRIO)
 
 /*
  * 5.2.1 SCTP Initiation Structure (SCTP_INIT)
@@ -807,6 +832,23 @@ typedef struct {
 	sctp_peeloff_arg_t p_arg;
 	unsigned flags;
 } sctp_peeloff_flags_arg_t;
+
+/*
+ * Socket Option for Getting the Association/Stream-Specific PR-SCTP Status
+ */
+struct sctp_prstatus {
+	sctp_assoc_t sprstat_assoc_id;
+	__u16 sprstat_sid;
+	__u16 sprstat_policy;
+	__u64 sprstat_abandoned_unsent;
+	__u64 sprstat_abandoned_sent;
+};
+
+struct sctp_default_prinfo {
+	sctp_assoc_t pr_assoc_id;
+	__u32 pr_value;
+	__u16 pr_policy;
+};
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
