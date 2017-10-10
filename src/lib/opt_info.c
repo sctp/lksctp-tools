@@ -53,10 +53,14 @@ sctp_opt_info(int sd, sctp_assoc_t id, int opt, void *arg, socklen_t *size)
 	case SCTP_AUTH_ACTIVE_KEY:
 	case SCTP_PEER_AUTH_CHUNKS:
 	case SCTP_LOCAL_AUTH_CHUNKS:
+	case SCTP_PR_SUPPORTED:
+	case SCTP_DEFAULT_PRINFO:
+	case SCTP_PR_ASSOC_STATUS:
 		*(sctp_assoc_t *)arg = id;
 		return getsockopt(sd, IPPROTO_SCTP, opt, arg, size);
 	default:
-		return ENOTSUP;
+		errno = ENOTSUP;
+		return -1;
 	}
 
 } /* sctp_opt_info() */
