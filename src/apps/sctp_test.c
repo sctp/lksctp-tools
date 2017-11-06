@@ -256,7 +256,7 @@ void usage(char *argv0)
 	fprintf(stderr, "\t   be specified by using this argument multiple times.\n");
 	fprintf(stderr, "\t   For example, '-B 10.0.0.1 -B 20.0.0.2'.\n");
 	fprintf(stderr, "\t   In case of IPv6 linklocal address, interface name can be set in following way \n");
-	fprintf(stderr, "\t   For example, '-B fe80::f8c3:b77f:698e:4506\%eth2'.\n");
+	fprintf(stderr, "\t   For example, '-B fe80::f8c3:b77f:698e:4506%%eth2'.\n");
 	fprintf(stderr, "\t-C use the specified address(es) for connection to the\n");
 	fprintf(stderr, "\t   peer socket. Multiple addresses can be specified by\n");
 	fprintf(stderr, "\t   using this argument multiple times.\n");
