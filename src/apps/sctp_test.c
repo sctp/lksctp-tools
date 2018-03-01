@@ -1166,7 +1166,7 @@ mixed_mode_test(void)
 	iov.iov_base = NULL;
 	max_fd = -1;
 	sks = (0 == listeners) ? 1 : listeners;
-	memset(poll_sks, 0, sizeof(sks * sizeof(_poll_sks)));
+	memset(poll_sks, 0, sks * sizeof(_poll_sks));
 
 	for (i = 0; i < sks; i++) {
 		poll_sks[i].sk = socket_r();
