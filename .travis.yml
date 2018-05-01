@@ -1,0 +1,8 @@
+language: c
+script:
+  - ./bootstrap && ./configure && make
+  # ipv6 is not supported by Travis
+  - make -C src/func_tests/ v4test
+compiler:
+  - gcc
+  - clang
