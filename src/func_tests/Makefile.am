@@ -30,6 +30,7 @@ PASSING_KERN_TESTS = \
 	test_recvmsg \
 	test_timetolive \
 	test_sctp_sendrecvmsg \
+	test_sctp_sendvrecvv \
 	test_getname \
 	test_tcp_style\
 	test_1_to_1_socket_bind_listen \
@@ -58,6 +59,7 @@ PASSING_V6_KERN_TESTS = \
 	test_peeloff_v6 \
 	test_timetolive_v6 \
 	test_sctp_sendrecvmsg_v6 \
+	test_sctp_sendvrecvv_v6 \
 	test_getname_v6 \
 	test_tcp_style_v6
 
@@ -117,6 +119,7 @@ test_connectx_SOURCES = test_connectx.c
 test_recvmsg_SOURCES = test_recvmsg.c 
 test_timetolive_SOURCES = test_timetolive.c
 test_sctp_sendrecvmsg_SOURCES = test_sctp_sendrecvmsg.c
+test_sctp_sendvrecvv_SOURCES = test_sctp_sendvrecvv.c
 test_getname_SOURCES = test_getname.c 
 test_tcp_style_SOURCES = test_tcp_style.c 
 
@@ -160,7 +163,9 @@ test_timetolive_v6_SOURCES = test_timetolive.c
 test_timetolive_v6_CFLAGS = ${V6FLAGS}
 
 test_sctp_sendrecvmsg_v6_SOURCES = test_sctp_sendrecvmsg.c
+test_sctp_sendvrecvv_v6_SOURCES = test_sctp_sendvrecvv.c
 test_sctp_sendrecvmsg_v6_CFLAGS = ${V6FLAGS}
+test_sctp_sendvrecvv_v6_CFLAGS = ${V6FLAGS}
 
 test_getname_v6_SOURCES = test_getname.c
 test_getname_v6_CFLAGS = ${V6FLAGS}
