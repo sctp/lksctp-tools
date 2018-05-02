@@ -99,3 +99,91 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 
 	return (error);
 }
+
+int sctp_recvv(int s, const struct iovec *iov, int iovlen,
+	       struct sockaddr *from, socklen_t *fromlen, void *info,
+	       socklen_t *infolen, unsigned int *infotype, int *flags)
+{
+	char incmsg[CMSG_SPACE(sizeof(struct sctp_rcvinfo) +
+			       sizeof(struct sctp_nxtinfo))];
+	int error, len, _infolen;
+	struct cmsghdr *cmsg;
+	struct msghdr inmsg;
+
+	memset(&inmsg, 0, sizeof(inmsg));
+
+	/* set from and iov */
+	inmsg.msg_name = from;
+	inmsg.msg_namelen = fromlen ? *fromlen : 0;
+	inmsg.msg_iov = (struct iovec *)iov;
+	inmsg.msg_iovlen = iovlen;
+	inmsg.msg_control = incmsg;
+	inmsg.msg_controllen = sizeof(incmsg);
+
+	error = recvmsg(s, &inmsg, flags ? *flags : 0);
+	if (error < 0)
+		return error;
+
+	/* set fromlen, frags */
+	if (fromlen)
+		*fromlen = inmsg.msg_namelen;
+
+	if (flags)
+		*flags = inmsg.msg_flags;
+
+	if (!info || !infotype || !infolen)
+		return error;
+
+	*infotype = SCTP_RECVV_NOINFO;
+	_infolen = *infolen;
+
+	/* set info and infotype */
+	for (cmsg = CMSG_FIRSTHDR(&inmsg); cmsg != NULL;
+				cmsg = CMSG_NXTHDR(&inmsg, cmsg)) {
+		if (cmsg->cmsg_level != IPPROTO_SCTP)
+			continue;
+
+		if (cmsg->cmsg_type == SCTP_RCVINFO) {
+			len = sizeof(struct sctp_rcvinfo);
+			if (*infotype == SCTP_RECVV_NOINFO) {
+				if (_infolen < len)
+					break;
+				memcpy(info, CMSG_DATA(cmsg), len);
+				*infotype = SCTP_RECVV_RCVINFO;
+				*infolen = len;
+			} else if (*infotype == SCTP_RECVV_NXTINFO) {
+				if (_infolen < len +
+					       sizeof(struct sctp_nxtinfo))
+					break;
+				memcpy(info + len, info,
+				       sizeof(struct sctp_nxtinfo));
+				memcpy(info, CMSG_DATA(cmsg), len);
+				*infotype = SCTP_RECVV_RN;
+				*infolen = len + sizeof(struct sctp_nxtinfo);
+			} else {
+				break;
+			}
+		} else if (cmsg->cmsg_type == SCTP_NXTINFO) {
+			len = sizeof(struct sctp_nxtinfo);
+			if (*infotype == SCTP_RECVV_NOINFO) {
+				if (_infolen < len)
+					break;
+				memcpy(info, CMSG_DATA(cmsg), len);
+				*infotype = SCTP_RECVV_NXTINFO;
+				*infolen = len;
+			} else if (*infotype == SCTP_RECVV_RCVINFO) {
+				if (_infolen < len +
+					       sizeof(struct sctp_rcvinfo))
+					break;
+				memcpy(info + sizeof(struct sctp_rcvinfo),
+				       CMSG_DATA(cmsg), len);
+				*infotype = SCTP_RECVV_RN;
+				*infolen = len + sizeof(struct sctp_rcvinfo);
+			} else {
+				break;
+			}
+		}
+	}
+
+	return error;
+}

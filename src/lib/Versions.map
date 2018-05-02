@@ -10,7 +10,9 @@ VERS_1 {
 		sctp_opt_info;
 		sctp_peeloff;
 		sctp_recvmsg;
+		sctp_recvv;
 		sctp_sendmsg;
+		sctp_sendv;
 		sctp_send;
 
 	local:
