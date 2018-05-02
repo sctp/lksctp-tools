@@ -1,0 +1,97 @@
+.\" (C) Copyright Xin Long REDHAT Corp. 2018.
+.\"
+.\" Permission is granted to distribute possibly modified copies
+.\" of this manual provided the header is included verbatim,
+.\" and in case of nontrivial modification author and date
+.\" of the modification is added to the header.
+.\"
+.TH SCTP_SENDV 3 2018-04-29 "Linux 4.16 "Linux Programmer's Manual"
+.SH NAME
+sctp_sendv \- Send messages from a SCTP socket with an extensible way.
+.SH SYNOPSIS
+.nf
+.B #include <sys/types.h>
+.B #include <sys/socket.h>
+.B #include <netinet/sctp.h>
+.sp
+.BI "int sctp_sendv(int " sd ", const struct iovec * " iov ", int " iovcnt ,
+.BI "               struct sockaddr *" addrs ", int " addrcnt ", void * " info ,
+.BI "               socklen_t " infolen ", unsigned int " infotype ", int " flags );
+.fi
+.SH DESCRIPTION
+.BR sctp_sendv
+provides an extensible way for an application to communicate different send
+attributes to the SCTP stack when sending a message. There are three types
+of attributes that can be used to describe a message to be sent. They are
+struct sctp_sndinfo, struct sctp_prinfo, and struct sctp_authinfo. The
+following structure, sctp_sendv_spa, is defined to be used when more than
+one of the above attributes are needed to describe a message to be sent.
+
+   struct sctp_sendv_spa {
+     uint32_t sendv_flags;
+     struct sctp_sndinfo sendv_sndinfo;
+     struct sctp_prinfo sendv_prinfo;
+     struct sctp_authinfo sendv_authinfo;
+   };
+
+The sendv_flags field holds a bitwise OR of SCTP_SEND_SNDINFO_VALID,
+SCTP_SEND_PRINFO_VALID, and SCTP_SEND_AUTHINFO_VALID indicating if
+the sendv_sndinfo/sendv_prinfo/sendv_authinfo fields contain valid
+information.
+
+.I sd
+is the socket descriptor.
+.I iov
+is the gather buffer,  the data in the buffer is treated as a single
+user message.
+.I iovcnt
+is the number of elements in iov.
+.I addrs
+is an array of addresses to be used to set up an association or
+a single address to be used to send the message, and  NULL is passed
+in if the caller neither wants to set up an association nor wants
+to send the message to a specific address.
+.I addrcnt
+is the number of addresses in the addrs array.
+.I info
+is a pointer to the buffer containing the attribute associated with the
+message to be sent,  and the type is indicated by the info_type parameter.
+.I infolen
+is the length of info, in bytes.
+.I infotype
+identifies the type of the information provided in info ,and the current
+defined values are as follows:
+.TP
+.B SCTP_SENDV_NOINFO
+No information is provided.  The parameter info is a NULL pointer, and
+infolen is 0.
+.TP
+.B SCTP_SENDV_SNDINFO
+The parameter info is pointing to a struct sctp_sndinfo.
+.TP
+.B SCTP_SENDV_PRINFO
+The parameter info is pointing to a struct sctp_prinfo.
+.TP
+.B SCTP_SENDV_AUTHINFO
+The parameter info is pointing to a struct sctp_authinfo.
+.TP
+.B SCTP_SENDV_SPA
+The parameter info is pointing to a struct sctp_sendv_spa.
+.PP
+.I flags
+The same flags as used by the sendmsg() call flags (e.g., MSG_DONTROUTE).
+.SH "RETURN VALUE"
+On success,
+.BR sctp_sendv
+returns the number of bytes sent or -1 if an error occurred.
+.SH "SEE ALSO"
+.BR sctp (7)
+.BR sctp_bindx (3),
+.BR sctp_connectx (3),
+.BR sctp_send (3),
+.BR sctp_recvmsg (3),
+.BR sctp_recvv (3),
+.BR sctp_peeloff (3),
+.BR sctp_getpaddrs (3),
+.BR sctp_getladdrs (3),
+.BR sctp_opt_info (3),
