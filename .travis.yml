@@ -1,6 +1,8 @@
 language: c
 script:
-  - ./bootstrap && ./configure && make
+  - ./bootstrap
+    && ./configure
+    && make -j `/usr/bin/getconf _NPROCESSORS_ONLN`
   # ipv6 is not supported by Travis
   - make -C src/func_tests/ v4test
 compiler:
