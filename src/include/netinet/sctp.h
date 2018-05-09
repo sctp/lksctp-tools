@@ -122,6 +122,49 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 /* Return the address length for an address family. */
 int sctp_getaddrlen(sa_family_t family);
 
+
+/* sendv infotype */
+enum {
+	SCTP_SENDV_NOINFO,
+	SCTP_SENDV_SNDINFO,
+	SCTP_SENDV_PRINFO,
+	SCTP_SENDV_AUTHINFO,
+	SCTP_SENDV_SPA
+};
+
+/* sendv_flags */
+#define SCTP_SEND_SNDINFO_VALID		0x1
+#define SCTP_SEND_PRINFO_VALID		0x2
+#define SCTP_SEND_AUTHINFO_VALID	0x4
+
+struct sctp_sendv_spa {
+	uint32_t sendv_flags;
+	struct sctp_sndinfo sendv_sndinfo;
+	struct sctp_prinfo sendv_prinfo;
+	struct sctp_authinfo sendv_authinfo;
+};
+
+int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
+	       struct sockaddr *addrs, int addrcnt, void *info,
+	       socklen_t infolen, unsigned int infotype, int flags);
+
+/* recvv infotype */
+enum {
+	SCTP_RECVV_NOINFO,
+	SCTP_RECVV_RCVINFO,
+	SCTP_RECVV_NXTINFO,
+	SCTP_RECVV_RN
+};
+
+struct sctp_recvv_rn {
+	struct sctp_rcvinfo recvv_rcvinfo;
+	struct sctp_nxtinfo recvv_nxtinfo;
+};
+
+int sctp_recvv(int s, const struct iovec *iov, int iovlen,
+	       struct sockaddr *from, socklen_t *fromlen, void *info,
+	       socklen_t *infolen, unsigned int *infotype, int *flags);
+
 #ifdef __cplusplus
 }
 #endif
