@@ -8,3 +8,6 @@ script:
 compiler:
   - gcc
   - clang
+notifications:
+  email:
+    - linux-sctp@vger.kernel.org
