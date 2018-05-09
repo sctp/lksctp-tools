@@ -7,96 +7,17 @@ script:
   - ./.travis/linux-build.sh
 env:
   global:
-    - KERNEL=4.17
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "JuWc37fLUp36CB7kvmRvAE49cAuX3nxh8FmpcAHUFeefg2Z6ce+vBt5IdFW6dQgdoks35RbzkitUJwdcFiMggrN7jqs/ubIZkKeFzy4PP5oefU9L/w7z9bqSk+nolmA+sy/i6P6Yz7FHrGyXUhtZXnbsX/mQKclzsio7n22L+NDHVs4yUaLGmYPr1OvXcoHUPncuD7PHZcZzI3kKt6lUt2JAkacNUuUEIxQDxkL4gnoX5+OVG75twi0WD7r0vCGEGSMhHZ9y/7qi5Gx6xd5JVBkGVrXbZZtiZrtM1h0OD3Wn9B7ti5VOnWCQuuuxe49t5qKBjO6cC8Bz/2ktSIgf/WWdf4If2dRPyuJT36RqwmBbCJSqh4+qDRq0cP7Gb9zHwuz5kA3vpeBlx1l1oSF3CI7ZK7WtjetrvlrJ/SiLcuMRnnFgaUCNTyT5d4k1Dvxhlt/YJKxLVMualTUwcVZJEWDs07Sju3ljGkifEC3zQOoaOhVHKw/WDotIRW/HNGrzSblHV25hWKdvqIwcVTKGVbq7G/vJzxtpfjYj/t8gwlP31vWiv5/RdBbDk6DrV2/Wq+OSf8i/WHuTKTVjA9abV5LyGemEe0u/oJcRlUupN5UVLfCAozz/6GR6A99A88CoUijvxA5rvEEpQyYZnwjXCUP05iy6QBYD3VnLbg1pI3g="
   matrix:
     - KERNEL=""
 compiler:
   - gcc
-  - clang
 
-matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libelf-dev
-            - g++-4.9
-      env:
-        - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
-
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libelf-dev
-            - g++-5
-      env:
-        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libelf-dev
-            - g++-6
-      env:
-        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - libelf-dev
-            - g++-7
-      env:
-        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-
-    # works on Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-3.9
-          packages:
-            - libelf-dev
-            - clang-3.9
-      env:
-        - MATRIX_EVAL="CC=clang-3.9 && CXX=clang++-3.9"
-
-    # works on Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-4.0
-          packages:
-            - libelf-dev
-            - clang-4.0
-      env:
-        - MATRIX_EVAL="CC=clang-4.0 && CXX=clang++-4.0"
-
-    # works on Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - llvm-toolchain-trusty-5.0
-          packages:
-            - libelf-dev
-            - clang-5.0
-      env:
-        - MATRIX_EVAL="CC=clang-5.0 && CXX=clang++-5.0"
 before_install:
-  - eval "${MATRIX_EVAL}"
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-certificates.crt
+  - sudo apt-get install -y libelf-dev
   - $CC --version
 
 notifications:
@@ -104,3 +25,12 @@ notifications:
     on_success: change
     on_failure: change
     recipients: linux-sctp@vger.kernel.org
+
+addons:
+  coverity_scan:
+    project:
+      name: "sctp/lksctp-tools"
+      description: "lksctp-tools"
+    notification_email: marcelo.leitner@gmail.com
+    build_command: "./.travis/linux-covscan.sh"
+    branch_pattern: coverity_scan
