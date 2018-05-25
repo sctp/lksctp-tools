@@ -95,6 +95,10 @@ LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_stream],
 LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_seq],
 		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ])
 
+# PR-SCTP field used to probe for sendv/recvv support, added on v4.17
+LKSCTP_CHECK_MEMBER([struct sendv_prinfo.sctp_prinfo],
+		    [HAVE_SCTP_SENDV])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile

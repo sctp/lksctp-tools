@@ -30,7 +30,6 @@ PASSING_KERN_TESTS = \
 	test_recvmsg \
 	test_timetolive \
 	test_sctp_sendrecvmsg \
-	test_sctp_sendvrecvv \
 	test_getname \
 	test_tcp_style\
 	test_1_to_1_socket_bind_listen \
@@ -59,9 +58,15 @@ PASSING_V6_KERN_TESTS = \
 	test_peeloff_v6 \
 	test_timetolive_v6 \
 	test_sctp_sendrecvmsg_v6 \
-	test_sctp_sendvrecvv_v6 \
 	test_getname_v6 \
 	test_tcp_style_v6
+
+if HAVE_SCTP_SENDV
+PASSING_KERN_TESTS += \
+	test_sctp_sendvrecvv
+PASSING_V6_KERN_TESTS += \
+	test_sctp_sendvrecvv_v6
+endif
 
 noinst_PROGRAMS = ${PASSING_KERN_TESTS} ${PASSING_V6_KERN_TESTS}
 

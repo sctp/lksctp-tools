@@ -108,6 +108,7 @@ sctp_send(int s, const void *msg, size_t len,
 	return sendmsg(s, &outmsg, flags);
 }
 
+#ifdef HAVE_SCTP_SENDV
 static struct cmsghdr *sctp_sendv_store_cmsg(struct cmsghdr *cmsg, int *cmsglen,
 					     int type, int len, void *data)
 {
@@ -234,3 +235,4 @@ int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 
 	return err;
 }
+#endif

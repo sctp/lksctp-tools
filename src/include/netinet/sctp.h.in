@@ -67,6 +67,7 @@ extern "C" {
 #undef HAVE_SCTP_PEELOFF_FLAGS
 #undef HAVE_SCTP_PDAPI_EVENT_PDAPI_STREAM
 #undef HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ
+#undef HAVE_SCTP_SENDV
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
@@ -131,6 +132,7 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 int sctp_getaddrlen(sa_family_t family);
 
 
+#ifdef HAVE_SCTP_SENDV
 /* sendv infotype */
 enum {
 	SCTP_SENDV_NOINFO,
@@ -144,14 +146,18 @@ enum {
 #define SCTP_SEND_SNDINFO_VALID		0x1
 #define SCTP_SEND_PRINFO_VALID		0x2
 #define SCTP_SEND_AUTHINFO_VALID	0x4
+#endif
 
 struct sctp_sendv_spa {
 	uint32_t sendv_flags;
 	struct sctp_sndinfo sendv_sndinfo;
+#ifdef HAVE_SCTP_SENDV
 	struct sctp_prinfo sendv_prinfo;
 	struct sctp_authinfo sendv_authinfo;
+#endif
 };
 
+#ifdef HAVE_SCTP_SENDV
 int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 	       struct sockaddr *addrs, int addrcnt, void *info,
 	       socklen_t infolen, unsigned int infotype, int flags);
@@ -172,6 +178,7 @@ struct sctp_recvv_rn {
 int sctp_recvv(int s, const struct iovec *iov, int iovlen,
 	       struct sockaddr *from, socklen_t *fromlen, void *info,
 	       socklen_t *infolen, unsigned int *infotype, int *flags);
+#endif
 
 #ifdef __cplusplus
 }
