@@ -79,6 +79,10 @@ LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
 #LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_assoc_reset_event], \
 #		    [HAVE_SCTP_ASSOC_RESET_EVENT])
 
+# Support for stream change event, added on v4.12, b444153fb5a6
+#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_change_event], \
+#		    [HAVE_SCTP_STREAM_CHANGE_EVENT])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
