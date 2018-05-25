@@ -60,6 +60,8 @@ extern "C" {
 #define HAVE_SCTP_ADDIP
 #define HAVE_SCTP_CANSET_PRIMARY
 
+#undef HAVE_SCTP_STREAM_RESET_EVENT
+
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
 int sctp_connectx(int sd, struct sockaddr *addrs, int addrcnt,

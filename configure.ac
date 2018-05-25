@@ -71,6 +71,10 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
 		strchr strerror strtol strtoul])
 
+# Support for stream reset even, added on v4.11, 35ea82d611da
+LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
+		    [HAVE_SCTP_STREAM_RESET_EVENT])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
