@@ -86,6 +86,9 @@ LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
 # RFC 6525 (Stream Reconf), finished on v4.12, c0d8bab6ae51
 LKSCTP_CHECK_DECL([SCTP_RECONFIG_SUPPORTED], [HAVE_SCTP_STREAM_RECONFIG])
 
+# sctp_peeloff_flags was added on v4.13, 2cb5c8e378d1
+LKSCTP_CHECK_TYPE([sctp_peeloff_flags_arg_t], [HAVE_SCTP_PEELOFF_FLAGS])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
