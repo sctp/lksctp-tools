@@ -9,6 +9,7 @@ libcnetinetdir = $(includedir)/netinet
 
 # Supposing this is part of the development package, header for our
 # API.
-include_HEADERS = 
+include_HEADERS =
 
-libcnetinet_HEADERS = sctp.h
+libcnetinet_HEADERS = sctp.h.in
+BUILT_SOURCES = sctp.h

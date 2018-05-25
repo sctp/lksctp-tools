@@ -71,6 +71,7 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
 		strchr strerror strtol strtoul])
 
+AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
 		bin/Makefile
