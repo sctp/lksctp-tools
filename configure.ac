@@ -89,6 +89,12 @@ LKSCTP_CHECK_DECL([SCTP_RECONFIG_SUPPORTED], [HAVE_SCTP_STREAM_RECONFIG])
 # sctp_peeloff_flags was added on v4.13, 2cb5c8e378d1
 LKSCTP_CHECK_TYPE([sctp_peeloff_flags_arg_t], [HAVE_SCTP_PEELOFF_FLAGS])
 
+# New members to sctp_pdapi_event, added on v4.16, 65f5e357839e
+LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_stream],
+		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_STREAM])
+LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_seq],
+		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
