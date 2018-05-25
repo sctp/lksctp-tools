@@ -44,6 +44,14 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netdb.h netinet/in.h stdint.h \
 		  stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h \
 		  sys/time.h unistd.h])
+AC_CHECK_HEADERS([linux/sctp.h], [], [], [AC_INCLUDES_DEFAULT
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
