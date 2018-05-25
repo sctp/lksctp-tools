@@ -75,6 +75,10 @@ AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
 LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
 		    [HAVE_SCTP_STREAM_RESET_EVENT])
 
+# Support for assoc reset event, added on v4.12, c95129d127c6
+#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_assoc_reset_event], \
+#		    [HAVE_SCTP_ASSOC_RESET_EVENT])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
