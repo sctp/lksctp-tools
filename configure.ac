@@ -83,6 +83,9 @@ LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
 #LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_change_event], \
 #		    [HAVE_SCTP_STREAM_CHANGE_EVENT])
 
+# RFC 6525 (Stream Reconf), finished on v4.12, c0d8bab6ae51
+LKSCTP_CHECK_DECL([SCTP_RECONFIG_SUPPORTED], [HAVE_SCTP_STREAM_RECONFIG])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile

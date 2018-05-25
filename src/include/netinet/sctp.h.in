@@ -63,6 +63,7 @@ extern "C" {
 #undef HAVE_SCTP_STREAM_RESET_EVENT
 #undef HAVE_SCTP_ASSOC_RESET_EVENT
 #undef HAVE_SCTP_STREAM_CHANGE_EVENT
+#undef HAVE_SCTP_STREAM_RECONFIG
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
