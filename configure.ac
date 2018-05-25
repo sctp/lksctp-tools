@@ -41,7 +41,9 @@ AC_SUBST(LIBTOOL_DEPS)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netdb.h netinet/in.h stdint.h \
+		  stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h \
+		  sys/time.h unistd.h])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -58,7 +60,8 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket strchr strerror strtol strtoul])
+AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
+		strchr strerror strtol strtoul])
 
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
