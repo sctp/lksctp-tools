@@ -292,6 +292,7 @@ static inline int test_sctp_send(int s, const void *msg, size_t len,
 	return error;			
 }
 
+#ifdef HAVE_SCTP_SENDV
 static inline int test_sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 				  struct sockaddr *addrs, int addrcnt,
 				  void *info, socklen_t infolen,
@@ -309,6 +310,7 @@ static inline int test_sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 			 error, errno);
 	return error;
 }
+#endif
 
 static inline int test_sctp_recvmsg(int sk, void *msg, size_t len,
 				    struct sockaddr *from, socklen_t *fromlen,
@@ -321,6 +323,7 @@ static inline int test_sctp_recvmsg(int sk, void *msg, size_t len,
 	return error;			
 }
 
+#ifdef HAVE_SCTP_SENDV
 static inline int test_sctp_recvv(int s, const struct iovec *iov, int iovlen,
 				  struct sockaddr *from, socklen_t *fromlen,
 				  void *info, socklen_t *infolen,
@@ -332,6 +335,8 @@ static inline int test_sctp_recvv(int s, const struct iovec *iov, int iovlen,
 		tst_brkm(TBROK, tst_exit, "sctp_recvmsg: %s", strerror(errno));
 	return error;
 }
+#endif
+
 static inline void *test_malloc(size_t size)
 {
 	void *buf = malloc(size);

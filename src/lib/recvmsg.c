@@ -100,6 +100,7 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 	return (error);
 }
 
+#ifdef HAVE_SCTP_SENDV
 int sctp_recvv(int s, const struct iovec *iov, int iovlen,
 	       struct sockaddr *from, socklen_t *fromlen, void *info,
 	       socklen_t *infolen, unsigned int *infotype, int *flags)
@@ -187,3 +188,4 @@ int sctp_recvv(int s, const struct iovec *iov, int iovlen,
 
 	return error;
 }
+#endif

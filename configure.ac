@@ -41,7 +41,17 @@ AC_SUBST(LIBTOOL_DEPS)
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netdb.h netinet/in.h stdint.h stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h malloc.h netdb.h netinet/in.h stdint.h \
+		  stdlib.h string.h sys/ioctl.h sys/param.h sys/socket.h \
+		  sys/time.h unistd.h])
+AC_CHECK_HEADERS([linux/sctp.h], [], [], [AC_INCLUDES_DEFAULT
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#endif
+])
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -58,8 +68,38 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket strchr strerror strtol strtoul])
+AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
+		strchr strerror strtol strtoul])
 
+# Support for stream reset even, added on v4.11, 35ea82d611da
+LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
+		    [HAVE_SCTP_STREAM_RESET_EVENT])
+
+# Support for assoc reset event, added on v4.12, c95129d127c6
+#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_assoc_reset_event], \
+#		    [HAVE_SCTP_ASSOC_RESET_EVENT])
+
+# Support for stream change event, added on v4.12, b444153fb5a6
+#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_change_event], \
+#		    [HAVE_SCTP_STREAM_CHANGE_EVENT])
+
+# RFC 6525 (Stream Reconf), finished on v4.12, c0d8bab6ae51
+LKSCTP_CHECK_DECL([SCTP_RECONFIG_SUPPORTED], [HAVE_SCTP_STREAM_RECONFIG])
+
+# sctp_peeloff_flags was added on v4.13, 2cb5c8e378d1
+LKSCTP_CHECK_TYPE([sctp_peeloff_flags_arg_t], [HAVE_SCTP_PEELOFF_FLAGS])
+
+# New members to sctp_pdapi_event, added on v4.16, 65f5e357839e
+LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_stream],
+		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_STREAM])
+LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_seq],
+		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ])
+
+# PR-SCTP field used to probe for sendv/recvv support, added on v4.17
+LKSCTP_CHECK_MEMBER([struct sendv_prinfo.sctp_prinfo],
+		    [HAVE_SCTP_SENDV])
+
+AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile
 		bin/Makefile

@@ -23,34 +23,30 @@
 #include <netinet/sctp.h> /* SCTP_SOCKOPT_BINDX_* */
 #include <errno.h>
 
+#ifdef HAVE_SCTP_PEELOFF_FLAGS
 int
 sctp_peeloff_flags(int fd, sctp_assoc_t associd, unsigned flags)
 {
+	socklen_t peeloff_size = sizeof(sctp_peeloff_flags_arg_t);
 	sctp_peeloff_flags_arg_t peeloff;
-	socklen_t peeloff_size;
 	int err;
+
+	if (!flags)
+		return sctp_peeloff(fd, associd);
 
 	peeloff.p_arg.associd = associd;
 	peeloff.p_arg.sd = 0;
 	peeloff.flags = flags;
 
-
-	if (flags) {
-		peeloff_size = sizeof(sctp_peeloff_flags_arg_t);
-		err = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_PEELOFF_FLAGS, &peeloff,
-				 &peeloff_size);
-	} else {
-		peeloff_size = sizeof(sctp_peeloff_arg_t);
-		err = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_PEELOFF, &peeloff.p_arg,
-				 &peeloff_size);
-	}
+	err = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_PEELOFF_FLAGS, &peeloff,
+			 &peeloff_size);
 
 	if (err < 0)
 		return err;
 
 	return peeloff.p_arg.sd;
-
-} /* sctp_peeloff() */
+}
+#endif
 
 /* Branch off an association into a seperate socket.  This is a new SCTP API
  * described in the section 8.2 of the Sockets API Extensions for SCTP. 
@@ -59,6 +55,18 @@ sctp_peeloff_flags(int fd, sctp_assoc_t associd, unsigned flags)
 int
 sctp_peeloff(int fd, sctp_assoc_t associd)
 {
-	return sctp_peeloff_flags(fd, associd, 0);
-}
+	socklen_t peeloff_size = sizeof(sctp_peeloff_arg_t);
+	sctp_peeloff_arg_t peeloff;
+	int err;
 
+	peeloff.associd = associd;
+	peeloff.sd = 0;
+
+	err = getsockopt(fd, SOL_SCTP, SCTP_SOCKOPT_PEELOFF, &peeloff,
+			 &peeloff_size);
+
+	if (err < 0)
+		return err;
+
+	return peeloff.sd;
+}
