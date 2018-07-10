@@ -166,6 +166,17 @@ main(int argc, char *argv[])
 	
 	tst_resm(TPASS, "COMM_UP notification on server socket - SUCCESS");
 
+#ifdef HAVE_SCTP_AUTH_NO_AUTH
+	error = test_recvmsg(acpt_sk, &inmessage, MSG_WAITALL);
+	test_check_msg_notification(&inmessage,
+				    error,
+				    sizeof(struct sctp_authkey_event),
+				    SCTP_AUTHENTICATION_EVENT,
+				    SCTP_AUTH_NO_AUTH);
+
+	tst_resm(TPASS, "AUTH_NO_AUTH notification on server socket - SUCCESS");
+#endif
+
 	inmessage.msg_control = incmsg;
 	inmessage.msg_controllen = sizeof(incmsg);
 	error = test_recvmsg(acpt_sk, &inmessage, MSG_WAITALL);

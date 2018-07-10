@@ -99,6 +99,10 @@ LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_seq],
 LKSCTP_CHECK_MEMBER([struct sendv_prinfo.sctp_prinfo],
 		    [HAVE_SCTP_SENDV])
 
+# This event indicates that the peer does not support SCTP authentication,
+# added on v4.16, 30f6ebf65bc4
+LKSCTP_CHECK_DECL([SCTP_AUTH_NO_AUTH], [HAVE_SCTP_AUTH_NO_AUTH])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile

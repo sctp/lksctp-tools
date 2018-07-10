@@ -68,6 +68,7 @@ extern "C" {
 #undef HAVE_SCTP_PDAPI_EVENT_PDAPI_STREAM
 #undef HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ
 #undef HAVE_SCTP_SENDV
+#undef HAVE_SCTP_AUTH_NO_AUTH
 
 int sctp_bindx(int sd, struct sockaddr *addrs, int addrcnt, int flags);
 
