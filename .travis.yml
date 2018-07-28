@@ -106,4 +106,6 @@ before_install:
 
 notifications:
   email:
-    - linux-sctp@vger.kernel.org
+    on_success: change
+    on_failure: change
+    recipients: linux-sctp@vger.kernel.org
