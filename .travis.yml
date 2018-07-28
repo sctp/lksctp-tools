@@ -1,10 +1,17 @@
 language: c
+addons:
+  apt:
+    packages:
+      - libelf-dev
 script:
-  - ./bootstrap
-    && ./configure
-    && make -j `/usr/bin/getconf _NPROCESSORS_ONLN`
-  # ipv6 is not supported by Travis
-  - make -C src/func_tests/ v4test
+  - ./.travis/linux-build.sh
+env:
+  - KERNEL=4.10
+  - KERNEL=4.11
+  - KERNEL=4.12
+  - KERNEL=4.13
+  - KERNEL=4.16
+  - KERNEL=4.17
 compiler:
   - gcc
   - clang
