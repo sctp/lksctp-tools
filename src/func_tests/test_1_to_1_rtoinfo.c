@@ -82,6 +82,7 @@ main(void)
 	srtoinfo.srto_initial=60;
 	srtoinfo.srto_max=100;
 	srtoinfo.srto_min=40;
+	srtoinfo.srto_assoc_id = 0;
 
 	/*TEST2 Setting the values using setsockopt()*/
 	ret = setsockopt(sd, IPPROTO_SCTP, SCTP_RTOINFO, &srtoinfo, 

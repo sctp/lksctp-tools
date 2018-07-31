@@ -150,7 +150,7 @@ main(int argc, char *argv[])
 
 	/*send() TEST4: Sending less number of data from the buffer*/
 	/*Sending only 5 bytes so that only hello is received*/
-	test_sendto(sk, message, 5 , flag, (const struct sockaddr *)&conn_addr,
+	test_sendto(sk1, message, 5, flag, (const struct sockaddr *)&conn_addr,
 		    len);
 	test_recv(acpt_sk, message_rcv, 5, flag);
 	

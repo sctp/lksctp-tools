@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
 	tst_resm(TPASS, "sctp_sendmsg with zero ttl");
 
 	/* And finally a fragmented message that will time out. */
-	memset(ttlfrag, '0', sizeof(ttlfrag));
+	memset(ttlfrag, 48, sizeof(ttlfrag)); /* 48 is the ascii of '0' */
 	ttlfrag[sizeof(ttlfrag)-1] = '\0';
 	test_sctp_sendmsg(sk1, ttlfrag, sizeof(ttlfrag),
 			  (struct sockaddr *)&loop2, sizeof(loop2),

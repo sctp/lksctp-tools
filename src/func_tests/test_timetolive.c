@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
 	/* And finally a fragmented message that will time out. */
 	sinfo->sinfo_ppid = ppid;
 	sinfo->sinfo_stream = stream;
-	memset(ttlfrag, '0', sizeof(ttlfrag));
+	memset(ttlfrag, 48, sizeof(ttlfrag)); /* 48 is the ascii of '0' */
 	ttlfrag[sizeof(ttlfrag)-1] = '\0';
 	outmessage.msg_iov->iov_base = ttlfrag;
         outmessage.msg_iov->iov_len = sizeof(ttlfrag);
