@@ -412,5 +412,6 @@ int test_peer_addr(int sk, sctp_assoc_t asoc, sockaddr_storage_t *peers, int cou
 		}
 	}
 	sctp_freepaddrs(addrs);
+	free(found);
 	return 0;
 }
