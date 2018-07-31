@@ -466,7 +466,8 @@ poll_fd(int fd)
 	printf("poll_fd\n");
 	FD_SET(fd,&readfds);
 
-	select(max,&readfds,&writefds,&exceptfds,NULL);
+	if (select(max, &readfds, &writefds, &exceptfds, NULL) == -1)
+		return(cameup);
 	if(FD_ISSET(fd,&readfds)){
 		printf("Read please\n");
 		cameup += my_sctpReadInput(fd,4100);
@@ -605,7 +606,7 @@ main(int argc, char **argv)
 	int i,fd;
 	uint16_t myport=0;
 	int magic=0;
-	struct sctp_event_subscribe event;
+	struct sctp_event_subscribe event = {0};
 	while((i= getopt(argc,argv,"m:M:")) != EOF){
 		switch(i){
 		case 'm':
@@ -639,7 +640,11 @@ main(int argc, char **argv)
 		return(-1);
 	}	
 	printf("fd uses port %d\n",ntohs(got.sin_port));
-	listen(fd,100);
+	if (listen(fd, 100) == -1) {
+		printf("listen err: %d\n", errno);
+		close(fd);
+		return(-1);
+	}
 	/* enable all event notifications */
 	event.sctp_data_io_event = 1;
 	event.sctp_association_event = 1;
