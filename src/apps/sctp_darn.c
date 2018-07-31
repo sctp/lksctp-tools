@@ -731,9 +731,14 @@ command_listen(char *argv0, int sk)
 
 		if (echo) {
 			if( !(MSG_NOTIFICATION & inmessage.msg_flags)) {
-				sendto(recvsk, inmessage.msg_iov->iov_base,
-				       error, 0, (struct sockaddr *)&msgname,
-				       sizeof(msgname));
+				if (sendto(recvsk, inmessage.msg_iov->iov_base,
+					   error, 0,
+					   (struct sockaddr *)&msgname,
+					   sizeof(msgname)) == -1) {
+					fprintf(stderr, "%s: error: %s.\n",
+						argv0, strerror(errno));
+					exit(1);
+				}
 			}
 		}
 
@@ -950,6 +955,7 @@ command_send(char *argv0, int *skp)
 				outmsg.msg_controllen = 0;
 				outmsg.msg_name = &remote_addr;
 				outmsg.msg_namelen = ra_len;
+				outmsg.msg_flags = 0;
 
 				error = sendmsg(sk, &outmsg, 0);
 			} else {
@@ -1086,6 +1092,7 @@ command_poll(char *argv0)
 		outmsg.msg_controllen = 0;
 		outmsg.msg_name = &remote_addr;
 		outmsg.msg_namelen = ra_len;
+		outmsg.msg_flags = 0;
 	}
 
 
@@ -1412,6 +1419,8 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	int count = orig_count;
 
 
+	if (!parm)
+		return NULL;
 	/* Get the entries for this host.  */
 	hst4 = gethostbyname(parm);
 	hst6 = gethostbyname2(parm, AF_INET6);
