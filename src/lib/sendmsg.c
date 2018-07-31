@@ -87,6 +87,7 @@ sctp_send(int s, const void *msg, size_t len,
 	iov.iov_base = (void *)msg;
 	iov.iov_len = len;
 	outmsg.msg_iovlen = 1;
+	outmsg.msg_control = NULL;
 	outmsg.msg_controllen = 0;
 
 	if (sinfo) {	
