@@ -596,7 +596,7 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	}
 
  finally:
-
+	free(ipaddr);
 	*ret_count = count;
 
 	return new_addrs;
@@ -697,6 +697,8 @@ int bind_r(int sk, struct sockaddr_storage *saddr)
 		}
         } while (error < 0 && i < MAX_BIND_RETRYS);
 
+	free(host_s);
+	free(serv_s);
 	return 0;
 
 } /* bind_r() */
@@ -1136,10 +1138,8 @@ client(int sk)
 		order_state = next_order(order_state, order_pattern);
 		stream_state = next_stream(stream_state, stream_pattern);
 
-		if (send_r(sk, stream_state, order_state, msg_size, 0) < 0) {
-			close(sk);
+		if (send_r(sk, stream_state, order_state, msg_size, 0) < 0)
 			break;
-		}
 		/* The sender is echoing so do discard the echoed data. */
 		if (drain) {
 			receive_r(sk, 1);
@@ -1398,7 +1398,15 @@ void start_test(int role)
 	}
 
 	sk = socket_r();
-	bind_r(sk, &s_loc);
+	if (sk < 0) {
+		DEBUG_PRINT(DEBUG_NONE, "\nSocket create err %d\n", errno);
+		return;
+	}
+
+	if (bind_r(sk, &s_loc) == -1) {
+		DEBUG_PRINT(DEBUG_NONE, "\nSocket bind err %d\n", errno);
+		return;
+	}
 
 	/* Do we need to do bindx() to add any additional addresses? */
 	if (bindx_add_addrs)
