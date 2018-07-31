@@ -446,6 +446,7 @@ my_sctpReadInput(int fd)
 	msg.msg_iovlen = 1;
 	msg.msg_control = (caddr_t)controlVector;
 	msg.msg_controllen = sizeof(controlVector);
+	msg.msg_flags = 0;
 	errno = 0;
 	sz = recvmsg(fd,&msg,0);
 	if(sz <= 0){
@@ -483,7 +484,8 @@ clear_fds(int fd,int fd1)
 	}
 	notdone = 1;
 	while(notdone){
-		select(max,&readfds,&writefds,&exceptfds,&tv);
+		if (select(max, &readfds, &writefds, &exceptfds, &tv) == -1)
+			break;
 		notdone = 0;
 		if(FD_ISSET(fd,&readfds)){
 			notdone++;
@@ -553,7 +555,7 @@ main(int argc, char **argv)
 	char *addr=NULL;
 	uint16_t port=0;
 	int protocol_touse = IPPROTO_SCTP;
-	struct sctp_event_subscribe event;
+	struct sctp_event_subscribe event = {0};
 
 	while((i= getopt(argc,argv,"p:h:")) != EOF){
 		switch(i){
