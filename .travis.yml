@@ -9,12 +9,7 @@ env:
   global:
     - KERNEL=4.17
   matrix:
-    - KERNEL=4.10
-    - KERNEL=4.11
-    - KERNEL=4.12
-    - KERNEL=4.13
-    - KERNEL=4.16
-    - KERNEL=4.17
+    - KERNEL=""
 compiler:
   - gcc
   - clang
