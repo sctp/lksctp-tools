@@ -67,8 +67,7 @@ function build_lksctp()
 
 	make -j $nproc
 
-	#make -j $nproc distcheck
-
+	make -j $nproc distcheck
 }
 
 trap cleanup EXIT
