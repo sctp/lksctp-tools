@@ -272,7 +272,7 @@ main(int argc, char *argv[])
 	message = test_malloc((size + 1) * sizeof(u_int8_t));
 
 	for(i=0; i + 10 < size; i+= 10)
-		strncpy(message+i, "1234567890", 10);
+		memcpy(message+i, "1234567890", 10);
 	strncpy(message+i, "1234567890", size-i);
 	*(message+size) = 0;
 
