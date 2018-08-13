@@ -1,7 +1,16 @@
-Version 1.0.17 of the Developers' Release of the SCTP
+Version 1.0.18 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.18: Mon Aug 13 16:19 EDT 2016
+T:APP         Various test tools fixes
+T:LIB         Added support for sctp_peeloff_flags function
+T:LIB         Added macro definitions indicating which kernel
+              features were detected during build.
+T:LIB         Initial batch of fixes for coverity scan issues
+T:NA          Initial integration with Travis and Coverity Scan
+T:BUILD       Updated rfc listings so now 'make distcheck' works
 
 lksctp-1.0.17: Mon May  9 16:19 EDT 2016
 T:APP         Various sctp_test fixes
