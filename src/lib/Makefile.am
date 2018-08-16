@@ -8,5 +8,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include
 
 lib_LTLIBRARIES = libsctp.la
 
-libsctp_la_SOURCES = bindx.c connectx.c peeloff.c opt_info.c addrs.c sendmsg.c recvmsg.c Versions.map
-libsctp_la_LDFLAGS = -version-info 1:17:0 -Wl,--version-script=$(srcdir)/Versions.map
+libsctp_la_SOURCES = bindx.c connectx.c peeloff.c opt_info.c \
+		addrs.c sendmsg.c recvmsg.c Versions.map
+libsctp_la_LDFLAGS = -version-info \
+		@LIBSCTP_CURRENT@:@LIBSCTP_REVISION@:@LIBSCTP_AGE@ \
+		-Wl,--version-script=$(srcdir)/Versions.map

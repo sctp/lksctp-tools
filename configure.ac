@@ -14,6 +14,13 @@ dnl reduce clutter in the root; if we put it below AM_INIT_AUTOMAKE,
 dnl configure will fail ...)
 
 AC_INIT([lksctp-tools], [1.0.18], [], [], [http://www.lksctp.org/])
+AC_SUBST(LIBSCTP_CURRENT, 1)
+AC_SUBST(LIBSCTP_REVISION, 18)
+AC_SUBST(LIBSCTP_AGE, 0)
+AC_SUBST(LIBWITHSCTP_CURRENT, 1)
+AC_SUBST(LIBWITHSCTP_REVISION, 18)
+AC_SUBST(LIBWITHSCTP_AGE, 0)
+
 AC_CONFIG_AUX_DIR(bin)
 AC_CONFIG_SRCDIR([src/apps/sctp_darn.c])
 AC_CONFIG_HEADERS([config.h])
