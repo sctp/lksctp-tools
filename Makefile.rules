@@ -15,4 +15,5 @@
 edit = @sed \
 	-e "s|\@bindir\@|$(bindir)|" \
 	-e "s|\@libdir\@|$(libdir)|" \
-	-e "s|\@PACKAGE\@|$(PACKAGE)|"
+	-e "s|\@PACKAGE\@|$(PACKAGE)|" \
+	-e "s|\@PACKAGE_VERSION\@|$(PACKAGE_VERSION)|"
