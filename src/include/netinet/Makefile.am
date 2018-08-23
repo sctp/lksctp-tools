@@ -11,5 +11,4 @@ libcnetinetdir = $(includedir)/netinet
 # API.
 include_HEADERS =
 
-libcnetinet_HEADERS = sctp.h.in
-BUILT_SOURCES = sctp.h
+libcnetinet_HEADERS = sctp.h
