@@ -101,7 +101,7 @@ LKSCTP_CHECK_TYPE([struct sctp_prinfo], [HAVE_SCTP_SENDV])
 # added on v4.16, 30f6ebf65bc4
 LKSCTP_CHECK_DECL([SCTP_AUTH_NO_AUTH], [HAVE_SCTP_AUTH_NO_AUTH])
 
-# New members to sctp_paddrparams, added on v4.18, 0b0dce7a36fb
+# New members to sctp_paddrparams, added on v4.19, 0b0dce7a36fb
 LKSCTP_CHECK_MEMBER([struct sctp_paddrparams.spp_ipv6_flowlabel],
 		    [HAVE_SCTP_SPP_IPV6_FLOWLABEL])
 LKSCTP_CHECK_MEMBER([struct sctp_paddrparams.spp_dscp],
