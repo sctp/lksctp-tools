@@ -82,14 +82,6 @@ AC_CHECK_FUNCS([bzero gethostbyname gettimeofday memmove memset select socket \
 LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_reset_event],
 		    [HAVE_SCTP_STREAM_RESET_EVENT])
 
-# Support for assoc reset event, added on v4.12, c95129d127c6
-#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_assoc_reset_event], \
-#		    [HAVE_SCTP_ASSOC_RESET_EVENT])
-
-# Support for stream change event, added on v4.12, b444153fb5a6
-#LKSCTP_CHECK_MEMBER([struct sctp_event_subscribe.sctp_stream_change_event], \
-#		    [HAVE_SCTP_STREAM_CHANGE_EVENT])
-
 # RFC 6525 (Stream Reconf), finished on v4.12, c0d8bab6ae51
 LKSCTP_CHECK_DECL([SCTP_RECONFIG_SUPPORTED], [HAVE_SCTP_STREAM_RECONFIG])
 
