@@ -94,9 +94,8 @@ LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_stream],
 LKSCTP_CHECK_MEMBER([struct sctp_pdapi_event.pdapi_seq],
 		    [HAVE_SCTP_PDAPI_EVENT_PDAPI_SEQ])
 
-# PR-SCTP field used to probe for sendv/recvv support, added on v4.17
-LKSCTP_CHECK_MEMBER([struct sendv_prinfo.sctp_prinfo],
-		    [HAVE_SCTP_SENDV])
+# PR-SCTP struct used to probe for sendv/recvv support, added on v4.17
+LKSCTP_CHECK_TYPE([struct sctp_prinfo], [HAVE_SCTP_SENDV])
 
 # This event indicates that the peer does not support SCTP authentication,
 # added on v4.16, 30f6ebf65bc4
