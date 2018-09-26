@@ -92,9 +92,13 @@ main(int argc, char *argv[])
 	/* Create the client socket.  */
 	clt_sk = test_socket(AF_INET, SOCK_STREAM, IPPROTO_SCTP);
 
+	memset(&event, 0, sizeof(event));
 	event.sctp_data_io_event = 1;
 	event.sctp_association_event = 1;
 	event.sctp_shutdown_event = 1;
+#ifdef HAVE_SCTP_AUTH_NO_AUTH
+	event.sctp_authentication_event = 1;
+#endif
 	len = sizeof(struct sctp_event_subscribe);
 	test_setsockopt(svr_sk, SCTP_EVENTS, &event, len);
 	test_setsockopt(clt_sk, SCTP_EVENTS, &event, len);
