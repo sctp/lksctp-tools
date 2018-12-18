@@ -529,7 +529,7 @@ int receive_r(int sk)
 		DEBUG_PRINT(DEBUG_MIN, "\trecvmsg(sk=%d) ", sk);
 
 		error = recvmsg(sk, &inmessage, MSG_WAITALL);
-		if (error < 0 && error != EAGAIN) {
+		if (error < 0 && errno != EAGAIN) {
 			fprintf(stderr, "\n\t\t*** recvmsg: %s ***\n\n",
 					strerror(errno));
 			fflush(stdout);

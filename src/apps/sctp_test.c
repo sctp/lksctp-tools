@@ -870,7 +870,7 @@ int receive_r(int sk, int once)
 		DEBUG_PRINT(DEBUG_MIN, "\trecvmsg(sk=%d) ", sk);
 
 		error = recvmsg(recvsk, &inmessage, MSG_WAITALL);
-		if (error < 0 && error != EAGAIN) {
+		if (error < 0 && errno != EAGAIN) {
 			if (errno == ENOTCONN && socket_type == SOCK_STREAM &&
 			    role == SERVER) {
 				printf("No association is present now!!\n");
