@@ -16,4 +16,6 @@ edit = @sed \
 	-e "s|\@bindir\@|$(bindir)|" \
 	-e "s|\@libdir\@|$(libdir)|" \
 	-e "s|\@PACKAGE\@|$(PACKAGE)|" \
-	-e "s|\@PACKAGE_VERSION\@|$(PACKAGE_VERSION)|"
+	-e "s|\@LIBWITHSCTP_CURRENT\@|$(LIBWITHSCTP_CURRENT)|" \
+	-e "s|\@LIBWITHSCTP_REVISION\@|$(LIBWITHSCTP_REVISION)|" \
+	-e "s|\@LIBWITHSCTP_AGE\@|$(LIBWITHSCTP_AGE)|"
