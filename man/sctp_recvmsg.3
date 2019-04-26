@@ -44,7 +44,16 @@ message.
 .I msg_flags
 is a pointer to a integer that is filled with any message flags like
 .B MSG_NOTIFICATION or
-.B MSG_EOR.
+.B MSG_EOR. 
+The value of 
+.I msg_flags 
+pointer should be initialized to 0 to avoid unexpected behavior;
+.I msg_flags
+is also used as an input 
+.I flags 
+argument to 
+.I recvmsg
+function.
 .SH "RETURN VALUE"
 On success,
 .BR sctp_recvmsg
