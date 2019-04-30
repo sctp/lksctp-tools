@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.rules
 include $(top_srcdir)/Makefile.dirs
 
 # General compilation flags
-AM_CPPFLAGS = -I$(top_srcdir)/src/include
+AM_CPPFLAGS = -I$(top_builddir)/src/include
 
 lib_LTLIBRARIES = libsctp.la
 

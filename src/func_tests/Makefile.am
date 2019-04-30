@@ -4,7 +4,7 @@ include $(top_srcdir)/Makefile.rules
 include $(top_srcdir)/Makefile.dirs
 
 # General compilation flags
-AM_CPPFLAGS = -I. -I$(top_srcdir)/src/include -I$(top_srcdir)/src/testlib \
+AM_CPPFLAGS = -I. -I$(top_builddir)/src/include -I$(top_srcdir)/src/testlib \
               -g -O2 -fno-strict-aliasing -Wall -Wstrict-prototypes \
               -Wimplicit-function-declaration
 
