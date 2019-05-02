@@ -55,6 +55,8 @@ function download_prep_kernel()
 
 function build_lksctp()
 {
+	local use_builddir="$1"
+
 	make distclean || :
 	./bootstrap
 
@@ -63,11 +65,23 @@ function build_lksctp()
 		CFLAGS="$CFLAGS -I$KERNEL_HEADERS"
 	fi
 	export CFLAGS
-	./configure
+
+	if [ "$use_builddir" == 1 ]; then
+		mkdir build
+		pushd build
+		../configure
+	else
+		./configure
+	fi
 
 	make -j $nproc
 
 	make -j $nproc distcheck
+
+	if [ "$use_builddir" == 1 ]; then
+		popd
+		rm -rf build
+	fi
 }
 
 trap cleanup EXIT
@@ -77,9 +91,11 @@ if [ -z "$KERNEL" ]; then
 	for ver in $VERS; do
 		git_prep_kernel "$ver"
 		build_lksctp
+		build_lksctp 1
 	done
 else
 	download_kernel "$KERNEL"
 	download_prep_kernel "$KERNEL"
 	build_lksctp
+	build_lksctp 1
 fi
