@@ -30,6 +30,8 @@ function __prep_kernel()
 {
 	make mrproper
 	make allmodconfig
+	sed -i 's/CONFIG_RETPOLINE=/# CONFIG_RETPOLINE is not set/' .config
+	make oldconfig
 	make -j $nproc modules_prepare
 	make -j $nproc headers_install
 	KERNEL_HEADERS=$(pwd)/usr/include
