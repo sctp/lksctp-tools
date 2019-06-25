@@ -206,13 +206,13 @@ to write the option with the option level argument set to
 .TP
 .BR SCTP_RTOINFO.
 This option is used to get or set the protocol parameters used to
-initialize and bound retransmission timout(RTO). The structure sctp_rtoinfo
+initialize and bound retransmission timeout(RTO). The structure sctp_rtoinfo
 defined in /usr/include/netinet/sctp.h is used to access and modify these
 parameters.
 .TP
 .B SCTP_ASSOCINFO
 This option is used to both examine and set various association and endpoint
-parameters. The sturcture sctp_assocparams defined in
+parameters. The structure sctp_assocparams defined in
 /usr/include/netinet/sctp.h is used to access and modify these parameters.
 .TP
 .B SCTP_INITMSG
@@ -275,7 +275,7 @@ this socket option simply passes in to this call the sctp_sndrcvinfo structure
 defined in /usr/include/netinet/sctp.h. The input parameters accepted by this
 call include sinfo_stream, sinfo_flags, sinfo_ppid, sinfo_context,
 sinfo_timetolive. The user must set the sinfo_assoc_id field to identify the
- association to affect if the caller is using the one-to-many style.
+association to affect if the caller is using the one-to-many style.
 .TP
 .B SCTP_EVENTS
 This socket option is used to specify various notifications and ancillary data
@@ -316,7 +316,7 @@ is used to access this information.
 Applications can retrieve information about a specific peer address
 of an association, including its reachability state, congestion window,
 and retransmission timer values.  This information is read-only. The structure
-sctp_paddr_info defined in /usr/include/netinet/sctp.h is used to access this
+sctp_paddrinfo defined in /usr/include/netinet/sctp.h is used to access this
 information.
 .TP
 .B SCTP_GET_ASSOC_STATS
