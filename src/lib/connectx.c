@@ -26,6 +26,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <fcntl.h>
+#include "config.h"
+
+#define __SYMPFX(pfx, sym) #pfx sym
+#define _SYMPFX(pfx, sym) __SYMPFX(pfx, sym)
+#define SYMPFX(sym) _SYMPFX(__USER_LABEL_PREFIX__, #sym)
+
+#if HAVE_ATTRIBUTE_SYMVER
+#define SYMVER(name, name2) __attribute__ ((symver (SYMPFX(name2))))
+#else
+#define SYMVER(name, name2) __asm__(".symver " SYMPFX(name) "," SYMPFX(name2));
+#endif
+
 
 /* Support the sctp_connectx() interface.
  *
@@ -64,6 +76,7 @@ static int __connectx_addrsize(const struct sockaddr *addrs,
 }
 			
 
+SYMVER(__sctp_connectx, sctp_connectx@)
 int __sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
 {
 	int addrs_size = __connectx_addrsize(addrs, addrcnt);
@@ -75,6 +88,7 @@ int __sctp_connectx(int fd, struct sockaddr *addrs, int addrcnt)
 			    addrs_size);
 }
 
+SYMVER(sctp_connectx_orig, sctp_connectx@VERS_1)
 extern int sctp_connectx_orig (int)
 	__attribute ((alias ("__sctp_connectx")));
 
@@ -114,6 +128,7 @@ static int __connectx(int fd, struct sockaddr *addrs, socklen_t addrs_size,
 			  addrs, addrs_size);
 }
 
+SYMVER(sctp_connectx2, sctp_connectx@VERS_2)
 int sctp_connectx2(int fd, struct sockaddr *addrs, int addrcnt,
 		      sctp_assoc_t *id)
 {
@@ -125,6 +140,7 @@ int sctp_connectx2(int fd, struct sockaddr *addrs, int addrcnt,
 	return __connectx(fd, addrs, addrs_size, id);
 }
 
+SYMVER(sctp_connectx3, sctp_connectx@@VERS_3)
 int sctp_connectx3(int fd, struct sockaddr *addrs, int addrcnt,
 		      sctp_assoc_t *id)
 {
@@ -179,12 +195,3 @@ int sctp_connectx3(int fd, struct sockaddr *addrs, int addrcnt,
 	return __connectx(fd, addrs, addrs_size, id);
 }
 
-#define __SYMPFX(pfx, sym) #pfx sym
-#define _SYMPFX(pfx, sym) __SYMPFX(pfx, sym)
-#define SYMPFX(sym) _SYMPFX(__USER_LABEL_PREFIX__, #sym)
-#define SYMVER(name, name2) __asm__(".symver " SYMPFX(name) "," SYMPFX(name2))
-
-SYMVER(__sctp_connectx, sctp_connectx@);
-SYMVER(sctp_connectx_orig, sctp_connectx@VERS_1);
-SYMVER(sctp_connectx2, sctp_connectx@VERS_2);
-SYMVER(sctp_connectx3, sctp_connectx@@VERS_3);

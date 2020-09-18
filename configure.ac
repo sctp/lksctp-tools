@@ -130,4 +130,12 @@ AC_ARG_ENABLE(tests,
 	[enable_tests=yes])
 AM_CONDITIONAL(BUILD_TESTS, [test $enable_tests != no])
 
+# GCC tries to be "helpful" and only issue a warning for unrecognized
+# attributes.  So we compile the test with Werror, so that if the
+# attribute is not recognized the compilation fails
+AC_LANG(C)
+AC_LANG_WERROR
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[__attribute__ ((symver ("foo@foo_1"))) void frob (void) { }]])],
+                  [AC_DEFINE([HAVE_ATTRIBUTE_SYMVER], [1], [Checking for symver attribute])], [])
+
 AC_OUTPUT
