@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-VERS="master v4.17 v4.16 v4.13 v4.12 v4.11 v4.10"
+VERS="master v5.4 v4.19 v4.17 v4.16 v4.13 v4.12 v4.11 v4.10"
 
 nproc=$(/usr/bin/getconf _NPROCESSORS_ONLN)
 basedir=$(pwd)
