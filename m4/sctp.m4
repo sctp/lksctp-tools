@@ -6,7 +6,7 @@
 
 # Macros to assist on probing kernel features
 #   Probes if a type is defined
-AC_DEFUN([LKSCTP_CHECK_TYPE], [{
+AC_DEFUN([LKSCTP_CHECK_TYPE], [
 AC_CHECK_TYPE([$1],
 	AC_DEFINE([$2], 1,
 		  [Define if $1 is present.])
@@ -22,10 +22,10 @@ AC_CHECK_TYPE([$1],
 #ifdef HAVE_LINUX_SCTP_H
 # include <linux/sctp.h>
 #endif
-])}])
+])])
 
 #   Probes if a struct has a given member
-AC_DEFUN([LKSCTP_CHECK_MEMBER], [{
+AC_DEFUN([LKSCTP_CHECK_MEMBER], [
 AC_CHECK_MEMBER([$1],
 	AC_DEFINE([$2], 1,
 		  [Define if $1 is present.])
@@ -41,10 +41,10 @@ AC_CHECK_MEMBER([$1],
 #ifdef HAVE_LINUX_SCTP_H
 # include <linux/sctp.h>
 #endif
-])}])
+])])
 
 #   Probes if a declaration is present
-AC_DEFUN([LKSCTP_CHECK_DECL], [{
+AC_DEFUN([LKSCTP_CHECK_DECL], [
 AC_CHECK_DECL([$1],
 	AC_DEFINE([$2], 1,
 		  [Define if $1 is present.])
@@ -60,4 +60,4 @@ AC_CHECK_DECL([$1],
 #ifdef HAVE_LINUX_SCTP_H
 # include <linux/sctp.h>
 #endif
-])}])
+])])
