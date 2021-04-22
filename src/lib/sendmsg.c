@@ -77,25 +77,21 @@ int
 sctp_send(int s, const void *msg, size_t len,
           const struct sctp_sndrcvinfo *sinfo, int flags)
 {
-	struct msghdr outmsg;
+	struct msghdr outmsg = {};
 	struct iovec iov;
 	char outcmsg[CMSG_SPACE(sizeof(struct sctp_sndrcvinfo))];
 
-	outmsg.msg_name = NULL;
-	outmsg.msg_namelen = 0;
 	outmsg.msg_iov = &iov;
 	iov.iov_base = (void *)msg;
 	iov.iov_len = len;
 	outmsg.msg_iovlen = 1;
-	outmsg.msg_control = NULL;
-	outmsg.msg_controllen = 0;
+	outmsg.msg_flags = flags;
 
 	if (sinfo) {	
 		struct cmsghdr *cmsg;
 
 		outmsg.msg_control = outcmsg;
 		outmsg.msg_controllen = sizeof(outcmsg);
-		outmsg.msg_flags = 0;
 
 		cmsg = CMSG_FIRSTHDR(&outmsg);
 		cmsg->cmsg_level = IPPROTO_SCTP;
