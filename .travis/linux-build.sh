@@ -15,12 +15,7 @@ function cleanup()
 
 function clone_kernel()
 {
-	if ! [[ $KERNEL =~ \\s ]]; then
-		depth="--depth=50"
-	else
-		depth=""
-	fi
-	git clone $depth https://github.com/torvalds/linux
+	git clone https://github.com/torvalds/linux
 }
 
 function download_kernel()
