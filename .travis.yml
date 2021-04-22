@@ -114,6 +114,6 @@ addons:
     project:
       name: "sctp/lksctp-tools"
       description: "lksctp-tools"
-    notification_email: marcelo.leitner@gmail.com
+    notification_email: linux-sctp@vger.kernel.org
     build_command: "./.travis/linux-covscan.sh"
-    branch_pattern: coverity_scan
+    branch_pattern: master
