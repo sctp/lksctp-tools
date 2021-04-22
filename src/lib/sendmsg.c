@@ -125,14 +125,12 @@ int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 {
 	char _cmsg[CMSG_SPACE(sizeof(struct sctp_sendv_spa))];
 	struct cmsghdr *cmsg = (struct cmsghdr *)_cmsg;
+	struct msghdr outmsg = {};
 	struct sockaddr *addr;
-	struct msghdr outmsg;
 	int len, cmsglen = 0;
 	int err, type, i;
 	char *addrbuf;
 
-	/* set msg_iov, msg_iovlen, msg_flags */
-	memset(&outmsg, 0x00, sizeof(outmsg));
 	outmsg.msg_iov = (struct iovec *)iov;
 	outmsg.msg_iovlen = iovcnt;
 	outmsg.msg_flags = flags;
