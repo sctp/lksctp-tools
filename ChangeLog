@@ -1,7 +1,15 @@
-Version 1.0.18 of the Developers' Release of the SCTP
+Version 1.0.19 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.19: Wed Apr 28 02:51:29 PM -03 2021
+T:LIB         Fixes ignored parameter on sctp_sendv
+T:LIB         Man page updates
+T:BUILD       Fix hardcoded version for libsctp and libwithsctp
+T:BUILD       Various fixes for CI integration
+T:BUILD       Fix netinet/sctp.h not being installed
+T:TEST        Various fixes
 
 lksctp-1.0.18: Mon Aug 13 16:19 EDT 2016
 T:APP         Various test tools fixes
