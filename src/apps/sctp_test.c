@@ -487,14 +487,11 @@ struct sockaddr *
 append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 {
 	struct sockaddr *new_addrs = NULL;
+	struct addrinfo hints, *res, *rp;
 	void *aptr;
 	struct sockaddr *sa_addr;
 	struct sockaddr_in *b4ap;
 	struct sockaddr_in6 *b6ap;
-	struct hostent *hst4 = NULL;
-	struct hostent *hst6 = NULL;
-	int i4 = 0;
-	int i6 = 0;
 	int j;
 	int orig_count = *ret_count;
 	int count = orig_count;
@@ -514,27 +511,16 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 		}
 	}
 
-	/* Get the entries for this host.  */
-	hst4 = gethostbyname(ipaddr);
-	hst6 = gethostbyname2(ipaddr, AF_INET6);
-
-	if ((NULL == hst4 || hst4->h_length < 1)
-	    && (NULL == hst6 || hst6->h_length < 1)) {
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_protocol = IPPROTO_SCTP;
+	if (getaddrinfo(ipaddr, NULL, &hints, &res) != 0) {
 		fprintf(stderr, "bad hostname: %s\n", ipaddr);
 		goto finally;
 	}
 
-	/* Figure out the number of addresses.  */
-	if (NULL != hst4) {
-		for (i4 = 0; NULL != hst4->h_addr_list[i4]; ++i4) {
-			count++;
-		}
-	}
-	if (NULL != hst6) {
-		for (i6 = 0; NULL != hst6->h_addr_list[i6]; ++i6) {
-			count++;
-		}
-	}
+	for (rp = res; rp != NULL; rp = rp->ai_next)
+		count++;
 
 	/* Expand memory for the new addresses.  Assume all the addresses
 	 * are v6 addresses.
@@ -565,34 +551,17 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	}
 
 	/* Put the new addresses away.  */
-	if (NULL != hst4) {
-		for (j = 0; j < i4; ++j) {
-			b4ap = (struct sockaddr_in *)aptr;
-			memset(b4ap, 0x00, sizeof(*b4ap));
-			b4ap->sin_family = AF_INET;
-			b4ap->sin_port = htons(local_port);
-			bcopy(hst4->h_addr_list[j], &b4ap->sin_addr,
-			      hst4->h_length);
-
-			aptr += sizeof(struct sockaddr_in);
-		} /* for (loop through the new v4 addresses) */
-	}
-
-	if (NULL != hst6) {
-		for (j = 0; j < i6; ++j) {
-			b6ap = (struct sockaddr_in6 *)aptr;
-			memset(b6ap, 0x00, sizeof(*b6ap));
-			b6ap->sin6_family = AF_INET6;
-			b6ap->sin6_port =  htons(local_port);
+	for (rp = res; rp != NULL; rp = rp->ai_next) {
+		b4ap = (struct sockaddr_in *)aptr;
+		b6ap = (struct sockaddr_in6 *)aptr;
+		bcopy(rp->ai_addr, aptr, rp->ai_addrlen);
+		b4ap->sin_port = htons(local_port); /* equal to b6ap.v6.sin6_port */
+		if (rp->ai_family == AF_INET6) {
 			b6ap->sin6_scope_id = if_index;
-			bcopy(hst6->h_addr_list[j], &b6ap->sin6_addr,
-			      hst6->h_length);
-			if (!ifindex) {
+			if (!ifindex)
 				b6ap->sin6_scope_id = ifindex;
-			}
-
-			aptr += sizeof(struct sockaddr_in6);
-		} /* for (loop through the new v6 addresses) */
+		}
+		aptr += rp->ai_addrlen;
 	}
 
  finally:
