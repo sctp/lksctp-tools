@@ -64,11 +64,11 @@ typedef enum { COMMAND_NONE, COMMAND_RECV, COMMAND_SEND } command_t;
 #define MAX_NUM_HOST	5
 static char *local_host[MAX_NUM_HOST];
 static int num_local_host = 0;
-static int local_port = 4444;
+static char *local_port = "4444";
 
 static int buffer_size = BUFSIZE;
 static char *remote_host = NULL;
-static int remote_port = 4444;
+static char *remote_port = "4444";
 static command_t command = COMMAND_NONE;
 static char *filename = NULL;
 static int interactive = 0;
@@ -133,7 +133,7 @@ static int parse_arguments(int argc, char *argv[])
 			break;
 		case 2:		/* local port */
 		case 'P':
-			local_port = atoi(optarg);
+			local_port = optarg;
 			break;
 		case 3:		/* remote host */
 		case 'h':
@@ -141,7 +141,7 @@ static int parse_arguments(int argc, char *argv[])
 			break;
 		case 4:		/* remote port */
 		case 'p':
-			remote_port = atoi(optarg);
+			remote_port = optarg;
 			break;
 		case 5:
 		case 'f':
@@ -236,6 +236,7 @@ emsg(char *prog,char *s)
 
 static int build_endpoint(char *argv0)
 {
+	struct addrinfo hints, *rp;
 	int retval,i;
 
 	/* Create the local endpoint.  */
@@ -245,22 +246,19 @@ static int build_endpoint(char *argv0)
 	}
 
 	for ( i = 0;i < num_local_host;i++ ) {
-		struct hostent *hst;
-		struct sockaddr_in laddr;
-
-		memset(&laddr, 0, sizeof(laddr));
 		/* Get the transport address for the local host name.  */
 		fprintf(stderr,"Hostname %d is %s\n",i+1,local_host[i]);
-		if ( (hst = gethostbyname(local_host[i])) == NULL ) {
+
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = AF_INET;
+		hints.ai_protocol = IPPROTO_SCTP;
+		if (getaddrinfo(local_host[i], local_port, &hints, &rp) != 0) {
 			fprintf(stderr, "%s: bad hostname: %s\n", argv0, local_host[i]);
 			exit(1);
 		}
-		memcpy(&laddr.sin_addr, hst->h_addr_list[0],sizeof(laddr.sin_addr));
-		laddr.sin_port = htons(local_port);
-		laddr.sin_family = AF_INET;
 
 		/* Bind this socket to the test port.  */
-		if ( bind(retval, (struct sockaddr *)&laddr, sizeof(laddr)) ) {
+		if (bind(retval, rp->ai_addr, rp->ai_addrlen)) {
 			emsg(argv0,"bind");
 			exit(-1);
 		}
@@ -339,21 +337,19 @@ command_send(char *argv0, int sk)
 {
 	struct msghdr outmsg;
 	struct iovec iov;
-	struct hostent *hst;
-	struct sockaddr_in remote_addr;
+	struct addrinfo hints, *rp;
 	int fd;
 	int msglen;
 	int ct;
 
 	/* Set up the destination.  */
-	hst = gethostbyname(remote_host);
-	if (hst == NULL || hst->h_length < 1) {
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_INET;
+	hints.ai_protocol = IPPROTO_SCTP;
+	if (getaddrinfo(remote_host, remote_port, &hints, &rp) != 0) {
 		fprintf(stderr, "%s: bad hostname: %s\n", argv0, remote_host);
 		exit(1);
 	}
-	memcpy(&remote_addr.sin_addr, hst->h_addr_list[0], sizeof(remote_addr.sin_addr));
-	remote_addr.sin_port = htons(remote_port);
-	remote_addr.sin_family = AF_INET;
 
 	/* Initialize the message struct we use to pass messages to
 	 * the remote socket.
@@ -364,8 +360,8 @@ command_send(char *argv0, int sk)
 	outmsg.msg_iovlen = 1;
 	outmsg.msg_control = NULL;
 	outmsg.msg_controllen = 0;
-	outmsg.msg_name = &remote_addr;
-	outmsg.msg_namelen = sizeof(remote_addr);
+	outmsg.msg_name = rp->ai_addr;
+	outmsg.msg_namelen = rp->ai_addrlen;
 
 	/* open the file */
 	if ( filename == NULL ) fd = 0;
