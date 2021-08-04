@@ -75,7 +75,7 @@ AC_FUNC_REALLOC
 AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_SETVBUF_REVERSED
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS([bzero getaddrinfo gethostbyname gettimeofday memmove memset select socket \
+AC_CHECK_FUNCS([bzero getaddrinfo gettimeofday memmove memset select socket \
 		strchr strerror strtol strtoul])
 
 # Support for stream reset even, added on v4.11, 35ea82d611da
