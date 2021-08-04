@@ -63,13 +63,13 @@ int TST_CNT = 0;
 
 int mode = NOT_DEFINED;
 
-int	assoc_num,
-	remote_port,
-	local_port;
+int assoc_num;
 int active = 0;
 
-char *local_host = NULL;
-char *remote_host = NULL;
+char *local_host;
+char *remote_host;
+char *local_port;
+char *remote_port;
 sockaddr_storage_t client_loop,
 		server_loop;
 struct hostent *hst;
@@ -102,6 +102,7 @@ void usage(char *argv0)
 
 /* Parse command line options */
 void parse_arguments(int argc, char*argv[]) {
+	struct addrinfo hints, *rp;
 	int c;
 
 	while ((c = getopt(argc, argv, ":H:P:ach:ln:p:")) >= 0) {
@@ -110,7 +111,7 @@ void parse_arguments(int argc, char*argv[]) {
 				local_host = optarg;
 				break;
 			case 'P':
-				local_port = atoi(optarg);
+				local_port = optarg;
 				break;
 			case 'c':
 			    if (mode == NOT_DEFINED)
@@ -138,7 +139,7 @@ void parse_arguments(int argc, char*argv[]) {
 				assoc_num = atoi(optarg);
 				break;
 			case 'p':
-				remote_port = atoi(optarg);
+				remote_port = optarg;
 				break;
 			default:
 				usage(argv[0]);
@@ -146,6 +147,9 @@ void parse_arguments(int argc, char*argv[]) {
 		}
 	} /* while() */
 
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_INET;
+	hints.ai_protocol = IPPROTO_SCTP;
 	if (mode == CLIENT) {
 		if (assoc_num) {
 			if (assoc_num > MAXCLIENTNUM) {
@@ -160,13 +164,13 @@ void parse_arguments(int argc, char*argv[]) {
 			assoc_num = 1;
 
 		if (remote_host && remote_port) {
-			hst = gethostbyname(remote_host);
-
-			memcpy(&server_loop.v4.sin_addr, hst->h_addr_list[0],
-				   sizeof(server_loop.v4.sin_addr));
-
-			server_loop.v4.sin_family = AF_INET;
-server_loop.v4.sin_port = htons(remote_port);
+			if (getaddrinfo(remote_host, remote_port, &hints, &rp) != 0) {
+				printf("%s: bad remote hostname or port: %s, %s\n",
+				       argv[0], remote_host, remote_port);
+				usage(argv[0]);
+				exit(0);
+			}
+			memcpy(&server_loop, rp->ai_addr, rp->ai_addrlen);
 		} else {
 			printf("Remote host and remote port must be defined "
 				"in client mode\n");
@@ -174,20 +178,12 @@ server_loop.v4.sin_port = htons(remote_port);
 			exit(0);
 		}
 
-		if (local_host) {
-			hst = gethostbyname(local_host);
-
-			memcpy(&client_loop.v4.sin_addr, hst->h_addr_list[0],
-				   sizeof(client_loop.v4.sin_addr));
-		} else
-			client_loop.v4.sin_addr.s_addr = INADDR_ANY;
-
-		if (local_port)
-			client_loop.v4.sin_port = htons(local_port);
-		else
-			client_loop.v4.sin_port = 0;
-
-		client_loop.v4.sin_family = AF_INET;
+		if (getaddrinfo(local_host, local_port, &hints, &rp) != 0) {
+			printf("%s: bad local hostname or port: %s, %s\n",
+			       argv[0], local_host, local_port);
+			exit(0);
+		}
+		memcpy(&client_loop, rp->ai_addr, rp->ai_addrlen);
 	} else if (mode == SERVER) {
 		if (active) {
 			printf("This option if for client use only");
@@ -201,23 +197,17 @@ server_loop.v4.sin_port = htons(remote_port);
 			exit(0);
 		}
 
-		if (local_host) {
-			hst = gethostbyname(local_host);
-
-			memcpy(&server_loop.v4.sin_addr, hst->h_addr_list[0],
-				   sizeof(server_loop.v4.sin_addr));
-		} else
-			server_loop.v4.sin_addr.s_addr = INADDR_ANY;
-
-		if (local_port)
-			server_loop.v4.sin_port = htons(local_port);
-		else {
+		if (!local_port) {
 			printf("Specify a local port in server mode.\n");
 			usage(argv[0]);
 			exit(0);
 		}
-
-		server_loop.v4.sin_family = AF_INET;
+		if (getaddrinfo(local_host, local_port, &hints, &rp) != 0) {
+			printf("%s: bad local hostname or port: %s, %s\n",
+			       argv[0], local_host, local_port);
+			exit(0);
+		}
+		memcpy(&server_loop, rp->ai_addr, rp->ai_addrlen);
 	} else {
 		printf("Must assisgn a client or server mode.\n");
 		usage(argv[0]);
