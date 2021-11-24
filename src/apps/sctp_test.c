@@ -499,6 +499,9 @@ append_addr(const char *parm, struct sockaddr *addrs, int *ret_count)
 	char *ifname;
 	int ifindex = 0;
 
+	if (!ipaddr)
+		return NULL;
+
 	/* check the interface. */
 	ifname = strchr(ipaddr,'%');
 	if (ifname) {
