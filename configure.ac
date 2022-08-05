@@ -107,6 +107,9 @@ LKSCTP_CHECK_MEMBER([struct sctp_paddrparams.spp_ipv6_flowlabel],
 LKSCTP_CHECK_MEMBER([struct sctp_paddrparams.spp_dscp],
 		    [HAVE_SCTP_SPP_DSCP])
 
+# RFC 8260 (Message Interleaving)
+LKSCTP_CHECK_DECL([SCTP_FRAGMENT_INTERLEAVE], [HAVE_SCTP_FRAGMENT_INTERLEAVE])
+
 AC_CONFIG_HEADERS([src/include/netinet/sctp.h])
 AC_CONFIG_FILES([lksctp-tools.spec
 		Makefile

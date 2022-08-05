@@ -28,6 +28,8 @@ test_getname
 test_getname_v6
 test_inaddr_any
 test_inaddr_any_v6
+test_interleave
+test_interleave_v6
 test_peeloff
 test_peeloff_v6
 test_recvmsg
