@@ -75,6 +75,13 @@ PASSING_V6_KERN_TESTS += \
 	test_interleave_v6
 endif
 
+if HAVE_SCTP_STREAM_RECONFIG
+PASSING_KERN_TESTS += \
+	test_re_conf
+PASSING_V6_KERN_TESTS += \
+	test_re_conf_v6
+endif
+
 noinst_PROGRAMS = ${PASSING_KERN_TESTS} ${PASSING_V6_KERN_TESTS}
 
 $(top_builddir)/src/lib/libsctp.la:
@@ -187,3 +194,6 @@ test_tcp_style_v6_CFLAGS = ${V6FLAGS}
 
 test_interleave_v6_SOURCES = test_interleave.c
 test_interleave_v6_CFLAGS = ${V6FLAGS}
+
+test_re_conf_v6_SOURCES = test_re_conf.c
+test_re_conf_v6_CFLAGS = ${V6FLAGS}

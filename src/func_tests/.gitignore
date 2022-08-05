@@ -32,6 +32,8 @@ test_interleave
 test_interleave_v6
 test_peeloff
 test_peeloff_v6
+test_re_conf
+test_re_conf_v6
 test_recvmsg
 test_sctp_sendrecvmsg
 test_sctp_sendrecvmsg_v6
