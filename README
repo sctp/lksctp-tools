@@ -124,14 +124,14 @@ set of tests for the code.  We can not safely refactor major parts of
 the code without a way to find the things we break.  If you decide to
 extend the SCTP Kernel Implementation we ask that you do the following:
 
-	1) Pick an XP story.  Tell lksctp-developers@lists.sourceforge.net
+	1) Pick an XP story.  Tell linux-sctp@vger.kernel.org
 	2) Write a functional test for that XP story.  The functional
 	   test defines "DONE" for the story.
-	3) Submit the functional test as a patch on SourceForge.
+	3) Submit the functional test as a Pull Request on GitHub.
 	4) Write unit tests for any new "objects" you define.
 	5) Implement your feature.
 	6) Submit the feature and the unit tests as a separate
-	SourceForge patch.
+	GitHub Pull Request.
 	
 Look in src/func_tests and in lksctp-tests package for examples of of tests.
 Please do not submit code that fails its own tests or any of the unit tests.
@@ -156,9 +156,10 @@ The simulator makes a few simplifying assumptions...
 
 MAILING LISTS and WEB SITES
 ---------------------------
-http://www.sourceforge.net/projects/lksctp
+https://github.com/sctp/lksctp-tools/
 
-	This is the lksctp project webpage.  
+	This is the lksctp project webpage.  The wiki section contains
+	more info about it, including which RFCs it supports.
 
 linux-sctp@vger.kernel.org
 	
