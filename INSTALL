@@ -36,57 +36,23 @@ later kernel.
 
 To install/build the lksctp-tools utilities/tests do the following:
 
-1) Download and install the following binary RPMs from the lksctp sourceforge
-   website at 
-	http://sourceforge.net/project/showfiles.php?group_id=26529
-   * lksctp-tools-x.y.z-1.i386.rpm
-   * lksctp-tools-x.y.z-devel-1.i386.rpm
-   * lksctp-tools-x.y.z-doc-1.i386.rpm
-
-   lksctp-tools-x.y.z-1.i386.rpm includes 
-   * SCTP run-time library.
-   * Sample SCTP applications: sctp_darn and sctp_test.
-   * withsctp: a tool when used with existing TCP binaries replaces TCP
-               with SCTP.
-
-   lksctp-tools-x.y.z-devel-1.i386.rpm includes
-   * SCTP header file /usr/include/netinet/sctp.h
-   * SCTP man pages.
-   * Source code for sample SCTP applications.
-
-   lksctp-tools-x.y.z-doc-1.i386.rpm includes
-   * SCTP RFC's and internet drafts. 
-
-   If you want to run and play with the included sample SCTP applications or 
-   develop your own SCTP applications, you can skip the rest of the
-   instructions.
-
-   If you are interested in running the functional regression tests included
-   in the lksctp-tools package, continue with the following instructions.
-
-2) Download and install the following source RPM form the lksctp sourceforge
-   website at 
-        http://sourceforge.net/project/showfiles.php?group_id=26529
-   * lksctp-tools-x.y.z-1.src.rpm
-   This will install the lksctp-tools gzipped tarball and RPM spec file. 
-
-3) Untar the lksctp-tools directory from the gzipped tarball. This creates a 
+1) Untar the lksctp-tools directory from the gzipped tarball. This creates a 
    subdirectory called lksctp-tools-x.y.z. 
 
    Ensure you have autoconf, automake and libtool packages installed on your
    system.
 
-4) Run ./bootstrap
+2) Run ./bootstrap
 
-5) Run ./configure
+3) Run ./configure
 
-6) Run make
+4) Run make
 
-7) To run the SCTP kernel regression tests,
+5) To run the SCTP kernel regression tests,
   
    $ cd src/func_tests
    $ make v4test (regression tests for the IPv4 socket support)
    $ make v6test (regression tests for the IPv6 socket support)
 
-8) Run other SCTP test tools/applications in src/apps directory to verify the
+6) Run other SCTP test tools/applications in src/apps directory to verify the
    running SCTP.
