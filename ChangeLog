@@ -67,13 +67,13 @@ T:API         Support for non-blocking sctp-connectx
 lksctp-2.6.28-1.0.11: Wed Oct 21 16:53:41 EDT 2009
 T:BUILD       fix parallel build warning
 T:BUILD       fix make distcheck for lksctp-tools
-T:BUILD       fix compiler warnings in the libraray, apps and tests
+T:BUILD       fix compiler warnings in the library, apps and tests
 T:API         Update the sctp.h header to match the kernel.
 
 lksctp-2.6.28-1.0.10: Fri Mar 27 11:15:25 EDT 2009
 T:TEST	      Split the kernel frame test framework from lksctp-tools.  The
               framework is very sensitive to all kernel changes, not just ones
-	      related to SCTP.  As such, it has been a gating fractor to the
+	      related to SCTP.  As such, it has been a gating factor to the
 	      releases of the new tools.
 T:APP	      New tool sctp_status to be used with SCTP conformance tests.
               http://networktest.sourceforge.net/
@@ -96,7 +96,7 @@ T:NA          Process withsctp.in at build time
 K:Patch       Add documentation for sctp sysctl variable
 K:NA          Mark the tsn as received after all allocations finish
 K:NA          Make sure N * sizeof(union sctp_addr) does not overflow.
-K:NA          Correclty set changeover_active for SFR-CACC
+K:NA          Correctly set changeover_active for SFR-CACC
 K:NA          Correctly cleanup procfs entries upon failure.
 K:NA          Fix ECN markings for IPv6
 K:NA          Flush the queue only once during fast retransmit.
@@ -106,12 +106,12 @@ K:NA          Move sctp_v4_dst_saddr out of loop
 K:NA          retran_path update bug fix
 K:NA          Fix NULL dereference of asoc.
 K:NA          Fix use of uninitialized pointer
-K:NA          Add address type check while process paramaters of ASCONF chunk
+K:NA          Add address type check while process parameters of ASCONF chunk
 K:NA          Do not enable peer IPv6 address support on PF_INET socket
 K:NA          Initialize partial_bytes_acked to 0, when all of the data is acked
 K:NA          IPv4 vs IPv6 addresses mess in sctp_inet[6]addr_event.
 K:NA          Fix compiler warning about const qualifiers
-K:NA          Fix protocol violation when receiving an error lenght INIT-ACK
+K:NA          Fix protocol violation when receiving an error length INIT-ACK
 K:NA          Add check for hmac_algo parameter in sctp_verify_param()
 K:Patch       New sctp mailing list
 K:NA          Remove an unused parameter from sctp_cmd_hb_timer_update
@@ -155,7 +155,7 @@ K:NA          Do not increase rwnd when reading partial notification.
 K:Patch       Stop claiming that this is a "reference implementation"
 K:NA          Fix miss of report unrecognized HMAC Algorithm parameter
 K:NA          Correctly initialize error when parameter validation failed.
-K:Patch       Follow Add-IP security consideratiosn wrt INIT/INIT-ACK
+K:Patch       Follow Add-IP security considerations wrt INIT/INIT-ACK
 K:Patch       Implement ADD-IP special case processing for ABORT chunk
 K:Patch       Change use_as_src into a full address state
 K:Patch       Update ASCONF processing to conform to spec.
@@ -178,11 +178,11 @@ K:NA          Fix the bind_addr info during migration.
 K:NA          Add bind hash locking to the migrate code
 K:NA          Fix build issues with SCTP AUTH.
 K:NA          Fix chunk acceptance when no authenticated chunks were listed.
-K:NA          Fix the supported extensions paramter
-K:NA          Fix SCTP-AUTH to correctly add HMACS paramter.
+K:NA          Fix the supported extensions parameter
+K:NA          Fix SCTP-AUTH to correctly add HMACS parameter.
 K:NA          Fix the number of HB transmissions.
 K:NA          Add missing "space"
-K:NA          Always flush the queue when uncorcking.
+K:NA          Always flush the queue when uncorking.
 K:NA          Clean-up some defines for regressions tests.
 K:NA          Fix PR-SCTP to deliver all the accumulated ordered chunks
 K:NA          Make sctp_verify_param return multiple indications.
@@ -202,7 +202,7 @@ K:NA          #if 0 sctp_update_copy_cksum()
 K:NA          Consolidate sctp_ulpq_renege_xxx functions
 Patch         port randomization
 Patch         Tie ADD-IP and AUTH functionality as required by spec.
-Patch         API updates to suport SCTP-AUTH extensions.
+Patch         API updates to support SCTP-AUTH extensions.
 Patch         Implement the receive and verification of AUTH chunk
 Patch         Enable the sending of the AUTH chunk.
 Patch         Implement SCTP-AUTH parameter processing
@@ -214,10 +214,10 @@ Patch         Implement the Supported Extensions Parameter
 K:NA          net/sctp/socket.c: make 3 variables static
 K:NA          Make sctp_addto_param() static.
 Patch         Rewrite of sctp buffer management code
-K:NA          Add paramters validity check for ASCONF chunk
-K:NA          Discard OOTB packetes with bundled INIT early.
+K:NA          Add parameters validity check for ASCONF chunk
+K:NA          Discard OOTB packets with bundled INIT early.
 K:NA          Clean up OOTB handling and fix infinite loop processing
-K:NA          Explicitely discard OOTB chunks
+K:NA          Explicitly discard OOTB chunks
 K:NA          Send ABORT chunk with correct tag in response to INIT ACK
 K:NA          Validate buffer room when processing sequential chunks
 K:NA          Convert bind_addr_list locking to RCU
@@ -226,7 +226,7 @@ K:NA          Fix to handle invalid parameter length correctly
 K:NA          Abort on COOKIE-ECHO if backlog is exceeded.
 K:NA          Correctly disable listening when backlog is 0.
 K:NA          Do not retransmit chunks that are newer then rtt.
-K:NA          Uncomfirmed transports can't become Inactive
+K:NA          Unconfirmed transports can't become Inactive
 K:NA          Pick the correct port when binding to 0.
 K:NA          Use net_ratelimit to suppress error messages print too fast
 K:NA          Fix to encode PROTOCOL VIOLATION error cause correctly
@@ -740,7 +740,7 @@ NA           Update to 2.5.43 kernel. (samudrala)
 Bug   623286 SHUTDOWN_COMPLETE has 0 vtag on lost SDC + restart. (samudrala)
 Patch 601756 VTAG checks for ABORT and SHUTDOWN_COMPLETE chunks. (ardelle.fan)
 Patch 619993 Fixes a couple of sctp_peeloff() issues. (samudrala)
-Bug   611919 Fast retranmist should ignore cwnd limit. (daisyc)
+Bug   611919 Fast retransmit should ignore cwnd limit. (daisyc)
 Bug   611840 Restart address needs to check INIT and happen earlier (jgrimm)
 
 lksctp-2_5_41-0_6_0:
