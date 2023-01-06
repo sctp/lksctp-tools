@@ -1,5 +1,5 @@
 This is the style guide for the LKSCTP Project.
-<http://www.sf.net/projects/lksctp/>
+<https://github.com/sctp/lksctp-tools//>
 
 1.0 Introduction
 

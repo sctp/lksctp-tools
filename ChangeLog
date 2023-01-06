@@ -913,13 +913,5 @@ Bug   473322 Sendmsg insists on msg_name (jgrimm)
 
 
 If you would like to follow the day-to-day development of the SCTP
-kernel, refer to:
-
-   http://lists.sourceforge.net/lists/listinfo/lksctp-developers
-
-Post messages for the developers (including bug reports) to
-
-   lksctp-developers@lists.sourceforge.net
-
-If you wish to participate in development, please subscribe to the
-developers' list, drop a note to lksctp-developers.
+kernel, please refer to the README file for contact information and how to
+collaborate.

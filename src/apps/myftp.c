@@ -27,7 +27,7 @@
  *    lksctp developers <sctp-developers-list@cig.mot.com>
  * 
  * Or submit a bug report through the following website:
- *    http://www.sf.net/projects/lksctp
+ *    https://github.com/sctp/lksctp-tools/
  *
  * Written or modified by: 
  *    Xingang Guo           <xingang.guo@intel.com>

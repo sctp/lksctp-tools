@@ -11,5 +11,5 @@ $ make all
 # make install
 
 This package originally written by La Monte H.P. Yarroll <piggy@acm.org>.
-To submit fixes or bug reports see lksctp.sourceforget.net.
-You can try the author or lksctp-developers@lists.sourceforget.net for support.
+To submit fixes or bug reports see https://github.com/sctp/lksctp-tools/
+You can try linux-sctp@vger.kernel.org for support.
