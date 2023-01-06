@@ -217,7 +217,7 @@ Patch         Rewrite of sctp buffer management code
 K:NA          Add paramters validity check for ASCONF chunk
 K:NA          Discard OOTB packetes with bundled INIT early.
 K:NA          Clean up OOTB handling and fix infinite loop processing
-K:NA          Explicitely discard OOTB chunks
+K:NA          Explicitly discard OOTB chunks
 K:NA          Send ABORT chunk with correct tag in response to INIT ACK
 K:NA          Validate buffer room when processing sequential chunks
 K:NA          Convert bind_addr_list locking to RCU
