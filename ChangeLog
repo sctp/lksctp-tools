@@ -111,7 +111,7 @@ K:NA          Do not enable peer IPv6 address support on PF_INET socket
 K:NA          Initialize partial_bytes_acked to 0, when all of the data is acked
 K:NA          IPv4 vs IPv6 addresses mess in sctp_inet[6]addr_event.
 K:NA          Fix compiler warning about const qualifiers
-K:NA          Fix protocol violation when receiving an error lenght INIT-ACK
+K:NA          Fix protocol violation when receiving an error length INIT-ACK
 K:NA          Add check for hmac_algo parameter in sctp_verify_param()
 K:Patch       New sctp mailing list
 K:NA          Remove an unused parameter from sctp_cmd_hb_timer_update
