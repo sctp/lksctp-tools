@@ -178,8 +178,8 @@ K:NA          Fix the bind_addr info during migration.
 K:NA          Add bind hash locking to the migrate code
 K:NA          Fix build issues with SCTP AUTH.
 K:NA          Fix chunk acceptance when no authenticated chunks were listed.
-K:NA          Fix the supported extensions paramter
-K:NA          Fix SCTP-AUTH to correctly add HMACS paramter.
+K:NA          Fix the supported extensions parameter
+K:NA          Fix SCTP-AUTH to correctly add HMACS parameter.
 K:NA          Fix the number of HB transmissions.
 K:NA          Add missing "space"
 K:NA          Always flush the queue when uncorcking.
@@ -214,7 +214,7 @@ Patch         Implement the Supported Extensions Parameter
 K:NA          net/sctp/socket.c: make 3 variables static
 K:NA          Make sctp_addto_param() static.
 Patch         Rewrite of sctp buffer management code
-K:NA          Add paramters validity check for ASCONF chunk
+K:NA          Add parameters validity check for ASCONF chunk
 K:NA          Discard OOTB packetes with bundled INIT early.
 K:NA          Clean up OOTB handling and fix infinite loop processing
 K:NA          Explicitly discard OOTB chunks
