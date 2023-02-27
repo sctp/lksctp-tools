@@ -121,7 +121,10 @@ files.
 Displays the following information about the active associations.
 assoc ptr, sock ptr, socket style, sock state, association state, hash bucket,
 association id, bytes in transmit queue, bytes in receive queue, user id, 
-inode, local port, remote port, local addresses and remote addresses.
+inode, local port, remote port, local addresses, remote addresses,
+heartbeat interval, in streams, out streams, max retransmissions, init retries,
+shutdown retries, retransmitted chunks, sock transmit queue committed bytes,
+sock transmit queue bytes, and sock send and receive buffer bytes.
 .TP
 .B eps
 Displays the following information about the active endpoints.
@@ -196,6 +199,51 @@ The number of SCTP packets sent. Retransmitted DATA chunks are included.
 .TP
 .B SctpInSCTPPacks
 The number of SCTP packets received. Duplicates are included.
+.TP
+.B SctpT1InitExpireds
+The number of timer T1 INIT expired.
+.TP
+.B SctpT1CookieExpireds
+The number of timer T1 COOKIE-ECHO expired.
+.TP
+.B SctpT2ShutdownExpireds
+The number of timer T2 SHUTDOWN expired.
+.TP
+.B SctpT3RtxExpireds
+The number of timer T3 RTX expired.
+.TP
+.B SctpT4RtoExpireds
+The number of timer T4 RTO expired.
+.TP
+.B SctpT5ShutdownGuardExpireds
+The number of timer T5 SHUTDOWN GUARD expired.
+.TP
+.B SctpDelaySackExpireds
+The number of timer DELAY_SACK expired.
+.TP
+.B SctpAutocloseExpireds
+The number of timer AUTOCLOSE expired.
+.TP
+.B SctpT3Retransmits
+The number of T3 timer retransmission.
+.TP
+.B SctpPmtudRetransmits
+The number of PMTUD retransmission.
+.TP
+.B SctpFastRetransmits
+The number of FAST retransmission.
+.TP
+.B SctpInPktSoftirq
+The number of SCTP packets received in Softirq.
+.TP
+.B SctpInPktBacklog
+The number of SCTP packets received in Backlog.
+.TP
+.B SctpInPktDiscards
+The number of SCTP packets discarded in receiving.
+.TP
+.B SctpInDataChunkDiscards
+The number of SCTP data chunks discarded in receiving.
 .SH "SOCKET OPTIONS"
 To set or get a SCTP socket option, call
 .BR getsockopt (2)
