@@ -123,7 +123,9 @@ int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 	       struct sockaddr *addrs, int addrcnt, void *info,
 	       socklen_t infolen, unsigned int infotype, int flags)
 {
-	char _cmsg[CMSG_SPACE(sizeof(struct sctp_sendv_spa))];
+	char _cmsg[CMSG_SPACE(sizeof(struct sctp_sndinfo)) +
+		   CMSG_SPACE(sizeof(struct sctp_prinfo)) +
+		   CMSG_SPACE(sizeof(struct sctp_authinfo))];
 	struct cmsghdr *cmsg = (struct cmsghdr *)_cmsg;
 	struct msghdr outmsg = {};
 	struct sockaddr *addr;

@@ -105,8 +105,8 @@ int sctp_recvv(int s, const struct iovec *iov, int iovlen,
 	       struct sockaddr *from, socklen_t *fromlen, void *info,
 	       socklen_t *infolen, unsigned int *infotype, int *flags)
 {
-	char incmsg[CMSG_SPACE(sizeof(struct sctp_rcvinfo) +
-			       sizeof(struct sctp_nxtinfo))];
+	char incmsg[CMSG_SPACE(sizeof(struct sctp_rcvinfo)) +
+		    CMSG_SPACE(sizeof(struct sctp_nxtinfo))];
 	int error, len, _infolen;
 	struct cmsghdr *cmsg;
 	struct msghdr inmsg;
