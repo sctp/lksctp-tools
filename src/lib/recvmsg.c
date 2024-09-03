@@ -86,6 +86,11 @@ int sctp_recvmsg(int s, void *msg, size_t len, struct sockaddr *from,
 	if (!sinfo)
 		return error;
 
+	/* zero-initialize sctp_assoc_id, as the kernel always uses sctp_assoc_id > 0
+	 * and hence the caller can check for sinfo_assoc_id != 0 to determine if the kernel
+	 * actually provided a SCPT_SNDRCV cmsg below. */
+	sinfo->sinfo_assoc_id = 0;
+
 	for (cmsg = CMSG_FIRSTHDR(&inmsg); cmsg != NULL;
 				 cmsg = CMSG_NXTHDR(&inmsg, cmsg)){
 		if ((IPPROTO_SCTP == cmsg->cmsg_level) &&
