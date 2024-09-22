@@ -1,7 +1,15 @@
-Version 1.0.19 of the Developers' Release of the SCTP
+Version 1.0.20 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.20: Sun Sep 22 16:08:56 EDT 2024
+T:APP         Replace use of deprecated gethostbyname with getaddrinfo
+T:APP         Check strdup return in append_addr
+T:LIB         Define cmsg array with correct size in sendv and recvv
+T:LIB         zero-initialize sinfo_assoc_id in sctp_rcvmsg
+T:LIB         Man page updates
+T:TEST        Add a test case for RE_CONFIG and interleaving
 
 lksctp-1.0.19: Wed Apr 28 02:51:29 PM -03 2021
 T:LIB         Fixes ignored parameter on sctp_sendv
