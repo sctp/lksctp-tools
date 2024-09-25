@@ -13,12 +13,12 @@ dnl (CONFIG_AUX_DIR is for putting stuff in $TOPSRCDIR/bin, so we
 dnl reduce clutter in the root; if we put it below AM_INIT_AUTOMAKE,
 dnl configure will fail ...)
 
-AC_INIT([lksctp-tools], [1.0.20], [], [], [http://www.lksctp.org/])
+AC_INIT([lksctp-tools], [1.0.21], [], [], [http://www.lksctp.org/])
 AC_SUBST(LIBSCTP_CURRENT, 1)
-AC_SUBST(LIBSCTP_REVISION, 20)
+AC_SUBST(LIBSCTP_REVISION, 21)
 AC_SUBST(LIBSCTP_AGE, 0)
 AC_SUBST(LIBWITHSCTP_CURRENT, 1)
-AC_SUBST(LIBWITHSCTP_REVISION, 20)
+AC_SUBST(LIBWITHSCTP_REVISION, 21)
 AC_SUBST(LIBWITHSCTP_AGE, 0)
 
 AC_CONFIG_AUX_DIR(bin)

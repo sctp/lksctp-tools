@@ -1,7 +1,14 @@
-Version 1.0.20 of the Developers' Release of the SCTP
+Version 1.0.21 of the Developers' Release of the SCTP
 Linux Kernel Implementation is available from
 
         http://www.kernel.org
+
+lksctp-1.0.21: Thu Sep 26 16:23:06 EDT 2024
+T:APP         Close some opened sockets in sctp_darn and sctp_test
+T:APP         Free host_s and serv_s in sctp_test and sctp_status
+T:TEST        Call close on the correct sk in test_1_to_1_send
+T:TEST        Free the allocated buffers before return
+T:TEST        Replace malloc with test_malloc
 
 lksctp-1.0.20: Sun Sep 22 16:08:56 EDT 2024
 T:APP         Replace use of deprecated gethostbyname with getaddrinfo
