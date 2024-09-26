@@ -308,10 +308,7 @@ test_build_msg(int len)
 		"012345678901234567890123456789012345678901234567890";
 	char *msg_buf, *p;
 
-	msg_buf = (char *)malloc(len);
-	if (!msg_buf)
-		tst_brkm(TBROK, tst_exit, "malloc failed");
-
+	msg_buf = (char *)test_malloc(len);
 	p = msg_buf;
 
 	do {
@@ -368,7 +365,9 @@ int test_peer_addr(int sk, sctp_assoc_t asoc, sockaddr_storage_t *peers, int cou
 	struct sockaddr *sa_addr;
 	socklen_t addrs_size = 0;
 	void *addrbuf;
-	char *found = (char *) malloc(count);
+	char *found;
+
+	found = (char *)test_malloc(count);
 	memset(found, 0, count);
 
 	error = sctp_getpaddrs(sk, asoc, &addrs);
