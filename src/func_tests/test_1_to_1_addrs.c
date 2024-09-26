@@ -285,5 +285,6 @@ main(int argc, char *argv[])
 
 	close(clnt_sk);
 
+	free(buffer_rcv);
 	return 0;
 }

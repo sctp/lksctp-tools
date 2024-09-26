@@ -155,6 +155,8 @@ main(int argc, char *argv[])
 	close(svr_sk);
 	close(clt_sk);
 
-        /* Indicate successful completion.  */
-        return 0;
+	free(big_buffer);
+	free(msg_buf);
+	/* Indicate successful completion.  */
+	return 0;
 }

@@ -222,5 +222,6 @@ main(int argc, char *argv[])
 	close(sk1);
 	close(lstn_sk);
 
+	free(tmp_addr);
 	return 0;
 }

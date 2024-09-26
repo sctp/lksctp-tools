@@ -205,5 +205,7 @@ main(int argc, char *argv[])
 
 	close(lstn_sk);
 	close(acpt_sk);
+
+	free(buffer_rcv);
 	return 0;
 }

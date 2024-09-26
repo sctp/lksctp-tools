@@ -1142,6 +1142,7 @@ main(void)
 	close(accept_sk);
 	close(peeloff_sk);
 
-        /* Indicate successful completion.  */
-        return 0;
+	free(big_buffer);
+	/* Indicate successful completion.  */
+	return 0;
 }

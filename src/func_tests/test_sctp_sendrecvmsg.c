@@ -365,6 +365,9 @@ int main(int argc, char *argv[])
 
 	close(sk2);
 
+	free(big_buffer);
+	free(fillmsg);
+
 	/* Indicate successful completion.  */
 	return 0;	
 }

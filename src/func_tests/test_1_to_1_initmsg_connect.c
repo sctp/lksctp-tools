@@ -115,6 +115,7 @@ main (int argc, char **argv)
 	close (sk1);
 	close (sk2);
 	close (sk3);
-	
-        return 0;
+
+	free(buffer_rcv);
+	return 0;
 }

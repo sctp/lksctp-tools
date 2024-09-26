@@ -450,6 +450,7 @@ int main(void)
 
         close(sk2);
 
-        /* Indicate successful completion.  */
-       	return 0; 
+	free(big_buffer);
+	/* Indicate successful completion.  */
+	return 0;
 }

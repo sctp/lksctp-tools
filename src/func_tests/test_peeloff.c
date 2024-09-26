@@ -294,6 +294,7 @@ main(int argc, char *argv[])
 		close(clt_sk[i]);
 	}
 
-        /* Indicate successful completion.  */
-       	return 0; 
+	free(big_buffer);
+	/* Indicate successful completion.  */
+	return 0;
 }

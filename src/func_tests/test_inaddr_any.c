@@ -246,6 +246,7 @@ main(void)
 
 	tst_resm(TPASS, "send msgs from a socket with INADDR_ANY bind address");
 
-        /* Indicate successful completion.  */
-        return 0;
+	free(iov.iov_base);
+	/* Indicate successful completion.  */
+	return 0;
 }
