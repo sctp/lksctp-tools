@@ -814,7 +814,7 @@ int connectx_r(int sk, struct sockaddr *addrs, int count)
 
 int receive_r(int sk, int once)
 {
-	int recvsk = sk, i = 0, error = 0;
+	int recvsk = sk, i = 0, error = 0, ret = -1;
         char incmsg[CMSG_SPACE(sizeof(_sctp_cmsg_data_t))];
         struct iovec iov;
         struct msghdr inmessage;
@@ -879,16 +879,15 @@ int receive_r(int sk, int once)
 			break;
 	}
 
+	ret = 0;
+
+error_out:
 	if (recvsk != sk)
 		close(recvsk);
-
+	if (ret)
+		close(sk);
 	free(iov.iov_base);
-	return 0;
-error_out:
-	close(sk);
-	free(iov.iov_base);
-	return -1;
-
+	return ret;
 } /* receive_r () */
 
 int next_order(int state, int pattern)
@@ -1377,6 +1376,7 @@ void start_test(int role)
 
 	if (bind_r(sk, &s_loc) == -1) {
 		DEBUG_PRINT(DEBUG_NONE, "\nSocket bind err %d\n", errno);
+		close(sk);
 		return;
 	}
 

@@ -655,6 +655,10 @@ command_listen(char *argv0, int sk)
 			}
 			fflush(stdout);
 			if (NULL == fgets(message, REALLY_BIG, stdin)) {
+				if (socket_type == SOCK_STREAM && recvsk) {
+					close(recvsk);
+					recvsk = 0;
+				}
 				done = 1;
 				continue;
 			}
