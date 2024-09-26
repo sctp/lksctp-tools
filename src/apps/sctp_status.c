@@ -314,6 +314,8 @@ int main(int argc, char *argv[]) {
 		DEBUG_PRINT(DEBUG_MAX, "remote:addr=%s, port=%s, family=%d\n",
 			    host_s, serv_s, res->ai_family);
 
+		free(host_s);
+		free(serv_s);
 		freeaddrinfo(res);
         }
 
@@ -384,6 +386,8 @@ int main(int argc, char *argv[]) {
 		DEBUG_PRINT(DEBUG_MAX, "local:addr=%s, port=%s, family=%d\n",
 			    host_s, serv_s, res->ai_family);
 
+		free(host_s);
+		free(serv_s);
 		freeaddrinfo(res);
         }
 
@@ -438,6 +442,8 @@ int bind_r(int sk, struct sockaddr_storage *saddr) {
 		}
 	} while (error < 0 && i < MAX_BIND_RETRYS);
 
+	free(host_s);
+	free(serv_s);
 	return 0;
 } /* bind_r() */
 

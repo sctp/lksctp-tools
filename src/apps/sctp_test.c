@@ -1716,6 +1716,8 @@ main(int argc, char *argv[])
 		DEBUG_PRINT(DEBUG_MAX, "remote:addr=%s, port=%s, family=%d\n",
 			    host_s, serv_s, res->ai_family);
 
+		free(host_s);
+		free(serv_s);
 		freeaddrinfo(res);
         }
 
@@ -1804,6 +1806,8 @@ main(int argc, char *argv[])
 		DEBUG_PRINT(DEBUG_MAX, "local:addr=%s, port=%s, family=%d\n",
 			    host_s, serv_s, res->ai_family);
 
+		free(host_s);
+		free(serv_s);
 		freeaddrinfo(res);
         }
 
