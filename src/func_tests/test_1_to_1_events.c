@@ -200,5 +200,6 @@ main(int argc, char *argv[])
 	close(svr_sk);
 	close(acpt_sk);
 
+	free(big_buffer);
 	return 0;
 }

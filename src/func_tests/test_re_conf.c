@@ -245,7 +245,7 @@ main(int argc, char *argv[])
 	free(buffer);
 	free(srs);
 	free(sas);
-
+	free(msg_buffer);
 	/*Indicate successful completion*/
 	exit(EXIT_SUCCESS);
 }

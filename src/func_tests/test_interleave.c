@@ -215,6 +215,7 @@ main(int argc, char *argv[])
 	inmessage.msg_controllen = sizeof(incmsg);
 	error = test_recvmsg(sk2, &inmessage, MSG_WAITALL);
 	test_check_msg_data(&inmessage, error, msg_len, MSG_EOR, stream, ppid);
+	free(msg_buffer);
 
 	/* TEST #2: Verify data integrity */
 	msg_len = MSG_SIZE;
@@ -248,7 +249,7 @@ main(int argc, char *argv[])
 	close(sk2);
 
 	free(buffer);
-
+	free(msg_buffer);
 	/* Indicate successful completion */
 	return 0;
 }

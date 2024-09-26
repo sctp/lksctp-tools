@@ -458,6 +458,7 @@ main(int argc, char *argv[])
 	close(accept2_sk);
 	close(listen_sk);
 
-        /* Indicate successful completion.  */
+	free(big_buffer);
+	/* Indicate successful completion.  */
 	return 0;
 }

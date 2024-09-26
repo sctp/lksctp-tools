@@ -229,6 +229,7 @@ main(int argc, char *argv[])
 	if ((error != -1) || (errno != EMSGSIZE))
        		tst_brkm(TBROK, tst_exit, "Send a message that exceeds "
 			 "assoc frag point error:%d errno:%d", error, errno);
+	free(msg_buf);
 
 	tst_resm(TPASS, "Send a message that exceeds assoc frag point");
 
@@ -289,9 +290,10 @@ main(int argc, char *argv[])
 	test_check_msg_notification(&inmessage, error,
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_SHUTDOWN_COMP);
-				
-        close(sk2);
 
-        /* Indicate successful completion.  */
-       	return 0; 
+	close(sk2);
+
+	free(big_buffer);
+	/* Indicate successful completion.  */
+	return 0;
 }

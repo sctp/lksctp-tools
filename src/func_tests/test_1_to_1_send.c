@@ -237,5 +237,6 @@ main(int argc, char *argv[])
 	close(lstn_sk);
 	close(acpt_sk);
 
+	free(message_rcv);
 	return 0;
 }

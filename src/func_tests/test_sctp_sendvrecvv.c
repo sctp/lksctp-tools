@@ -266,5 +266,11 @@ int main(int argc, char *argv[])
 	close(sk1);
 	close(sk2);
 
+#if TEST_V6
+	free(v6addrs);
+#else
+	free(v4addrs);
+#endif
+	free(iov.iov_base);
 	return 0;
 }

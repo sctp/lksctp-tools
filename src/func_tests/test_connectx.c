@@ -265,6 +265,7 @@ main(int argc, char *argv[])
 	close(clt_sk2);
 	close(peeloff_sk);
 
+	free(big_buffer);
 	/* Indicate successful completion.  */
 	return 0; 
 }

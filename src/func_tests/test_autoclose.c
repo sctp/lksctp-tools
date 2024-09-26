@@ -162,6 +162,7 @@ main(int argc, char *argv[])
 	close(sk1);
 	close(sk2);
 
+	free(big_buffer);
 	/* Indicate successful completion.  */
 	return 0;
 }

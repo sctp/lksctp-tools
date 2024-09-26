@@ -240,6 +240,7 @@ main(int argc, char *argv[])
 
 	tst_resm(TPASS, "Graceful shutdown of associations using SCTP_EOF"); 
 
-        /* Indicate successful completion.  */
-        return 0;
+	free(big_buffer);
+	/* Indicate successful completion.  */
+	return 0;
 }

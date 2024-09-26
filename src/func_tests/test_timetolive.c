@@ -388,8 +388,10 @@ int main(int argc, char *argv[])
 				    sizeof(struct sctp_assoc_change),
 				    SCTP_ASSOC_CHANGE, SCTP_SHUTDOWN_COMP);
 
-        close(sk2);
+	close(sk2);
 
-        /* Indicate successful completion.  */
-        return 0;
+	free(big_buffer);
+	free(fillmsg);
+	/* Indicate successful completion.  */
+	return 0;
 }
