@@ -233,7 +233,7 @@ main(int argc, char *argv[])
 	test_recv(acpt_sk, message_rcv, strlen(message) + 1, flag);
 	tst_resm(TPASS, "sctp_send() with no sinfo - SUCCESS");
 
-	close(sk1);
+	close(sk);
 	close(lstn_sk);
 	close(acpt_sk);
 
