@@ -80,7 +80,7 @@ main(int argc, char *argv[])
         setvbuf(stdout, NULL, _IONBF, 0);
         setvbuf(stderr, NULL, _IONBF, 0);
 
-	message_rcv = malloc(512);
+	message_rcv = test_malloc(512);
 
         pf_class = PF_INET;
 

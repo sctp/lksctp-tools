@@ -72,7 +72,7 @@ t_recv(void) {
         char * buffer;
 
 	memset(&inmessage, 0, sizeof(inmessage));
-        buffer = malloc(100);
+        buffer = test_malloc(100);
 
         iov.iov_base = buffer;
         iov.iov_len = 100;
