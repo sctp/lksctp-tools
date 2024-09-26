@@ -179,7 +179,7 @@ main(int argc, char *argv[])
 
         lstn_sk = test_socket(pf_class, SOCK_STREAM, IPPROTO_SCTP);
 
-	message_rcv = malloc(512);
+	message_rcv = test_malloc(512);
 
 	/*Binding the listen socket*/
         test_bind(lstn_sk, (struct sockaddr *) &lstn_addr, sizeof(lstn_addr));

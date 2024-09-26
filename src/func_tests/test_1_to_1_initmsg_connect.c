@@ -107,7 +107,7 @@ main (int argc, char **argv)
 			  (struct sockaddr *)&conn_addr, len,
 			  0, 0, 65534, 0, 0);
 
-	buffer_rcv = malloc(100);
+	buffer_rcv = test_malloc(100);
 	test_recv(sk2, buffer_rcv, (strlen(message) + 1), MSG_NOSIGNAL);
 
 	tst_resm(TPASS, "connect() with init timeout set to 0 - SUCCESS");

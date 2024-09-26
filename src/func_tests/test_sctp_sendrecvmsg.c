@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
 			strerror(errno));
 	tst_resm(TINFO, "creating a fillmsg of size %d",
 		gstatus.sstat_rwnd+RWND_SLOP);
-        fillmsg = malloc(gstatus.sstat_rwnd+RWND_SLOP);
+        fillmsg = test_malloc(gstatus.sstat_rwnd+RWND_SLOP);
 
 	/* Send a fillmsg */
 	memset(fillmsg, 'X', gstatus.sstat_rwnd+RWND_SLOP);
