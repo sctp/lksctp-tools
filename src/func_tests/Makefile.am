@@ -161,6 +161,11 @@ test_1_to_1_threads_SOURCES = test_1_to_1_threads.c
 test_1_to_1_initmsg_connect_SOURCES = test_1_to_1_initmsg_connect.c
 
 #
+# Disable _FORTIFY_SOURCE for this test so that the EFAULT case works
+#
+test_1_to_1_recvfrom_CFLAGS = $(AM_CFLAGS) -U_FORTIFY_SOURCE
+
+#
 # Specifying objects rules for "v6test"
 #
 test_basic_v6_SOURCES = test_basic.c
