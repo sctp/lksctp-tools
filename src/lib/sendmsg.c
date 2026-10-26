@@ -20,6 +20,7 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <string.h>
 #include <stdlib.h>
 #include <netinet/in.h>
@@ -131,7 +132,11 @@ int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 	struct sockaddr *addr;
 	int len, cmsglen = 0;
 	int err, type, i;
+	size_t cmsgspace;
 	char *addrbuf;
+
+	if (addrcnt < 0)
+		return -EINVAL;
 
 	outmsg.msg_iov = (struct iovec *)iov;
 	outmsg.msg_iovlen = iovcnt;
@@ -153,8 +158,15 @@ int sctp_sendv(int s, const struct iovec *iov, int iovcnt,
 
 	/* alloc memory only when it's multi-address */
 	if (addrcnt) {
-		len = CMSG_SPACE(sizeof(struct sockaddr_in6)) * addrcnt;
-		cmsg = malloc(sizeof(_cmsg) + len);
+		/* Compute the control buffer size in size_t: the product
+		 * overflows an int for large addrcnt, which would yield an
+		 * allocation smaller than what the loop below writes.
+		 */
+		cmsgspace = CMSG_SPACE(sizeof(struct sockaddr_in6)) *
+			    (size_t)addrcnt;
+		if (cmsgspace > (size_t)INT_MAX - sizeof(_cmsg))
+			return -EINVAL;
+		cmsg = malloc(sizeof(_cmsg) + cmsgspace);
 		if (!cmsg)
 			return -ENOMEM;
 	}
