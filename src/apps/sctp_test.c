@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
@@ -93,7 +94,7 @@
 #define ASSOC_PATTERN_SEQUENTIAL 0
 #define ASSOC_PATTERN_RANDOM     1
 
-#define NCASES 6
+#define NCASES 7
 #define MAX_POLL_SKS 256
 
 #define DEBUG_PRINT(level, print_this...)	\
@@ -171,6 +172,7 @@ int bindx_add_count = 0;
 struct sockaddr *connectx_addrs = NULL;
 int connectx_count = 0;
 int if_index = 0;
+bool first = true;
 
 unsigned char msg[] = "012345678901234567890123456789012345678901234567890";
 
@@ -181,6 +183,7 @@ static int msg_sizes[NCASES][MSG_CNT] =
 	 {1, 1453, 32768, 1, 1453, 32768, 1, 1453, 32768, 1},
 	 {1, 1000, 2000, 3000, 5000, 10000, 15000, 20000, 25000, 32768},
 	 {32768, 32768, 32768, 32768, 32768, 32768, 32768, 32768, 32768, 32768},
+	 {0,0,0,0,0,0,0,0,0,0},
 	};
 
 static const char *sac_state_tbl[] = {
@@ -234,7 +237,8 @@ void usage(char *argv0)
 	fprintf(stderr, "\t   5 = 32768 byte packets.\n");
 	fprintf(stderr, "\t       (default max receive window size.)\n");
 	fprintf(stderr, "\t   6 = random size packets.\n");
-	fprintf(stderr, "\t   -ve value = Packets of specifed size.\n");
+	fprintf(stderr, "\t   7 = don't send any packets, just wait for heartbeat.\n");
+	fprintf(stderr, "\t   -ve value = Packets of specifed size. (for example -c -9999)\n");
 	fprintf(stderr, "\t-m max msgsize for option -c 6 (1500-65515, default value 32768)\n");
 	fprintf(stderr, "\t-x number of repeats\n");
 	fprintf(stderr, "\t-o order-pattern\n");
@@ -932,6 +936,12 @@ int next_msg_size(int msg_cnt)
 
 	if (size_arg) {
 		msg_size = size_arg;
+	} else if (test_case == 7) {
+		if (first) {
+			first = false;
+			msg_size = 1;
+		} else
+			msg_size = 0;
 	} else if (test_case < NCASES) {
 		msg_size = msg_sizes[test_case][msg_cnt];
 	} else {
@@ -1106,9 +1116,15 @@ client(int sk)
 	for (i = 0; i < msg_cnt; i++) {
 
 		msg_size = next_msg_size(i);
+
+		if (msg_size == 0) {
+			fprintf(stdout, "Sleeping 1 second on zero size message\n");
+			sleep(1);
+			continue;
+		}
+
 		order_state = next_order(order_state, order_pattern);
 		stream_state = next_stream(stream_state, stream_pattern);
-
 		if (send_r(sk, stream_state, order_state, msg_size, 0) < 0)
 			break;
 		/* The sender is echoing so do discard the echoed data. */
@@ -1283,6 +1299,13 @@ mixed_mode_test(void)
 				n_order = as[assoc_i].order_state =
 					next_order(as[assoc_i].order_state,
 					order_pattern);
+
+				if (n_msg_size == 0) {
+					fprintf(stdout, "Sleeping on zero size message\n");
+					sleep(1);
+					continue;
+				}
+
 				n_stream = as[assoc_i].stream_state =
 					next_stream(as[assoc_i].stream_state,
 					stream_pattern);
